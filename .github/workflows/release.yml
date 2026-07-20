@@ -1,0 +1,62 @@
+name: Release Plugin
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  # Extract this version's changelog entry from readme.txt
+  prepare-changelog:
+    runs-on: ubuntu-latest
+    outputs:
+      changelog: ${{ steps.extract.outputs.changelog }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Extract changelog from readme.txt
+        id: extract
+        run: |
+          CHANGELOG=$(node dev/extract-changelog.js latest)
+          echo "changelog<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+  # Build, validate versions, create the GitHub release, deploy to wp.org SVN
+  release:
+    needs: prepare-changelog
+    uses: artkrsk/wordpress-plugin-release-action/.github/workflows/release.yml@main
+    with:
+      # Node 24: last LTS line that still bundles corepack (the action uses it for pnpm)
+      node_version: '24'
+      php_version: '8.4'
+      # The action installs Node deps only; composer install must be explicit — it also
+      # generates vendor-prefixed/ via the Strauss post-install hook, which the build
+      # fails fast without (deliberately: no self-healing installs in the build itself).
+      build_command: 'composer install --prefer-dist --no-progress && pnpm build'
+
+      # Changelog from readme.txt
+      custom_changelog: ${{ needs.prepare-changelog.outputs.changelog }}
+
+      # WordPress.org listing assets (banners, icons, screenshots)
+      assets_directory: '.wordpress-org'
+
+      # Version consistency: all three are stamped from composer.json "version",
+      # and the tag must match them.
+      version_files: '["plugin_header", "readme.txt", "package.json"]'
+
+      # Approved on wp.org; SVN_USERNAME/SVN_PASSWORD repo secrets are set.
+      deploy_to_wordpress: true
+
+    secrets:
+      SVN_USERNAME: ${{ secrets.SVN_USERNAME }}
+      SVN_PASSWORD: ${{ secrets.SVN_PASSWORD }}

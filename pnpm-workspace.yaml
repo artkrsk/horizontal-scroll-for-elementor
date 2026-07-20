@@ -1,0 +1,12 @@
+# wp-env pins the pre-0.6 adm-zip (GHSA memory-allocation advisory); it only
+# unzips the trusted core/plugin archives here, but the patched line is API-compatible
+overrides:
+  adm-zip: ^0.6.0
+
+allowBuilds:
+  # sass pulls @parcel/watcher for its own CLI --watch, which this build never uses
+  '@parcel/watcher': false
+  esbuild: true
+  # wp-env pulls it via @php-wasm/node for its playground runtime; the harness uses
+  # the Docker runtime, so the native flock binding is never loaded
+  fs-ext-extra-prebuilt: false

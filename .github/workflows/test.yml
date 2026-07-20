@@ -1,0 +1,208 @@
+name: Tests
+
+on:
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master
+
+# Supersede in-flight runs for the same ref so pushes don't pile up on the
+# single self-hosted runner.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  MAX_ZIP_SIZE_MB: '0.5'
+  NODE_OPTIONS: '--dns-result-order=ipv4first --no-network-family-autoselection'
+
+jobs:
+  quality:
+    name: Code Quality
+    runs-on: self-hosted
+    steps:
+      - name: Disable git hooks
+        run: git config --global core.hooksPath /dev/null
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        if: runner.environment == 'github-hosted'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Setup pnpm
+        if: runner.environment == 'github-hosted'
+        run: corepack enable
+
+      - name: Setup PHP
+        if: runner.environment == 'github-hosted'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Composer dependencies (runs Strauss via post-install hook)
+        run: composer install --prefer-dist --no-progress
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: PHPStan
+        run: pnpm phpstan
+
+  plugin-check:
+    name: WordPress.org Plugin Check
+    runs-on: self-hosted
+    steps:
+      - name: Disable git hooks
+        run: git config --global core.hooksPath /dev/null
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        if: runner.environment == 'github-hosted'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Setup pnpm
+        if: runner.environment == 'github-hosted'
+        run: corepack enable
+
+      - name: Setup PHP
+        if: runner.environment == 'github-hosted'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Composer dependencies (runs Strauss via post-install hook)
+        run: composer install --prefer-dist --no-progress
+
+      - name: Build plugin
+        run: pnpm build
+
+      - name: Validate ZIP size
+        run: |
+          ZIP_FILE="dist/horizontal-scroll-for-elementor.zip"
+          SIZE_BYTES=$(stat -f%z "$ZIP_FILE" 2>/dev/null || stat -c%s "$ZIP_FILE")
+          SIZE_MB=$(echo "scale=2; $SIZE_BYTES / 1024 / 1024" | bc)
+
+          if (( $(echo "$SIZE_MB > $MAX_ZIP_SIZE_MB" | bc -l) )); then
+            echo "ZIP too large: ${SIZE_MB} MB (max ${MAX_ZIP_SIZE_MB} MB)"
+            exit 1
+          fi
+
+          echo "ZIP size: ${SIZE_MB} MB"
+
+      - name: Clean up stale wp-env Docker resources
+        run: |
+          # The plugin-check action generates its own hashed .wp-env.json, so a prior
+          # run's containers can orphan under a hash `wp-env destroy` won't match and
+          # keep 8880/8881 bound. Remove them by project name and published port.
+          docker rm -f $(docker ps -aq --filter "name=wp-env-horizontal-scroll-for-elementor") 2>/dev/null || true
+          docker rm -f $(docker ps -aq --filter "publish=8880" --filter "publish=8881") 2>/dev/null || true
+          # `|| true` only catches a non-zero exit, not a hang; wp-env destroy can wedge
+          # on Docker I/O, so bound it (TERM at 180s, KILL 30s later) to free the runner.
+          timeout --kill-after=30 180 npx wp-env destroy --force 2>/dev/null || true
+          # The action's hashed wp-env dirs are populated via Docker (root-owned), so a
+          # stale file from a prior run causes EACCES on re-setup and a plain rm can't
+          # remove it. Delete them from inside a container as root.
+          docker run --rm -v "$HOME/.wp-env:/wp-env" alpine \
+            sh -c 'rm -rf /wp-env/wp-env-horizontal-scroll-for-elementor-*' 2>/dev/null || true
+
+      - name: Run WordPress Plugin Check
+        uses: wordpress/plugin-check-action@v1
+        with:
+          build-dir: './dist/horizontal-scroll-for-elementor'
+          wp-version: 'latest'
+          # The plugin's prefixes (arts_horizontal_scroll_*, Arts\HorizontalScroll,
+          # ARTS_HORIZONTAL_SCROLL_*) are deliberate and consistent but don't derive
+          # from the slug, which is all this sniff accepts.
+          ignore-codes: |
+            WordPress.NamingConventions.PrefixAllGlobals.InvalidPrefixPassed
+
+  integration:
+    name: Integration Tests
+    runs-on: self-hosted
+    # First run on a fresh runner downloads WP + plugin zips, builds arm64
+    # images, and sparse-clones the core PHPUnit suite.
+    timeout-minutes: 30
+    steps:
+      - name: Disable git hooks
+        run: git config --global core.hooksPath /dev/null
+
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        if: runner.environment == 'github-hosted'
+        uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+
+      - name: Setup pnpm
+        if: runner.environment == 'github-hosted'
+        run: corepack enable
+
+      - name: Setup PHP
+        if: runner.environment == 'github-hosted'
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer
+
+      - name: Install Node dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Composer dependencies (runs Strauss via post-install hook)
+        run: composer install --prefer-dist --no-progress
+
+      - name: Clean up stale wp-env Docker resources
+        run: |
+          # Pre-clean BEFORE the build: a container leaked by a cancelled run pins
+          # the previous dist/ inode through its bind mount, so the fresh staging
+          # would never reach the tests. Filters match this repo's committed wp-env
+          # ports (8892/8893); the name filter also catches instances orphaned
+          # under a stale hash.
+          docker rm -f $(docker ps -aq --filter "name=wp-env-horizontal-scroll-for-elementor") 2>/dev/null || true
+          docker rm -f $(docker ps -aq --filter "publish=8892" --filter "publish=8893") 2>/dev/null || true
+          # `|| true` only catches a non-zero exit, not a hang; wp-env destroy can
+          # wedge on Docker I/O, so bound it (TERM at 180s, KILL 30s later).
+          timeout --kill-after=30 180 pnpm exec wp-env destroy --force 2>/dev/null || true
+
+      - name: Build plugin
+        run: pnpm build
+
+      - name: Start wp-env
+        run: pnpm exec wp-env start
+
+      - name: PHPUnit (integration)
+        run: pnpm exec wp-env run tests-cli --env-cwd=test-workspace -- vendor/bin/phpunit
+
+      - name: PHPUnit (no Elementor)
+        run: pnpm exec wp-env run tests-cli --env-cwd=test-workspace -- vendor/bin/phpunit -c phpunit-no-elementor.xml.dist
+
+      - name: Destroy wp-env
+        if: always()
+        run: |
+          timeout --kill-after=30 180 pnpm exec wp-env destroy --force 2>/dev/null || true
+          docker rm -f $(docker ps -aq --filter "publish=8892" --filter "publish=8893") 2>/dev/null || true

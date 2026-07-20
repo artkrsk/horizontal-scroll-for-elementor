@@ -1,0 +1,222 @@
+// ============================================================
+// Engine: sticky pin + named view-timeline scrub.
+//
+// Base rules consume layout-state vars whose FALLBACKS are the
+// horizontal values; every vertical state (unsupported browser,
+// touch, the Layout control) just sets the vars. `initial` on a
+// custom property is guaranteed-invalid, so var() falls back to
+// the horizontal value.
+//
+// `--arts-hs-move` multiplies the translate distance inside the
+// keyframes. Vertical states zero it, which also neutralizes the
+// WAAPI-built animation in polyfilled mode — JS never has to know
+// about breakpoints or touch.
+//
+// The `h-` twins ($ns: 'h-') are "what horizontal resolves to HERE,
+// given capability and touch policy". The Layout control's horizontal
+// state can't write real values (kit CSS outranks the @supports gate —
+// it would force the track in browsers that can't scrub it), so it
+// chains through the twins instead: `--arts-hs-track-position:
+// var(--arts-hs-h-track-position)` etc. The gates flip the twins to
+// `initial` (guaranteed-invalid propagates through the chain, so every
+// consumption falls back to its horizontal value); base and touch keep
+// them at the vertical values. That's what lets a narrower breakpoint
+// return to horizontal under a wider vertical without defeating
+// feature detection — and keeps touch stacking above an explicit
+// horizontal.
+// ============================================================
+
+@mixin arts-hs-vertical-vars($ns: '') {
+  --arts-hs-#{$ns}animation: none;
+  --arts-hs-#{$ns}move: 0;
+  --arts-hs-#{$ns}track-position: static;
+  --arts-hs-#{$ns}track-direction: column;
+  --arts-hs-#{$ns}track-width: auto;
+  --arts-hs-#{$ns}track-height: auto;
+  --arts-hs-#{$ns}pin-height: auto;
+}
+
+@mixin arts-hs-horizontal-layout-vars($ns: '') {
+  --arts-hs-#{$ns}move: initial;
+  --arts-hs-#{$ns}track-position: initial;
+  --arts-hs-#{$ns}track-direction: initial;
+  --arts-hs-#{$ns}track-width: initial;
+  --arts-hs-#{$ns}track-height: initial;
+  --arts-hs-#{$ns}pin-height: initial;
+}
+
+.arts-hs {
+  --arts-hs-height: 100vh;
+  --arts-hs-factor: 1;
+  --arts-hs-dir: 1;
+  --arts-hs-gap: 0px;
+  --arts-hs-offset: 0px;
+
+  @include arts-hs-vertical-vars; // default state: the designed vertical stack
+  @include arts-hs-vertical-vars('h-');
+
+  // Our own admin-bar metric, keyed to the body class WP renders ONLY when
+  // the bar is actually on the page — the var alone is unreliable (the
+  // Elementor editor preview exposes it while never rendering the bar).
+  // Under the class it mirrors WP's var (32px/46px across core's 782px
+  // breakpoint), except below 600px where core switches the bar to
+  // position: absolute (it scrolls away) and pinned content must not
+  // reserve room for it.
+  --arts-hs-admin-bar: 0px;
+
+  body.admin-bar & {
+    --arts-hs-admin-bar: var(--wp-admin--admin-bar--height, 0px);
+
+    @media screen and (max-width: 600px) {
+      --arts-hs-admin-bar: 0px;
+    }
+  }
+
+  // Value vars carry per-consumption fallbacks matching the defaults above:
+  // an unresolved var() inside calc() invalidates the whole declaration at
+  // computed-value time, and CSS optimizers have been known to strip
+  // custom-property blocks. Cheap insurance, never wrong.
+  height: var(
+    --arts-hs-pin-height,
+    calc(var(--arts-hs-height, 100vh) + var(--arts-hs-distance, 160cqw) * var(--arts-hs-factor, 1))
+  );
+  view-timeline: --arts-hs block;
+  // Explicit inset — the default (`auto`) inherits the scroller's
+  // scroll-padding, and WordPress sets scroll-padding-top to the admin-bar
+  // height (32px, 46px under core's 782px breakpoint; leaking into the
+  // editor preview too), which shifts the range off the sticky engage
+  // point. Tying it to the same var as the sticky top keeps range start ==
+  // pin start under any offset.
+  // --arts-hs-inset-start is JS-measured as min(sticky top, wrapper
+  // document offset): with a pin offset and the widget near the top of the
+  // page the range would otherwise begin before scroll 0 exists,
+  // pre-translating the track at rest (first panel visibly cut). The
+  // fallback mirrors the sticky top (offset + admin bar) — exact whenever
+  // enough content sits above.
+  view-timeline-inset: var(
+      --arts-hs-inset-start,
+      calc(var(--arts-hs-offset, 0px) + var(--arts-hs-admin-bar, 0px))
+    )
+    0px;
+  // Never `hidden`: a scroll container would hijack the sticky scrollport
+  // and kill the pin (and re-create the anonymous-timeline trap).
+  overflow-x: clip;
+  container-type: inline-size;
+  // Inline-size containment strips intrinsic sizing, so inside a
+  // flex-direction: row parent the widget's auto basis collapses to zero.
+  // An explicit default basis fixes that; Elementor's own widget width
+  // controls override at higher specificity.
+  width: 100%;
+
+  &__track {
+    position: var(--arts-hs-track-position, sticky);
+    // Stacks with the pin offset so pinned panels never hide under the
+    // admin bar (see --arts-hs-admin-bar above).
+    top: calc(var(--arts-hs-offset, 0px) + var(--arts-hs-admin-bar, 0px));
+    // Reduced by the pin offset: with a sticky header the visible area is
+    // viewport minus offset, and this is also what keeps the timeline's
+    // contain range equal to the sticky window — a full-height track under
+    // an offset made the scrub end short by exactly the offset value
+    // (range = distance + offset, sticky window = distance).
+    height: var(
+      --arts-hs-track-height,
+      calc(
+        var(--arts-hs-height, 100vh) - var(--arts-hs-offset, 0px) - var(--arts-hs-admin-bar, 0px)
+      )
+    );
+    display: flex;
+    align-items: stretch;
+    flex-direction: var(--arts-hs-track-direction, row);
+    gap: var(--arts-hs-gap, 0px);
+    width: var(--arts-hs-track-width, max-content);
+    // Inverted mode right-aligns the track start (set by the control).
+    // `translate`, not margin: margin percentages resolve against the
+    // containing block, so calc(100cqw - 100%) would always compute to 0
+    // there. Translate resolves % against the track's own width and
+    // composes with the animated transform on both scrub paths.
+    translate: var(--arts-hs-track-shift, 0px) 0;
+    // `linear` is load-bearing: it keeps the track glued 1:1 to scroll
+    // position. The shorthand is declared BEFORE the timeline/range
+    // longhands — the shorthand resets them.
+    animation: var(--arts-hs-animation, arts-hs-slide linear both);
+    animation-timeline: --arts-hs;
+    animation-range: contain 0% contain 100%;
+
+    // Panels keep Elementor's default flex-shrink:1. The max-content track
+    // sizes itself from its children's CONTENT width, so shrink then
+    // collapses every panel off its authored Width (100vw etc). Pin it:
+    // authored widths win, the track grows to fit. No-op in vertical states —
+    // track-height is auto there, so the column main axis has no deficit to
+    // shrink against.
+    > .e-con {
+      flex-shrink: 0;
+    }
+
+    // Boxed panels: Elementor's Width control (our 100vw default) only drives the
+    // OUTER width in `full` mode. In `boxed` mode the outer falls back to
+    // `--width: 100%` — degenerate against the max-content track — while the inner
+    // `.e-con-inner` handles the boxed max-width (--content-width). Give the boxed
+    // outer a definite one-screen width; the inner stays centered at its cap.
+    > .e-con-boxed {
+      width: 100cqw;
+    }
+  }
+
+  // Gate on the NAMED syntax the engine uses — probing view() misclassifies
+  // partial implementations and double-drives them.
+  @supports (view-timeline: --probe block) and (animation-timeline: --probe) and
+    (animation-range: contain 0% contain 100%) {
+    --arts-hs-animation: initial;
+    --arts-hs-h-animation: initial;
+
+    @include arts-hs-horizontal-layout-vars;
+    @include arts-hs-horizontal-layout-vars('h-');
+  }
+
+  // Polyfilled state flips LAYOUT only — the scrub animation is WAAPI-built
+  // by our own engine bundle against the polyfill's ViewTimeline. That
+  // polyfill's CSS-parsing layer mis-maps `contain` on subjects taller than
+  // the scrollport; its WAAPI surface is exact.
+  // (h-animation deliberately stays `none`: an explicit horizontal
+  // breakpoint must not start the CSS animation here.)
+  &.arts-hs_polyfilled {
+    @include arts-hs-horizontal-layout-vars;
+    @include arts-hs-horizontal-layout-vars('h-');
+  }
+
+  // Touch: declared after the gates so it wins at equal specificity.
+  @media (hover: none) and (pointer: coarse) {
+    &.arts-hs_touch-vertical {
+      @include arts-hs-vertical-vars;
+      @include arts-hs-vertical-vars('h-');
+    }
+  }
+}
+
+// Elementor Pro's per-page Scroll Snap marks top-level sections/containers
+// as snap stops — a stop the height of the pin runway traps scrolling at
+// the section edge. Its selector (.e-con:not(.e-child)) can ALSO match the
+// panels: nested-elements children are created without `isInner`, so they
+// render as e-parent until the editor's container view stamps it on first
+// render. Neutralized on the widget, on whatever root section/container
+// hosts it, and on every container inside the track; Pro prints its rule
+// inline after our stylesheet, hence the scoped !important.
+.arts-hs,
+.arts-hs .e-con,
+.e-con:has(.arts-hs),
+.elementor-section:has(.arts-hs) {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+
+@keyframes arts-hs-slide {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(
+      calc((-100% + 100cqw) * var(--arts-hs-dir, 1) * var(--arts-hs-move, 1))
+    );
+  }
+}

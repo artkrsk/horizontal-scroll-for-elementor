@@ -1,0 +1,103 @@
+{
+  "name": "arts/horizontal-scroll-for-elementor",
+  "version": "1.0.0",
+  "description": "Pinned horizontal-scroll sections — every panel is a real nested Container you design inline. Vertical re-layout on touch. No GSAP, no jQuery.",
+  "license": "GPL-3.0-or-later",
+  "homepage": "https://artemsemkin.com",
+  "authors": [
+    {
+      "name": "Artem Semkin",
+      "email": "me@artemsemkin.com",
+      "homepage": "https://artemsemkin.com"
+    }
+  ],
+  "plugin": {
+    "Plugin Name": "Arts Horizontal Scroll for Elementor",
+    "Description": "Pinned horizontal-scroll sections — every panel is a real nested Container you design inline. Vertical re-layout on touch. No GSAP, no jQuery.",
+    "Plugin URI": "https://artemsemkin.com/plugins/horizontal-scroll-for-elementor/",
+    "License": "GPLv3",
+    "License URI": "https://www.gnu.org/licenses/gpl-3.0",
+    "Text Domain": "horizontal-scroll-for-elementor"
+  },
+  "wordpress": {
+    "Requires at least": "6.5",
+    "Tested up to": "7.0",
+    "Requires PHP": "8.0"
+  },
+  "require": {
+    "php": ">=8.0",
+    "arts/base": "^1.1",
+    "arts/scroll-timeline-polyfill": "^1.0"
+  },
+  "autoload": {
+    "classmap": [
+      "vendor-prefixed/"
+    ],
+    "psr-4": {
+      "Arts\\HorizontalScroll\\": "src/php/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Arts\\HorizontalScroll\\Tests\\": "tests/"
+    }
+  },
+  "config": {
+    "optimize-autoloader": true
+  },
+  "require-dev": {
+    "arts/elementor-stubs": "^4.0",
+    "brianhenryie/strauss": "^0.28",
+    "phpstan/phpstan": "^2.0",
+    "szepeviktor/phpstan-wordpress": "^2.0",
+    "phpunit/phpunit": "^9.6",
+    "wp-phpunit/wp-phpunit": "~7.0.0",
+    "yoast/phpunit-polyfills": "^4.0",
+    "phpstan/phpstan-phpunit": "^2.0"
+  },
+  "extra": {
+    "strauss": {
+      "target_directory": "vendor-prefixed",
+      "namespace_prefix": "ArtsHorizontalScroll\\",
+      "classmap_prefix": "ArtsHorizontalScroll_",
+      "constant_prefix": "ARTS_HORIZONTAL_SCROLL_VENDOR_",
+      "classmap_output": true,
+      "include_modified_date": true,
+      "include_author": true,
+      "packages": [
+        "arts/base",
+        "arts/scroll-timeline-polyfill"
+      ],
+      "update_call_sites": [
+        "src/php",
+        "src/wordpress-plugin"
+      ],
+      "delete_vendor_packages": false,
+      "exclude_from_copy": {
+        "file_patterns": [
+          "/^tests\\//",
+          "/phpcs\\.xml/",
+          "/phpstan/",
+          "/\\.github/",
+          "/\\.gitignore/"
+        ]
+      }
+    }
+  },
+  "scripts": {
+    "phpstan": "phpstan analyse --memory-limit=1G",
+    "prefix-namespaces": [
+      "@php vendor/bin/strauss",
+      "@composer dump-autoload"
+    ],
+    "pre-autoload-dump": [
+      "@php -r \"is_dir('vendor-prefixed') || mkdir('vendor-prefixed');\""
+    ],
+    "post-install-cmd": [
+      "@php -r \"if (file_exists('vendor/bin/strauss')) { passthru(PHP_BINARY . ' vendor/bin/strauss'); passthru('composer dump-autoload'); }\""
+    ],
+    "post-update-cmd": [
+      "@php -r \"if (file_exists('vendor/bin/strauss')) { passthru(PHP_BINARY . ' vendor/bin/strauss'); passthru('composer dump-autoload'); }\""
+    ]
+  }
+}

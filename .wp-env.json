@@ -1,0 +1,14 @@
+{
+	"core": "https://wordpress.org/wordpress-7.0.1.zip",
+	"phpVersion": "8.3",
+	"port": 8892,
+	"testsPort": 8893,
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/elementor.4.1.5.zip",
+		"./dist/horizontal-scroll-for-elementor"
+	],
+	"mappings": {
+		"wp-content/mu-plugins": "./dev/mu-plugins",
+		"test-workspace": "."
+	}
+}

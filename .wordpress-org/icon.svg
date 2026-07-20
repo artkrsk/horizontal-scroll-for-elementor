@@ -1,0 +1,185 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-label="Horizontal Scroll for Elementor">
+  <title>Horizontal Scroll for Elementor</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="256" x2="256" y2="0" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#333333"/>
+      <stop offset="1" stop-color="#111111"/>
+    </linearGradient>
+    <clipPath id="win"><rect x="26" y="42" width="204" height="172" rx="26"/></clipPath>
+    <style>
+      .track { animation: slide 5.8s infinite linear; will-change: transform; }
+      .wf { will-change: transform, opacity; }
+      .r0 { animation: r0 5.8s infinite linear; }
+      .r1 { animation: r1 5.8s infinite linear; }
+      .r2 { animation: r2 5.8s infinite linear; }
+      .r3 { animation: r3 5.8s infinite linear; }
+      .r4 { animation: r4 5.8s infinite linear; }
+      .r5 { animation: r5 5.8s infinite linear; }
+      .r6 { animation: r6 5.8s infinite linear; }
+      .r7 { animation: r7 5.8s infinite linear; }
+      .r8 { animation: r8 5.8s infinite linear; }
+      .r9 { animation: r9 5.8s infinite linear; }
+      .r10 { animation: r10 5.8s infinite linear; }
+      .r11 { animation: r11 5.8s infinite linear; }
+      .r12 { animation: r12 5.8s infinite linear; }
+      .r13 { animation: r13 5.8s infinite linear; }
+      @keyframes slide {
+        0% { transform: translateX(-790.0px); animation-timing-function: linear; }
+        18.5% { transform: translateX(-790.0px); animation-timing-function: cubic-bezier(.5,0,.1,1); }
+        25% { transform: translateX(-994.0px); animation-timing-function: linear; }
+        43.5% { transform: translateX(-994.0px); animation-timing-function: cubic-bezier(.5,0,.1,1); }
+        50% { transform: translateX(-1198.0px); animation-timing-function: linear; }
+        68.5% { transform: translateX(-1198.0px); animation-timing-function: cubic-bezier(.5,0,.1,1); }
+        75% { transform: translateX(-1402.0px); animation-timing-function: linear; }
+        93.5% { transform: translateX(-1402.0px); animation-timing-function: cubic-bezier(.5,0,.1,1); }
+        100% { transform: translateX(-1606.0px); }
+      }
+      @keyframes r0 {
+        0% { opacity:0; transform:translateY(10px); }
+        1.5% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        8.5% { opacity:1; transform:translateY(0); }
+        18.5% { opacity:1; transform:translateY(0); }
+        23% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r1 {
+        0% { opacity:0; transform:translateY(10px); }
+        4.1% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        11.1% { opacity:1; transform:translateY(0); }
+        18.5% { opacity:1; transform:translateY(0); }
+        23% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r2 {
+        0% { opacity:0; transform:translateY(10px); }
+        6.7% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        13.7% { opacity:1; transform:translateY(0); }
+        18.5% { opacity:1; transform:translateY(0); }
+        23% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r3 {
+        0% { opacity:0; transform:translateY(10px); }
+        26.5% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        33.5% { opacity:1; transform:translateY(0); }
+        43.5% { opacity:1; transform:translateY(0); }
+        48% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r4 {
+        0% { opacity:0; transform:translateY(10px); }
+        29.1% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        36.1% { opacity:1; transform:translateY(0); }
+        43.5% { opacity:1; transform:translateY(0); }
+        48% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r5 {
+        0% { opacity:0; transform:translateY(10px); }
+        31.7% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        38.7% { opacity:1; transform:translateY(0); }
+        43.5% { opacity:1; transform:translateY(0); }
+        48% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r6 {
+        0% { opacity:0; transform:translateY(10px); }
+        34.3% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        41.3% { opacity:1; transform:translateY(0); }
+        43.5% { opacity:1; transform:translateY(0); }
+        48% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r7 {
+        0% { opacity:0; transform:translateY(10px); }
+        51.5% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        58.5% { opacity:1; transform:translateY(0); }
+        68.5% { opacity:1; transform:translateY(0); }
+        73% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r8 {
+        0% { opacity:0; transform:translateY(10px); }
+        54.1% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        61.1% { opacity:1; transform:translateY(0); }
+        68.5% { opacity:1; transform:translateY(0); }
+        73% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r9 {
+        0% { opacity:0; transform:translateY(10px); }
+        56.7% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        63.7% { opacity:1; transform:translateY(0); }
+        68.5% { opacity:1; transform:translateY(0); }
+        73% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r10 {
+        0% { opacity:0; transform:translateY(10px); }
+        59.3% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        66.3% { opacity:1; transform:translateY(0); }
+        68.5% { opacity:1; transform:translateY(0); }
+        73% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r11 {
+        0% { opacity:0; transform:translateY(10px); }
+        76.5% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        83.5% { opacity:1; transform:translateY(0); }
+        93.5% { opacity:1; transform:translateY(0); }
+        98% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r12 {
+        0% { opacity:0; transform:translateY(10px); }
+        79.1% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        86.1% { opacity:1; transform:translateY(0); }
+        93.5% { opacity:1; transform:translateY(0); }
+        98% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @keyframes r13 {
+        0% { opacity:0; transform:translateY(10px); }
+        81.7% { opacity:0; transform:translateY(10px); animation-timing-function:cubic-bezier(.2,.75,.25,1); }
+        88.7% { opacity:1; transform:translateY(0); }
+        93.5% { opacity:1; transform:translateY(0); }
+        98% { opacity:0; transform:translateY(-6px); }
+        100% { opacity:0; transform:translateY(10px); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .track { animation: none; }
+        .wf { animation: none !important; opacity: 1 !important; transform: none !important; }
+      }
+    </style>
+  </defs>
+
+  <rect width="256" height="256" rx="54" fill="url(#bg)"/>
+  <rect x="0.75" y="0.75" width="254.5" height="254.5" rx="53.25" fill="none" stroke="#FFFFFF" stroke-opacity="0.06"/>
+
+  <g clip-path="url(#win)">
+    <g class="track">
+      <rect x="0" y="42" width="204" height="172" fill="#4F46E5"/>
+      <rect x="204" y="42" width="204" height="172" fill="#0D9488"/>
+      <rect x="408" y="42" width="204" height="172" fill="#7C3AED"/>
+      <rect x="612" y="42" width="204" height="172" fill="#E11D48"/>
+      <rect x="816" y="42" width="204" height="172" fill="#4F46E5"/>
+      <g fill="#FFFFFF" fill-opacity="0.9"><rect class="wf r0" x="855.7" y="107.2" width="124.6" height="15" rx="7"/><rect class="wf r1" x="875.4" y="133.2" width="85.3" height="9" rx="4"/><rect class="wf r2" x="892.0" y="159.2" width="52" height="17" rx="8"/></g>
+      <rect x="1020" y="42" width="204" height="172" fill="#0D9488"/>
+      <g fill="#FFFFFF" fill-opacity="0.9"><rect class="wf r3" x="1040" y="94.7" width="72.2" height="64.5" rx="12"/><rect class="wf r4" x="1128.2" y="98.9" width="65.6" height="10" rx="5"/><rect class="wf r5" x="1128.2" y="120.9" width="57.7" height="10" rx="5"/><rect class="wf r6" x="1128.2" y="142.9" width="49.9" height="10" rx="5"/></g>
+      <rect x="1224" y="42" width="204" height="172" fill="#7C3AED"/>
+      <g fill="#FFFFFF" fill-opacity="0.9"><rect class="wf r7" x="1244.0" y="96.8" width="45.9" height="52.0" rx="11"/><rect class="wf r8" x="1303.0" y="96.8" width="45.9" height="52.0" rx="11"/><rect class="wf r9" x="1362.1" y="96.8" width="45.9" height="52.0" rx="11"/><rect class="wf r10" x="1276.8" y="164.8" width="98.4" height="9" rx="4"/></g>
+      <rect x="1428" y="42" width="204" height="172" fill="#E11D48"/>
+      <g fill="#FFFFFF" fill-opacity="0.9"><rect class="wf r11" x="1448" y="90.6" width="75.4" height="54.1" rx="12"/><rect class="wf r12" x="1536.6" y="90.6" width="75.4" height="54.1" rx="12"/><rect class="wf r13" x="1477.5" y="160.6" width="105.0" height="9" rx="4"/></g>
+      <rect x="1632" y="42" width="204" height="172" fill="#4F46E5"/>
+      <rect x="1836" y="42" width="204" height="172" fill="#0D9488"/>
+      <rect x="2040" y="42" width="204" height="172" fill="#7C3AED"/>
+      <rect x="2244" y="42" width="204" height="172" fill="#E11D48"/>
+      <rect x="2448" y="42" width="204" height="172" fill="#4F46E5"/>
+      <rect x="2652" y="42" width="204" height="172" fill="#0D9488"/>
+      <rect x="2856" y="42" width="204" height="172" fill="#7C3AED"/>
+      <rect x="3060" y="42" width="204" height="172" fill="#E11D48"/>
+    </g>
+  </g>
+
+  <rect x="26" y="42" width="204" height="172" rx="26" fill="none" stroke="#FFFFFF" stroke-opacity="0.12"/>
+</svg>

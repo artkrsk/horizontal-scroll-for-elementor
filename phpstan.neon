@@ -1,0 +1,21 @@
+includes:
+	- vendor/szepeviktor/phpstan-wordpress/extension.neon
+	- vendor/phpstan/phpstan-phpunit/extension.neon
+parameters:
+	level: max
+	phpVersion: 80000
+	paths:
+		- src/php
+		- tests
+	bootstrapFiles:
+		- vendor/autoload.php
+		- phpstan-bootstrap.php
+	scanFiles:
+		- vendor/arts/elementor-stubs/elementor-stubs.php
+	scanDirectories:
+		# WP_UnitTestCase & friends — loaded by the test bootstrap, not composer
+		- vendor/wp-phpunit/wp-phpunit/includes
+	treatPhpDocTypesAsCertain: false
+	ignoreErrors:
+		# Strauss limitation: Generic types and @template constraints aren't fully updated in vendor
+		- '#Class Arts\\HorizontalScroll\\.* extends generic class .* but does not specify its types#'
