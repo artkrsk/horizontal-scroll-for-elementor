@@ -16,7 +16,9 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-const OUT = fileURLToPath(new URL('../../.wordpress-org/blueprints/blueprint.json', import.meta.url))
+const OUT = fileURLToPath(
+  new URL('../../.wordpress-org/blueprints/blueprint.json', import.meta.url)
+)
 const seed = readFileSync(new URL('../seed/demo-page.php', import.meta.url), 'utf8')
 
 // Single source of truth for the page id: the landingPage and the seeder cannot drift.
