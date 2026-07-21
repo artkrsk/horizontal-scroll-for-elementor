@@ -113,6 +113,14 @@ jobs:
 
           echo "ZIP size: ${SIZE_MB} MB"
 
+      - name: Acquire cross-repo wp-env lock
+        # This host runs wp-env-based CI for several repos, each on its own
+        # self-hosted runner service, so they can execute concurrently.
+        # GitHub's `concurrency:` key only serializes within this repo -- it
+        # can't stop another repo's wp-env from colliding with this job's
+        # Docker resources. See .github/scripts/wp-env-host-lock.sh.
+        run: bash .github/scripts/wp-env-host-lock.sh acquire
+
       - name: Clean up stale wp-env Docker resources
         run: |
           # The plugin-check action generates its own hashed .wp-env.json, so a prior
@@ -139,6 +147,10 @@ jobs:
           # from the slug, which is all this sniff accepts.
           ignore-codes: |
             WordPress.NamingConventions.PrefixAllGlobals.InvalidPrefixPassed
+
+      - name: Release cross-repo wp-env lock
+        if: always()
+        run: bash .github/scripts/wp-env-host-lock.sh release
 
   integration:
     name: Integration Tests
@@ -176,6 +188,14 @@ jobs:
       - name: Install Composer dependencies (runs Strauss via post-install hook)
         run: composer install --prefer-dist --no-progress
 
+      - name: Acquire cross-repo wp-env lock
+        # This host runs wp-env-based CI for several repos, each on its own
+        # self-hosted runner service, so they can execute concurrently.
+        # GitHub's `concurrency:` key only serializes within this repo -- it
+        # can't stop another repo's wp-env from colliding with this job's
+        # Docker resources. See .github/scripts/wp-env-host-lock.sh.
+        run: bash .github/scripts/wp-env-host-lock.sh acquire
+
       - name: Clean up stale wp-env Docker resources
         run: |
           # Pre-clean BEFORE the build: a container leaked by a cancelled run pins
@@ -206,3 +226,7 @@ jobs:
         run: |
           timeout --kill-after=30 180 pnpm exec wp-env destroy --force 2>/dev/null || true
           docker rm -f $(docker ps -aq --filter "publish=8892" --filter "publish=8893") 2>/dev/null || true
+
+      - name: Release cross-repo wp-env lock
+        if: always()
+        run: bash .github/scripts/wp-env-host-lock.sh release
