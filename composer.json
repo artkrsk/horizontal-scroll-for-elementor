@@ -1,6 +1,6 @@
 {
   "name": "arts/horizontal-scroll-for-elementor",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Pinned horizontal-scroll sections — every panel is a real nested Container you design inline. Vertical re-layout on touch. No GSAP, no jQuery.",
   "license": "GPL-3.0-or-later",
   "homepage": "https://artemsemkin.com",
@@ -21,7 +21,7 @@
   },
   "wordpress": {
     "Requires at least": "6.5",
-    "Tested up to": "7.0",
+    "Tested up to": "7.1",
     "Requires PHP": "8.0"
   },
   "require": {

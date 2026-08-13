@@ -3,9 +3,9 @@ Contributors: artemsemkin
 Donate link: https://buymeacoffee.com/artemsemkin
 Tags: elementor, horizontal scroll, scrolling sections, pinned section, scroll animation
 Requires at least: 6.5
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/
@@ -98,6 +98,9 @@ With Elementor Pro's menu widget, yes. Point menu items at panels – or anythin
 Yes. The section publishes a small stable surface: a named CSS scroll timeline, state variables to gate on, per-panel range variables, and a JavaScript timeline API that works the same whether the browser is native or polyfilled. Your own scroll-driven animations can ride the same scroll as the track – the README in the GitHub repository documents the full contract.
 
 == Changelog ==
+
+= 1.0.1 =
+* Confirmed compatibility with WordPress 7.1.
 
 = 1.0.0 =
 Initial release
