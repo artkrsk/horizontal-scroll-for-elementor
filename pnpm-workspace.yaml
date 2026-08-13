@@ -1,3 +1,9 @@
+# wp-env pins the pre-0.6 adm-zip (GHSA-xcpc-8h2w-3j85, a 4GB-allocation DoS on
+# a crafted archive); it only unzips the trusted core/plugin archives here, but
+# the patched line is API-compatible.
+overrides:
+  adm-zip: ^0.6.0
+
 allowBuilds:
   # sass pulls @parcel/watcher for its own CLI --watch, which this build never uses
   '@parcel/watcher': false
