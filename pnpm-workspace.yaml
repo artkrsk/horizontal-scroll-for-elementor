@@ -2,6 +2,12 @@ allowBuilds:
   # sass pulls @parcel/watcher for its own CLI --watch, which this build never uses
   '@parcel/watcher': false
   esbuild: true
+  # @wordpress/env pulls this native module (via @wp-playground/cli →
+  # @php-wasm/node). It ships prebuilts for every platform we run, and its
+  # install script only re-require()s the binary it already shipped — the
+  # runtime loader reads binaries/ directly regardless. Allowing it would only
+  # matter on a platform miss, where it shells out to node-gyp.
+  fs-ext-extra-prebuilt: false
   # lefthook's binary rides its optionalDependencies, not this script — all the
   # postinstall does is write .git/hooks, which package.json#prepare does explicitly.
   lefthook: false
