@@ -8,6 +8,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * @extends BasePlugin<ManagersContainer>
+ */
 abstract class Plugin extends BasePlugin {
 
 	/** @var ManagersContainer */

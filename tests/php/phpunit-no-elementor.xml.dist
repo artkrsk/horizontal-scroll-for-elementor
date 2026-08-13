@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
-	bootstrap="tests/bootstrap.php"
+	bootstrap="bootstrap.php"
 	backupGlobals="false"
 	cacheResult="false"
 	colors="true"
@@ -9,7 +9,7 @@
 	>
 	<testsuites>
 		<testsuite name="no-elementor">
-			<directory>tests/NoElementor</directory>
+			<directory>NoElementor</directory>
 		</testsuite>
 	</testsuites>
 	<php>
