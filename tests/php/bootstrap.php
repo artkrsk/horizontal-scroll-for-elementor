@@ -8,7 +8,7 @@
  * tree — the SmokeTest pins that autoloader precedence.
  */
 
-require dirname( __DIR__ ) . '/vendor/autoload.php';
+require dirname( __DIR__, 2 ) . '/vendor/autoload.php';
 
 $ahs_wp_phpunit_dir = getenv( 'WP_PHPUNIT__DIR' );
 $ahs_tests_config   = getenv( 'WP_PHPUNIT__TESTS_CONFIG' );

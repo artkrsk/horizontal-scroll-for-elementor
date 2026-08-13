@@ -1,49 +1,21 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.4/schema.json",
-  "vcs": {
-    "enabled": true,
-    "clientKind": "git",
-    "useIgnoreFile": true
-  },
+  "$schema": "https://biomejs.dev/schemas/2.5.3/schema.json",
+  "extends": ["@arts/wp-plugin-tooling/biome"],
   "files": {
-    "includes": ["build/**", "dev/**/*.js", "src/ts/**", "project.config.js", "biome.json"]
-  },
-  "formatter": {
-    "enabled": true,
-    "indentStyle": "space",
-    "indentWidth": 2,
-    "lineWidth": 100
-  },
-  "assist": {
-    "actions": {
-      "source": {
-        "organizeImports": "on"
-      }
-    }
-  },
-  "linter": {
-    "enabled": true,
-    "rules": {
-      "preset": "recommended"
-    }
-  },
-  "javascript": {
-    "formatter": {
-      "semicolons": "asNeeded",
-      "quoteStyle": "single",
-      "trailingCommas": "none"
-    }
+    "includes": [
+      "src/ts/**",
+      "dev/**/*.js",
+      "project.config.js",
+      "vitest.config.ts",
+      "biome.json",
+      "knip.json",
+      ".fallowrc.jsonc"
+    ]
   },
   "overrides": [
     {
       "includes": ["src/ts/**"],
-      "linter": {
-        "rules": {
-          "suspicious": {
-            "noExplicitAny": "off"
-          }
-        }
-      }
+      "linter": { "rules": { "suspicious": { "noExplicitAny": "off" } } }
     }
   ]
 }

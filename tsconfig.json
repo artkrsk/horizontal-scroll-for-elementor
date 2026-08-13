@@ -1,11 +1,4 @@
 {
-	"compilerOptions": {
-		"target": "ES2018",
-		"module": "ESNext",
-		"moduleResolution": "bundler",
-		"strict": true,
-		"types": ["node"],
-		"noEmit": true
-	},
-	"include": ["src/ts/**/*"]
+  "extends": "@arts/wp-plugin-tooling/tsconfig",
+  "include": ["src/ts/**/*", "vitest.config.ts"]
 }

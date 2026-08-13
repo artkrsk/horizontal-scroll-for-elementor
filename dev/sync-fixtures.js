@@ -3,7 +3,14 @@
  * from the same build config the plugin sync uses (devTarget), so there is
  * exactly one place that knows where the Local site lives.
  */
-import '../build/env.js'
+// Load the gitignored .env (DEV_TARGET) — self-contained since the build
+// runner moved into @arts/wp-plugin-tooling.
+try {
+  process.loadEnvFile()
+} catch {
+  // No .env — fine; the guard below reports the missing DEV_TARGET.
+}
+
 import { cp, mkdir } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'

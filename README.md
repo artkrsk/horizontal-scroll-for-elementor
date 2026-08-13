@@ -1,5 +1,11 @@
 # Arts Horizontal Scroll for Elementor
 
+[![Tests](https://img.shields.io/github/actions/workflow/status/artkrsk/horizontal-scroll-for-elementor/test.yml?style=flat-square&logo=githubactions&logoColor=white&label=tests)](https://github.com/artkrsk/horizontal-scroll-for-elementor/actions/workflows/test.yml)
+[![Version](https://img.shields.io/wordpress/plugin/v/horizontal-scroll-for-elementor?style=flat-square&logo=wordpress&logoColor=white&label=wp.org)](https://wordpress.org/plugins/horizontal-scroll-for-elementor/)
+[![Installs](https://img.shields.io/wordpress/plugin/installs/horizontal-scroll-for-elementor?style=flat-square)](https://wordpress.org/plugins/horizontal-scroll-for-elementor/)
+[![Rating](https://img.shields.io/wordpress/plugin/rating/horizontal-scroll-for-elementor?style=flat-square)](https://wordpress.org/plugins/horizontal-scroll-for-elementor/reviews/)
+
+
 [![Tests](https://github.com/artkrsk/horizontal-scroll-for-elementor/actions/workflows/test.yml/badge.svg)](https://github.com/artkrsk/horizontal-scroll-for-elementor/actions/workflows/test.yml)
 
 Pinned horizontal-scroll sections for Elementor. The section holds still while its panels travel sideways as the page scrolls — and every panel is a real nested Container you design inline, not a template picked from a dropdown.

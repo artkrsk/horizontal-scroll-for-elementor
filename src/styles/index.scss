@@ -81,6 +81,7 @@
     calc(var(--arts-hs-height, 100vh) + var(--arts-hs-distance, 160cqw) * var(--arts-hs-factor, 1))
   );
   view-timeline: --arts-hs block;
+
   // Explicit inset — the default (`auto`) inherits the scroller's
   // scroll-padding, and WordPress sets scroll-padding-top to the admin-bar
   // height (32px, 46px under core's 782px breakpoint; leaking into the
@@ -98,10 +99,12 @@
       calc(var(--arts-hs-offset, 0px) + var(--arts-hs-admin-bar, 0px))
     )
     0px;
+
   // Never `hidden`: a scroll container would hijack the sticky scrollport
   // and kill the pin (and re-create the anonymous-timeline trap).
   overflow-x: clip;
   container-type: inline-size;
+
   // Inline-size containment strips intrinsic sizing, so inside a
   // flex-direction: row parent the widget's auto basis collapses to zero.
   // An explicit default basis fixes that; Elementor's own widget width
@@ -110,9 +113,11 @@
 
   &__track {
     position: var(--arts-hs-track-position, sticky);
+
     // Stacks with the pin offset so pinned panels never hide under the
     // admin bar (see --arts-hs-admin-bar above).
     top: calc(var(--arts-hs-offset, 0px) + var(--arts-hs-admin-bar, 0px));
+
     // Reduced by the pin offset: with a sticky header the visible area is
     // viewport minus offset, and this is also what keeps the timeline's
     // contain range equal to the sticky window — a full-height track under
@@ -129,12 +134,14 @@
     flex-direction: var(--arts-hs-track-direction, row);
     gap: var(--arts-hs-gap, 0px);
     width: var(--arts-hs-track-width, max-content);
+
     // Inverted mode right-aligns the track start (set by the control).
     // `translate`, not margin: margin percentages resolve against the
     // containing block, so calc(100cqw - 100%) would always compute to 0
     // there. Translate resolves % against the track's own width and
     // composes with the animated transform on both scrub paths.
     translate: var(--arts-hs-track-shift, 0px) 0;
+
     // `linear` is load-bearing: it keeps the track glued 1:1 to scroll
     // position. The shorthand is declared BEFORE the timeline/range
     // longhands — the shorthand resets them.
