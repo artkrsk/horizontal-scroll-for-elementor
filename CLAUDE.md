@@ -4,7 +4,7 @@ Free wp.org plugin: one nested-elements widget — a pinned section whose child 
 
 ## Identity (deliberate, don't "fix")
 
-- Display name "Arts Horizontal Scroll for Elementor", wp.org slug + text domain `horizontal-scroll-for-elementor`, GitHub `artkrsk/horizontal-scroll-for-elementor`. The slug in `project.config.js` drives builds; the directory and display names differ from it on purpose.
+- Display name "Arts Horizontal Scroll for Elementor", wp.org slug + text domain `horizontal-scroll-for-elementor`, GitHub `artkrsk/horizontal-scroll-for-elementor`. The slug in `project.config.js` drives builds; the display name deliberately differs from it.
 - `composer.json` is the single version/meta source — `arts-wp` stamps the plugin header, readme.txt, and package.json from it. `Requires Plugins:` is hand-maintained.
 
 ## Commands
@@ -31,6 +31,7 @@ Free wp.org plugin: one nested-elements widget — a pinned section whose child 
 - Canvas scrolling: ONLY `behavior: 'instant'` — themes set `scroll-behavior: smooth` and everything else becomes a seconds-long ease that fights Elementor's own scroll actors. Scroll-to-panel was built, fought, and DESCOPED — don't reintroduce canvas auto-scrolling.
 - `elementor.helpers.scrollToView` is suppressed for elements inside `.js-arts-hs` (element-top scrolling is meaningless in a pinned section).
 - Panel reordering is locked on every surface: `item_actions` sort/duplicate false (all four keys — shallow merge), `$e` data-dependency vetoes on `document/repeater/move`/`duplicate` and foreign `document/elements/move`, `isLocked: true` on panels → navigator refuses the drag. Root cause: core corrupts nested children on move/duplicate (reproducible against Nested Tabs). Insert/remove are healthy and stay enabled.
+- Panel width is defended twice: PHP `panel_container()` seeds only the INITIAL children, so the editor bundle stamps `content_width: full` + `100vw` onto `document/elements/create` ("+ Add Panel" builds a bare `{elType, isLocked, _title}` model), and coerces `%` widths to `vw` on `document/elements/settings`. `%` resolves against the `max-content` track — the panel blows out AND the scrub geometry breaks. The Width control only drives `--width` under `content_width: full`.
 - The editor bundle boots from the `elementor/nested-element-type-loaded` window event. `$e.hooks` ids are once-per-page-load — duplicate registration throws.
 - Controls carrying `selectors` are filed into the separate `style_controls` stack under Optimized Control Loading; tests read them via `Performance::set_use_style_controls(true)`. Presentation-only args (`size_units`, `range`, `label`) are stripped server-side — verify those in `elementor.widgetsCache`, not PHP.
 

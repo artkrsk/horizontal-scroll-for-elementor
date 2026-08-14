@@ -35,9 +35,9 @@ class NoticesTest extends TestCase {
 		$notices = new Notices();
 		$notices->activate_nested_elements();
 
-		// Container carries the real dependency chain on current Elementor
-		// (nested-elements is immutable there and re-derives from it); the
-		// nested-elements write is the defensive leg for older cores.
+		// Container carries the dependency chain — while it is off, Elementor
+		// re-derives nested-elements as inactive on every load. nested-elements
+		// is an ordinary mutable feature though, so it needs its own write too.
 		$this->assertSame( 'active', get_option( $container_key ) );
 		$this->assertSame( 'active', get_option( $nested_key ) );
 	}

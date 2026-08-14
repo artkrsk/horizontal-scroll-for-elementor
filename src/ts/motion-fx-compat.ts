@@ -18,7 +18,7 @@ interface ITrackState {
 
 const states = new WeakMap<HTMLElement, ITrackState>()
 
-/** Written by the engine's measure() — the wrapper stays per-frame cheap. */
+/** Written by the engine's measure() — the per-frame override reads state, never measures. */
 export const updateTrackState = (wrapper: HTMLElement, state: ITrackState): void => {
   states.set(wrapper, state)
 }

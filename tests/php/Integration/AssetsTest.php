@@ -80,8 +80,9 @@ class AssetsTest extends TestCase {
 		$this->assertStringContainsString( '@keyframes arts-hs-slide', $css );
 		// Gate-granted twins: the Layout control's horizontal state chains
 		// through --arts-hs-h-* so a narrower-breakpoint horizontal can undo a
-		// wider vertical without kit CSS outranking feature detection. Both
-		// states must compile: vertical values (base/touch) and initial (gates).
+		// wider vertical without Elementor's element CSS outranking feature
+		// detection. Both states must compile: vertical values (base/touch)
+		// and initial (gates).
 		$this->assertMatchesRegularExpression( '/--arts-hs-h-track-position:\s*static/', $css );
 		$this->assertMatchesRegularExpression( '/--arts-hs-h-track-position:\s*initial/', $css );
 		$this->assertMatchesRegularExpression( '/--arts-hs-h-animation:\s*none/', $css );

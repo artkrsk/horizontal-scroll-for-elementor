@@ -7,7 +7,7 @@
  *   from ElementorCommon
  * - `$e.components.get()` returns ComponentBase | undefined, and the
  *   nested-elements component's `exports` (NestedView) is untyped
- * - `$e.hooks` (registerUIAfter et al.) is absent from the $e type
+ * - `$e.hooks` (registerDataDependency et al.) is absent from the $e type
  * - `$e.commands` (isCurrentFirstTrace et al.) is absent from the $e type
  * - `$e.modules.hookData` is absent (hookUI is typed, hookData is not)
  * - `elementor.helpers.scrollToView` is absent from HelpersManager

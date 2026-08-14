@@ -5,13 +5,13 @@
  * Run against the Local dev site:
  *   wp eval-file dev/seed/demo-page.php --user=1
  *
- * Also inlined into .wordpress-org/blueprints/blueprint.json's runPHP step by
- * dev/blueprint/build-blueprint.js (no wp-cli context there — the WP_CLI::
- * calls below are guarded for that reason). Idempotent: finds the page by
- * slug and rewrites it wholesale. All styling is hard-coded (no kit globals,
- * no fluid presets) because the blueprint boots bare hello-elementor + free
- * Elementor. The two Motion FX garnishes are Elementor Pro settings that stay
- * inert without Pro.
+ * Also inlined into .wordpress-org/blueprints/blueprint.json as a writeFile
+ * step by `arts-wp blueprint build`, then required from the runPHP step that
+ * follows it (no wp-cli context there — the WP_CLI:: calls below are guarded
+ * for that reason). Idempotent: finds the page by slug and rewrites it
+ * wholesale. All styling is hard-coded (no kit globals, no fluid presets)
+ * because the blueprint boots bare hello-elementor + free Elementor. The two
+ * Motion FX garnishes are Elementor Pro settings that stay inert without Pro.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -20,8 +20,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 /**
  * Pinned so the blueprint's landingPage can address the page without guessing.
- * dev/blueprint/build-blueprint.js reads this constant — keep the literal on
- * one line.
+ * The blueprint generator regexes this constant out of the file — keep the
+ * literal on one line.
  */
 define( 'AHS_DEMO_PAGE_ID', 9911 );
 

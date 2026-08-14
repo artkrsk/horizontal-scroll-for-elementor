@@ -5,9 +5,6 @@
 [![Installs](https://img.shields.io/wordpress/plugin/installs/horizontal-scroll-for-elementor?style=flat-square)](https://wordpress.org/plugins/horizontal-scroll-for-elementor/)
 [![Rating](https://img.shields.io/wordpress/plugin/rating/horizontal-scroll-for-elementor?style=flat-square)](https://wordpress.org/plugins/horizontal-scroll-for-elementor/reviews/)
 
-
-[![Tests](https://github.com/artkrsk/horizontal-scroll-for-elementor/actions/workflows/test.yml/badge.svg)](https://github.com/artkrsk/horizontal-scroll-for-elementor/actions/workflows/test.yml)
-
 Pinned horizontal-scroll sections for Elementor. The section holds still while its panels travel sideways as the page scrolls — and every panel is a real nested Container you design inline, not a template picked from a dropdown.
 
 - **Pure CSS engine.** The browser's own scroll-driven animations move the track — no per-frame JavaScript, no GSAP, no jQuery. A few kilobytes of assets, loaded only on pages that use the widget.
@@ -20,16 +17,24 @@ Pinned horizontal-scroll sections for Elementor. The section holds still while i
 
 Requires WordPress 6.5+, PHP 8.0+, and the free [Elementor](https://wordpress.org/plugins/elementor/) plugin (Pro not required).
 
-Until the wp.org listing is live, grab the zip from the [latest GitHub release](https://github.com/artkrsk/horizontal-scroll-for-elementor/releases/latest) and install it via Plugins → Add New → Upload. Then drop the **Horizontal Scroll** widget on a page and design its panels like any other Containers.
+Install it from Plugins → Add New, or grab the zip from the [latest GitHub release](https://github.com/artkrsk/horizontal-scroll-for-elementor/releases/latest) and upload it. Then drop the **Horizontal Scroll** widget on a page and design its panels like any other Containers.
 
 ## Development
 
 ```bash
 pnpm install && composer install
-pnpm dev        # watch + mirror to a local WP site (DEV_TARGET in .env)
-pnpm build      # release build into dist/
-pnpm test       # builds, boots wp-env, runs both PHPUnit suites
-pnpm lint && pnpm typecheck && composer phpstan
+pnpm dev:plugin   # watch + mirror to a local WP site (DEV_TARGET in .env)
+pnpm build        # release build into dist/
+pnpm test         # Vitest suite
+pnpm exec biome check . && pnpm exec tsc --noEmit && composer phpstan && vendor/bin/phpcs
+```
+
+The PHP suites run inside wp-env, against the built artifact:
+
+```bash
+pnpm build && pnpm exec wp-env start
+pnpm exec wp-env run tests-cli --env-cwd=test-workspace -- vendor/bin/phpunit -c tests/php/phpunit.xml.dist
+pnpm exec wp-env run tests-cli --env-cwd=test-workspace -- vendor/bin/phpunit -c tests/php/phpunit-no-elementor.xml.dist
 ```
 
 Tests always run against the built `dist/` artifact, never repo source. The non-obvious engineering decisions are documented as why-comments at the relevant code sites — read them before refactoring.

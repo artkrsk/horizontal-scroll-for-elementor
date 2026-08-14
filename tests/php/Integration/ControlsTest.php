@@ -97,10 +97,11 @@ class ControlsTest extends TestCase {
 		$dictionary = $this->array_value( $controls['layout']['selectors_dictionary'] ?? null );
 		$horizontal = $this->string_value( $dictionary['horizontal'] ?? null );
 
-		// Horizontal must never write real values (kit CSS outranks the
-		// stylesheet's @supports gate — it would force the track in browsers
-		// that can't scrub it). It chains every state var through its `h-`
-		// twin, which only the capability gates flip to horizontal.
+		// Horizontal must never write real values (Elementor prints control
+		// selectors at {{WRAPPER}}'s three-class specificity, which outranks
+		// the stylesheet's @supports gate — it would force the track in
+		// browsers that can't scrub it). It chains every state var through its
+		// `h-` twin, which only the capability gates flip to horizontal.
 		foreach (
 			array(
 				'--arts-hs-animation: var(--arts-hs-h-animation)',

@@ -14,16 +14,17 @@
 //
 // The `h-` twins ($ns: 'h-') are "what horizontal resolves to HERE,
 // given capability and touch policy". The Layout control's horizontal
-// state can't write real values (kit CSS outranks the @supports gate —
-// it would force the track in browsers that can't scrub it), so it
-// chains through the twins instead: `--arts-hs-track-position:
-// var(--arts-hs-h-track-position)` etc. The gates flip the twins to
-// `initial` (guaranteed-invalid propagates through the chain, so every
-// consumption falls back to its horizontal value); base and touch keep
-// them at the vertical values. That's what lets a narrower breakpoint
-// return to horizontal under a wider vertical without defeating
-// feature detection — and keeps touch stacking above an explicit
-// horizontal.
+// state can't write real values (Elementor prints control selectors at
+// {{WRAPPER}}'s three-class specificity, which outranks the @supports
+// gate — @supports adds none — so it would force the track in browsers
+// that can't scrub it), so it chains through the twins instead:
+// `--arts-hs-track-position: var(--arts-hs-h-track-position)` etc. The
+// gates flip the twins to `initial` (guaranteed-invalid propagates
+// through the chain, so every consumption falls back to its horizontal
+// value); base and touch keep them at the vertical values. That's what
+// lets a narrower breakpoint return to horizontal under a wider
+// vertical without defeating feature detection — and keeps touch
+// stacking above an explicit horizontal.
 // ============================================================
 
 @mixin arts-hs-vertical-vars($ns: '') {
@@ -206,8 +207,10 @@
 // panels: nested-elements children are created without `isInner`, so they
 // render as e-parent until the editor's container view stamps it on first
 // render. Neutralized on the widget, on whatever root section/container
-// hosts it, and on every container inside the track; Pro prints its rule
-// inline after our stylesheet, hence the scoped !important.
+// hosts it, and on every container inside the track; Pro's rule ships in
+// Elementor's own generated CSS, which ties these selectors on specificity
+// and carries no guaranteed order against ours — hence the scoped
+// !important.
 .arts-hs,
 .arts-hs .e-con,
 .e-con:has(.arts-hs),

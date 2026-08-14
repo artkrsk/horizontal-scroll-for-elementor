@@ -17,12 +17,13 @@ class Elementor extends BaseManager {
 	 */
 	public function register_widgets( \Elementor\Widgets_Manager $widgets_manager ): void {
 		// The widget needs the Nested Elements module ACTIVE, not merely
-		// autoloadable. (Core's own Nested Tabs gates on 'container' — the
-		// same boolean on current Elementor, where nested-elements re-derives
-		// from it on every load.) The experiment is stable and default-on,
-		// but sites can still switch it (or its Container dependency) off —
-		// and versions predating it would fatal on the widget's parent class.
-		// Degrade to no-widget.
+		// autoloadable. Same gate core puts on its own promoted nested widgets
+		// (register_promoted_active_widgets), dependency check off for the same
+		// reason: Container being off already forces this feature inactive on
+		// every load. The experiment is stable and default-on, but sites can
+		// still switch it (or its Container dependency) off — and versions
+		// predating it would fatal on the widget's parent class. Degrade to
+		// no-widget.
 		if ( ! \Elementor\Plugin::$instance->experiments->is_feature_active( 'nested-elements' ) ) {
 			return;
 		}

@@ -195,10 +195,11 @@ class HorizontalScroll extends Widget_Nested_Base {
 					'vertical'   => esc_html__( 'Vertical', 'horizontal-scroll-for-elementor' ),
 				),
 				'default'              => 'horizontal',
-				// `horizontal` must never write real values: kit CSS outranks the
-				// stylesheet's @supports gate, so plain resets would force a
-				// horizontal track in browsers that can't scrub it (JS off
-				// included). It chains through the gate-granted `h-` twins
+				// `horizontal` must never write real values: Elementor prints control
+				// selectors at {{WRAPPER}}'s three-class specificity, which outranks
+				// the stylesheet's @supports gate (@supports adds none), so plain
+				// resets would force a horizontal track in browsers that can't scrub
+				// it (JS off included). It chains through the gate-granted `h-` twins
 				// instead — the stylesheet flips those to guaranteed-invalid
 				// inside its capability gates (every consumption then falls back
 				// to its horizontal value) and keeps them at the vertical values

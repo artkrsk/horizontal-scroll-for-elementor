@@ -13,10 +13,12 @@ class Notices extends BaseManager {
 	const ACTIVATE_ACTION = 'arts_hs_activate_container';
 
 	/**
-	 * The widget needs Elementor's Nested Elements module. On current
-	 * Elementor that module is immutable and hidden — its state derives
-	 * entirely from the "Flexbox Container" feature — so Container is both
-	 * the switch users can see and the one worth pointing at.
+	 * The widget needs Elementor's Nested Elements experiment. It ships
+	 * default-on and is an ordinary togglable feature, but it declares a
+	 * dependency on "Flexbox Container": while Container is off, Elementor
+	 * re-derives Nested Elements as inactive on every load, whatever that
+	 * feature's own saved option holds. So the notice offers to switch on
+	 * both, in that order.
 	 */
 	public function maybe_render_activation_notice(): void {
 		if ( ! current_user_can( 'manage_options' ) || ! did_action( 'elementor/loaded' ) ) {
@@ -74,15 +76,15 @@ class Notices extends BaseManager {
 		}
 		$experiments = \Elementor\Plugin::$instance->experiments;
 
-		// Container first — it has no dependencies of its own. On current
-		// Elementor this is the whole job: nested-elements is immutable and
-		// re-derives from Container on every request.
+		// Container first — it has no dependencies of its own, and while it is
+		// off Elementor forces nested-elements inactive on every load no matter
+		// what that feature's own option holds.
 		update_option( $experiments->get_feature_option_key( 'container' ), 'active' );
 
-		// Defensive for older Elementor, where nested-elements is a normal
-		// mutable option an admin may have deactivated separately. Order is
-		// load-bearing: written before Container, Elementor's own dependency
-		// validation throws and wp_die()s the request.
+		// nested-elements is an ordinary mutable feature an admin can switch off
+		// on its own, so Container alone is not enough. Order is load-bearing:
+		// written before Container, Elementor's own dependency validation throws
+		// and wp_die()s the request.
 		update_option( $experiments->get_feature_option_key( 'nested-elements' ), 'active' );
 	}
 }

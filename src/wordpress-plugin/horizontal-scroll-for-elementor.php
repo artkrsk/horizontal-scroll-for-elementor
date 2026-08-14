@@ -23,8 +23,9 @@ define( 'ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION', '1.0.1' );
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-// No dependency guard needed: "Requires Plugins: elementor" is enforced by WP 6.5+
-// and every Elementor-facing entry point is an elementor/* hook (inert without it).
+// No dependency guard needed: "Requires Plugins: elementor" blocks activation
+// without Elementor on WP 6.5+ (core never force-deactivates later), and every
+// Elementor-facing entry point is an elementor/* hook (inert without it).
 // Plugin extends Base\Plugin (arts/base BasePlugin), which schedules run() on the
 // hook/priority from Plugin::get_default_run_action()/get_run_action_priority().
 \Arts\HorizontalScroll\Plugin::instance();
