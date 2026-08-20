@@ -3,9 +3,20 @@
   "entry": [
     "src/ts/index.ts",
     "src/ts/editor/index.ts",
+    // Real runtime root, declared as the sass entry in project.config.js —
+    // a manifest fallow does not read.
+    "src/styles/index.scss",
     "project.config.js",
     "dev/sync-fixtures.js"
   ],
+  // Reached via `await import('./module')` in editor/index.ts; its default
+  // export is consumed off the dynamic namespace object.
+  "dynamicallyLoaded": ["src/ts/editor/module.ts"],
+  // Called reflectively by Elementor: getType/getView by the element-type
+  // registry, filter by the Marionette child-view admission hook.
+  "usedClassMembers": ["getType", "getView", "filter"],
+  // Used through `pnpm exec wp-env` (see CLAUDE.md); knip ignores it too.
+  "ignoreDependencies": ["@wordpress/env"],
   "ignorePatterns": ["dist/**", "vendor/**", "vendor-prefixed/**", "src/php/**"],
   "ignoreExportsUsedInFile": true,
   "duplicates": { "minOccurrences": 3 },
