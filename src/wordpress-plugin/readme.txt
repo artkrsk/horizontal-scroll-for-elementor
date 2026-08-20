@@ -32,6 +32,10 @@ The widget is a normal section in your page's vertical flow, not a whole-page ta
 
 Elementor Pro's Scrolling Effects keep working inside the section – element and background effects follow each panel's ride across the stage instead of freezing while the section is pinned. One-page navigation works too: anchor links and shared URLs scroll to the exact panel, and with Elementor Pro's menu widget the highlighted menu item follows the panel on stage. Entrance animations, lazy-loaded media, and visibility-triggered widgets fire as their panel comes into view, and Pro's page Scroll Snap keeps working around the section.
 
+= RTL and multilingual sites =
+
+On a right-to-left page the section mirrors itself – panels lay out right-to-left and the ride runs the other way, with the first panel still shown first. Nothing to configure, and either direction can be forced per section. WPML, Polylang, TranslatePress, and Weglot need no setup either: panels translate like the rest of the page, and every language keeps its own scroll direction.
+
 == Installation ==
 
 1. Install and activate the plugin. The free Elementor plugin is the only requirement.
@@ -89,6 +93,10 @@ No. The plugin never intercepts wheel, touch, or keyboard input. The page scroll
 
 It's built to stay out of the way. It doesn't bundle an animation library that could collide with your theme's scripts. Scroll snap is neutralized on the section itself, so Elementor Pro's Scroll Snap keeps working on the rest of the page. Smooth-scrolling libraries like Lenis are picked up automatically – the engine reads the native scroll position, which is exactly what they animate.
 
+= Does it work on right-to-left and multilingual sites? =
+
+Yes. On an RTL page the section mirrors on its own – panels lay out right-to-left and the first panel is still the one on stage – and the Direction control forces either direction when you don't want that. WPML, Polylang, TranslatePress, and Weglot all work without setup: panels are real Elementor Containers with no widget text to register, so they translate like the rest of the page. If translated RTL text doesn't mirror the section, the language's pack is missing – install it or set Direction to Right to Left.
+
 = Which Elementor effects work on widgets inside the panels? =
 
 Effects that fire on becoming visible work as-is: entrance animations, lazy-loaded images and backgrounds, video autoplay-on-visible, counters and progress bars all trigger as their panel scrolls into view. Elementor Pro's Scrolling Effects – on elements and on backgrounds – are corrected automatically: instead of freezing while the section is pinned, they follow the element's ride across the stage, from entering on one side to leaving on the other. Effects set to "Entire Page" read the page's own scroll, as always. Pro Sticky and Position: Fixed still don't apply inside the panels – a moving track can't hold a fixed element.
@@ -117,6 +125,11 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 4. Scroll: pinned section height, direction, how much page scroll the section consumes, and a pin offset for sticky headers.
 
 == Changelog ==
+
+= 1.1.0 =
+* added: an Auto option for the Direction control, now the default – the section follows the page's language direction, so right-to-left sites mirror automatically.
+* improved: the plugin page now covers right-to-left and multilingual support – WPML, Polylang, TranslatePress, and Weglot work without setup.
+* fixed: right-to-left pages no longer pin a blank section – panels lay out and travel the correct way.
 
 = 1.0.3 =
 * improved: documentation only – the plugin page now covers what works without Elementor Pro, how the widget differs from Pro's Horizontal Scroll motion effect, and which control sets the scroll pacing.
