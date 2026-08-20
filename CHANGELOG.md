@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0
+
+* added: an Auto option for the Direction control, now the default – the section follows the page's language direction, so right-to-left sites mirror automatically.
+* improved: the plugin page now covers right-to-left and multilingual support – WPML, Polylang, TranslatePress, and Weglot work without setup.
+* fixed: right-to-left pages no longer pin a blank section – panels lay out and travel the correct way.
+
 ## 1.0.3
 
 * improved: documentation only – the plugin page now covers what works without Elementor Pro, how the widget differs from Pro's Horizontal Scroll motion effect, and which control sets the scroll pacing.
