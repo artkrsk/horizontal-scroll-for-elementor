@@ -50,6 +50,12 @@ class RenderContractTest extends TestCase {
 		// integrations) select the js- prefixed family only.
 		$this->assertStringContainsString( 'js-arts-hs', $html );
 		$this->assertStringContainsString( 'js-arts-hs__track', $html );
+		// The runway is the widget's own inner div, never {{WRAPPER}} — core owns
+		// the root and its Advanced-tab selector pairing (see AdvancedTabTest).
+		$this->assertGreaterThan(
+			strpos( $html, 'elementor-widget-arts-horizontal-scroll' ),
+			strpos( $html, 'js-arts-hs' )
+		);
 		// Server-side no-JS scroll-budget estimate: (count - 1) * 80cqw.
 		$this->assertStringContainsString( '--arts-hs-distance: calc(2 * 80cqw)', $html );
 	}

@@ -14,6 +14,20 @@ use Elementor\Repeater;
 
 class HorizontalScroll extends Widget_Nested_Base {
 
+	/**
+	 * The pin runway is the widget's OWN inner div, never {{WRAPPER}}. Core pairs
+	 * wrapper-less markup (has_widget_inner_wrapper() false) with matching
+	 * Advanced-tab selectors only while `e_optimized_markup` is active — off, the
+	 * whole Advanced tab targets a `.elementor-widget-container` that was never
+	 * rendered. Leaving the flag to core keeps markup and selectors in step in
+	 * both states, and Advanced-tab padding/border land outside the runway.
+	 *
+	 * Every control below writes to this selector rather than {{WRAPPER}}:
+	 * `.arts-hs` declares these custom properties itself, and an element's own
+	 * declaration beats an inherited one regardless of specificity.
+	 */
+	private const RUNWAY = '{{WRAPPER}} .arts-hs';
+
 	public function get_name(): string {
 		return 'arts-horizontal-scroll';
 	}
@@ -48,15 +62,6 @@ class HorizontalScroll extends Widget_Nested_Base {
 
 	public function show_in_panel(): bool {
 		return \Elementor\Plugin::$instance->experiments->is_feature_active( 'nested-elements', true );
-	}
-
-	/**
-	 * Never wrap the output in .elementor-widget-container: the widget root is the
-	 * pin (scroll runway) and the track is position: sticky — an intermediate
-	 * wrapper would become the sticky containing block and break the pin.
-	 */
-	public function has_widget_inner_wrapper(): bool {
-		return false;
 	}
 
 	/** @return array<string, mixed> */
@@ -196,7 +201,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 				),
 				'default'              => 'horizontal',
 				// `horizontal` must never write real values: Elementor prints control
-				// selectors at {{WRAPPER}}'s three-class specificity, which outranks
+				// selectors at {{WRAPPER}}'s multi-class specificity, which outranks
 				// the stylesheet's @supports gate (@supports adds none), so plain
 				// resets would force a horizontal track in browsers that can't scrub
 				// it (JS off included). It chains through the gate-granted `h-` twins
@@ -210,7 +215,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 					'horizontal' => '--arts-hs-animation: var(--arts-hs-h-animation); --arts-hs-move: var(--arts-hs-h-move); --arts-hs-track-position: var(--arts-hs-h-track-position); --arts-hs-track-direction: var(--arts-hs-h-track-direction); --arts-hs-track-width: var(--arts-hs-h-track-width); --arts-hs-track-height: var(--arts-hs-h-track-height); --arts-hs-pin-height: var(--arts-hs-h-pin-height);',
 					'vertical'   => '--arts-hs-animation: none; --arts-hs-move: 0; --arts-hs-track-position: static; --arts-hs-track-direction: column; --arts-hs-track-width: auto; --arts-hs-track-height: auto; --arts-hs-pin-height: auto;',
 				),
-				'selectors'            => array( '{{WRAPPER}}' => '{{VALUE}}' ),
+				'selectors'            => array( self::RUNWAY => '{{VALUE}}' ),
 			)
 		);
 
@@ -253,7 +258,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 						'max' => 25,
 					),
 				),
-				'selectors'  => array( '{{WRAPPER}}' => '--arts-hs-gap: {{SIZE}}{{UNIT}};' ),
+				'selectors'  => array( self::RUNWAY => '--arts-hs-gap: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -308,7 +313,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 					'size' => 100,
 					'unit' => 'vh',
 				),
-				'selectors'   => array( '{{WRAPPER}}' => '--arts-hs-height: {{SIZE}}{{UNIT}};' ),
+				'selectors'   => array( self::RUNWAY => '--arts-hs-height: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -340,7 +345,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 					'ltr' => 'direction: ltr; --arts-hs-dir: 1;',
 					'rtl' => 'direction: rtl; --arts-hs-dir: -1;',
 				),
-				'selectors'            => array( '{{WRAPPER}}' => '{{VALUE}}' ),
+				'selectors'            => array( self::RUNWAY => '{{VALUE}}' ),
 			)
 		);
 
@@ -361,7 +366,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 					),
 				),
 				'default'     => array( 'size' => 1 ),
-				'selectors'   => array( '{{WRAPPER}}' => '--arts-hs-factor: {{SIZE}};' ),
+				'selectors'   => array( self::RUNWAY => '--arts-hs-factor: {{SIZE}};' ),
 			)
 		);
 
@@ -394,7 +399,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 						'max' => 30,
 					),
 				),
-				'selectors'   => array( '{{WRAPPER}}' => '--arts-hs-offset: {{SIZE}}{{UNIT}};' ),
+				'selectors'   => array( self::RUNWAY => '--arts-hs-offset: {{SIZE}}{{UNIT}};' ),
 			)
 		);
 
@@ -410,35 +415,40 @@ class HorizontalScroll extends Widget_Nested_Base {
 		$count  = max( 1, count( $panels ) );
 
 		// `arts-hs` is styling-only; `js-arts-hs` is the DOM hook scripts select by.
-		$this->add_render_attribute( '_wrapper', 'class', 'arts-hs js-arts-hs' );
+		$this->add_render_attribute( 'runway', 'class', 'arts-hs js-arts-hs' );
 		if ( 'yes' === ( $settings['touch_vertical'] ?? 'yes' ) ) {
-			$this->add_render_attribute( '_wrapper', 'class', 'arts-hs_touch-vertical' );
+			$this->add_render_attribute( 'runway', 'class', 'arts-hs_touch-vertical' );
 		}
 		// Server-side scroll-budget estimate so the pin works before (or without)
 		// JS measurement; the frontend script refines it to exact pixels.
 		$this->add_render_attribute(
-			'_wrapper',
+			'runway',
 			'style',
 			sprintf( '--arts-hs-distance: calc(%d * 80cqw);', $count - 1 )
 		);
 		?>
-		<div class="arts-hs__track js-arts-hs__track">
-			<?php
-			foreach ( array_keys( $panels ) as $index ) {
-				$this->print_child( $index );
-			}
-			?>
+		<div <?php $this->print_render_attribute_string( 'runway' ); ?>>
+			<div class="arts-hs__track js-arts-hs__track">
+				<?php
+				foreach ( array_keys( $panels ) as $index ) {
+					$this->print_child( $index );
+				}
+				?>
+			</div>
 		</div>
 		<?php
 	}
 
 	/**
 	 * Editor markup. Child containers are mounted INTO the placeholder selector
-	 * by the nested-elements editor machinery — the template stays empty.
+	 * by the nested-elements editor machinery — the track stays empty. No
+	 * distance estimate here: the engine measures and overwrites it on boot.
 	 */
 	protected function content_template(): void {
 		?>
-		<div class="arts-hs__track js-arts-hs__track"></div>
+		<div class="arts-hs js-arts-hs<# if ( 'yes' === settings.touch_vertical ) { #> arts-hs_touch-vertical<# } #>">
+			<div class="arts-hs__track js-arts-hs__track"></div>
+		</div>
 		<?php
 	}
 }

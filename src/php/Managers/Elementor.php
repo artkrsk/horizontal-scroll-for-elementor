@@ -11,6 +11,23 @@ use Arts\HorizontalScroll\Widgets\HorizontalScroll;
 
 class Elementor extends BaseManager {
 
+	private const VERSION_OPTION = 'arts_horizontal_scroll_version';
+
+	/**
+	 * Saved pages keep Elementor's generated post CSS and element cache until
+	 * something clears them — a plugin update that changes markup or control
+	 * selectors would otherwise keep serving the old pairing (moving the runway
+	 * inside the widget after 1.1.0 did both). One clear per version, both stores.
+	 */
+	public function maybe_clear_cache_on_version_change(): void {
+		$saved = get_option( self::VERSION_OPTION, '' );
+		if ( is_string( $saved ) && ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION === $saved ) {
+			return;
+		}
+		\Elementor\Plugin::$instance->files_manager->clear_cache();
+		update_option( self::VERSION_OPTION, ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION );
+	}
+
 	/**
 	 * Core auto-registers only its own nested widgets (hardcoded in
 	 * includes/managers/widgets.php) — third parties self-register here.

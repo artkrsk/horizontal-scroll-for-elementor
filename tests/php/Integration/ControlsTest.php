@@ -55,7 +55,7 @@ class ControlsTest extends TestCase {
 		foreach ( $expected as $id => $selector ) {
 			$this->assertArrayHasKey( $id, $controls );
 			$selectors = $this->array_value( $controls[ $id ]['selectors'] ?? null );
-			$this->assertSame( $selector, $selectors['{{WRAPPER}}'], $id );
+			$this->assertSame( $selector, $selectors['{{WRAPPER}} .arts-hs'], $id );
 		}
 	}
 

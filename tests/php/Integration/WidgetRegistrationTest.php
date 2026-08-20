@@ -39,12 +39,6 @@ class WidgetRegistrationTest extends TestCase {
 		);
 	}
 
-	public function test_widget_has_no_inner_wrapper(): void {
-		// An inner .elementor-widget-container between the pin ({{WRAPPER}}) and the
-		// sticky track would become the sticky containing block and break the pin.
-		$this->assertFalse( $this->widget()->has_widget_inner_wrapper() );
-	}
-
 	public function test_initial_config_supports_improved_repeaters(): void {
 		$widget = $this->widget();
 
