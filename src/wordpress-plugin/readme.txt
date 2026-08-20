@@ -36,8 +36,8 @@ Elementor Pro's Scrolling Effects keep working inside the section – element an
 
 1. Install and activate the plugin. The free Elementor plugin is the only requirement.
 2. IMPORTANT: Activate "Nested Elements" under Elementor → Settings → Features.
-3. Drop the Horizontal Scroll widget on a page and design its three starter panels – each is a real Container.
-4. Tune the section in the Layout controls: Height, Scroll Length, Direction, and Pin Top Offset for sticky headers.
+3. Edit a page with Elementor.
+4. Find the "Horizontal Scroll" widget under Layout in the widget panel and drop it on the page.
 
 == Frequently Asked Questions ==
 
@@ -97,7 +97,18 @@ With Elementor Pro's menu widget, yes. Point menu items at panels – or anythin
 
 Yes. The section publishes a small stable surface: a named CSS scroll timeline, state variables to gate on, per-panel range variables, and a JavaScript timeline API that works the same whether the browser is native or polyfilled. Your own scroll-driven animations can ride the same scroll as the track – the README in the GitHub repository documents the full contract.
 
+== Screenshots ==
+
+1. The Horizontal Scroll widget in Elementor's Layout category, next to Container and Grid.
+2. Panels are real Elementor Containers – add or remove them in the widget, design them in the canvas.
+3. Layout: stack panels vertically on touch devices or at any breakpoint, and set the gap between them.
+4. Scroll: pinned section height, direction, how much page scroll the section consumes, and a pin offset for sticky headers.
+
 == Changelog ==
+
+= 1.0.2 =
+* improved: the widget now sits in Elementor's Layout category, next to Container and Grid.
+* improved: a clearer widget icon in the Elementor panel.
 
 = 1.0.1 =
 * improved: confirmed compatibility with WordPress 7.1.
