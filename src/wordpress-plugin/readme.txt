@@ -5,7 +5,7 @@ Tags: elementor, horizontal scroll, scroll effects, sticky section, scroll anima
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/

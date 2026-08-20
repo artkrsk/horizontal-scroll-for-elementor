@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Arts Horizontal Scroll for Elementor
  * Description: Pinned horizontal-scroll sections — every panel is a real nested Container you design inline. Vertical re-layout on touch. No GSAP, no jQuery.
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: Artem Semkin
  * License: GPLv3
  * License URI: https://www.gnu.org/licenses/gpl-3.0
@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-define( 'ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION', '1.0.2' );
+define( 'ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION', '1.0.3' );
 
 require_once __DIR__ . '/vendor/autoload.php';
 

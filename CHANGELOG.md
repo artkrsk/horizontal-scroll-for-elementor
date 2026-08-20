@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.3
+
+* improved: documentation only – the plugin page now covers what works without Elementor Pro, how the widget differs from Pro's Horizontal Scroll motion effect, and which control sets the scroll pacing.
+
 ## 1.0.2
 
 * improved: the widget now sits in Elementor's Layout category, next to Container and Grid.
