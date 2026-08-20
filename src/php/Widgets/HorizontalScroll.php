@@ -23,12 +23,12 @@ class HorizontalScroll extends Widget_Nested_Base {
 	}
 
 	public function get_icon(): string {
-		return 'eicon-navigation-horizontal';
+		return 'eicon-slider-push';
 	}
 
 	/** @return array<int, string> */
 	public function get_categories(): array {
-		return array( 'general' );
+		return array( 'layout' );
 	}
 
 	/** @return array<int, string> */
