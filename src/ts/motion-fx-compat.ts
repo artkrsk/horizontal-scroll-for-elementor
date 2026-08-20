@@ -9,6 +9,9 @@
 // progress (see the section-level branch). Everywhere else — outside our
 // sections, vertical states, zero travel — the original runs untouched.
 
+import { TRACK_CLASS, WRAPPER_SELECTOR } from './contract'
+import { clamp01 } from './geometry'
+
 interface ITrackState {
   active: boolean
   inverted: boolean
@@ -26,14 +29,18 @@ export const updateTrackState = (wrapper: HTMLElement, state: ITrackState): void
 // Mirror of core's vertical formula (rounding included): 0 as the leading
 // edge touches the stage, 100 as the trailing edge leaves it. The stage is
 // the wrapper, not the viewport — boxed instances scrub inside their own box.
-const horizontalPercentage = (el: Element, wrapper: HTMLElement, inverted: boolean): number => {
+export const horizontalPercentage = (
+  el: Element,
+  wrapper: HTMLElement,
+  inverted: boolean
+): number => {
   const rect = el.getBoundingClientRect()
   const stage = wrapper.getBoundingClientRect()
   const range = stage.width + rect.width
   if (range <= 0) {
     return 0
   }
-  let percent = Math.min(1, Math.max(0, (stage.right - rect.left) / range))
+  let percent = clamp01((stage.right - rect.left) / range)
   if (inverted) {
     percent = 1 - percent
   }
@@ -44,15 +51,15 @@ const horizontalPercentage = (el: Element, wrapper: HTMLElement, inverted: boole
 // engage), 100 at release — the contract's contain 0% → contain 100%. The
 // wrapper is the runway in normal flow, so its rect keeps moving while the
 // track sits pinned; the traversal direction never inverts this axis.
-const pinProgress = (wrapper: HTMLElement, state: ITrackState): number => {
+export const pinProgress = (wrapper: HTMLElement, state: ITrackState): number => {
   const top = wrapper.getBoundingClientRect().top
-  const percent = Math.min(1, Math.max(0, (state.insetStart - top) / state.pinWindow))
+  const percent = clamp01((state.insetStart - top) / state.pinWindow)
   return Number.parseFloat((percent * 100).toFixed(2))
 }
 
 let installed = false
 
-const install = (): void => {
+const patchScrollUtility = (): void => {
   const scroll = window.elementorModules?.utils?.Scroll
   const original = scroll?.getElementViewportPercentage
   if (installed || !scroll || typeof original !== 'function') {
@@ -72,7 +79,7 @@ const install = (): void => {
       // element comes from the parent window's realm, where a same-realm
       // instanceof check is false on the first re-render.
       const wrapper =
-        el && typeof el.closest === 'function' ? el.closest<HTMLElement>('.js-arts-hs') : null
+        el && typeof el.closest === 'function' ? el.closest<HTMLElement>(WRAPPER_SELECTOR) : null
       const state = wrapper ? states.get(wrapper) : undefined
       if (el && wrapper && state?.active) {
         // The wrapper and track ARE the pin, not content riding it — the
@@ -81,7 +88,7 @@ const install = (): void => {
         // signature offsets ({start: 0, end: -100}) and wants pin progress.
         // Motion FX passes no offsets, and for it the wrapper is a normal
         // tall block whose vertical math is already right — original.
-        if (el === wrapper || el.classList.contains('js-arts-hs__track')) {
+        if (el === wrapper || el.classList.contains(TRACK_CLASS)) {
           if (offsetObj?.end === -100 && state.pinWindow > 0) {
             return pinProgress(wrapper, state)
           }
@@ -96,4 +103,6 @@ const install = (): void => {
   }
 }
 
-window.addEventListener('elementor/frontend/init', install)
+export const installMotionFx = (): void => {
+  window.addEventListener('elementor/frontend/init', patchScrollUtility)
+}

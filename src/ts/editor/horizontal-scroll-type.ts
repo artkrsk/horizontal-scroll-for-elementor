@@ -1,3 +1,4 @@
+import { WIDGET_TYPE } from '../contract'
 import View from './views/view'
 
 export default class HorizontalScrollType extends elementor.modules.elements.types
@@ -7,7 +8,7 @@ export default class HorizontalScrollType extends elementor.modules.elements.typ
   declare getModel: () => unknown
 
   getType(): string {
-    return 'arts-horizontal-scroll'
+    return WIDGET_TYPE
   }
 
   getView(): any {

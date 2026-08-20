@@ -22,3 +22,8 @@ export const computeInsetStart = (wrapper: HTMLElement, track: HTMLElement): num
   const stickyTop = Number.parseFloat(getComputedStyle(track).top) || 0
   return Math.max(0, Math.min(stickyTop, layoutDocTop(wrapper)))
 }
+
+// Progress fractions are clamped everywhere they are produced: a panel narrower
+// than the leftover viewport, or a subject wider than the stage, otherwise
+// pushes the ratio outside 0..1.
+export const clamp01 = (value: number): number => Math.min(1, Math.max(0, value))

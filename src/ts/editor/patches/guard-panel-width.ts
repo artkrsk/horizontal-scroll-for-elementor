@@ -14,91 +14,55 @@
 //      (keeping the number, so 50% -> 50vw) on the settings command. A `%`
 //      panel width is never sane here (it means "% of the track", never "one
 //      screen"), so this preserves intent in a unit that actually works.
-//
-// Mutating the command args in a Dependency hook (then returning true) is the
-// sanctioned single-transaction path — same mechanism as lock-panel-moves.
+import { defineDependency, editedContainers, isOurWidget, registerDependencies } from './dependency'
+
 const PANEL_WIDTH = { unit: 'vw', size: 100 }
 
 export const registerPanelWidthGuard = (): void => {
-  if (
-    typeof $e?.modules?.hookData?.Dependency !== 'function' ||
-    typeof $e?.hooks?.registerDataDependency !== 'function'
-  ) {
-    return
-  }
-
-  const isOurWidget = (container: any): boolean =>
-    'arts-horizontal-scroll' === container?.model?.get?.('widgetType')
-
-  // Guard 1: bare panels created via "+ Add Panel" get a definite default width.
-  class DefaultPanelWidth extends $e.modules.hookData.Dependency {
-    getCommand(): string {
-      return 'document/elements/create'
-    }
-
-    getId(): string {
-      return 'arts-hs-default-panel-width'
-    }
-
-    getConditions(args: any): boolean {
-      return isOurWidget(args?.container) && 'container' === args?.model?.elType
-    }
-
-    apply(args: any): boolean {
-      const model = args.model
-      model.settings = model.settings ?? {}
-      // Respect an already-authored width (initial panels carry the PHP default).
-      if (!model.settings.width) {
-        // Match panel_container(): `full` is required for the Width control to
-        // take effect (its `--width` selector is gated on content_width:full),
-        // and it's what the initial panels already use.
-        model.settings.content_width = 'full'
-        model.settings.width = { ...PANEL_WIDTH }
+  registerDependencies('panel-width guard', () => [
+    // Guard 1: bare panels created via "+ Add Panel" get a definite default width.
+    defineDependency(
+      'document/elements/create',
+      'arts-hs-default-panel-width',
+      (args: any) => isOurWidget(args?.container) && 'container' === args?.model?.elType,
+      (args: any) => {
+        const model = args.model
+        model.settings = model.settings ?? {}
+        // Respect an already-authored width (initial panels carry the PHP default).
+        if (!model.settings.width) {
+          // Match panel_container(): `full` is required for the Width control to
+          // take effect (its `--width` selector is gated on content_width:full),
+          // and it's what the initial panels already use.
+          model.settings.content_width = 'full'
+          model.settings.width = { ...PANEL_WIDTH }
+        }
+        return true // allow the (now-enriched) create
       }
-      return true // allow the (now-enriched) create
-    }
-  }
+    ),
 
-  // Guard 2: a percentage Width on a panel is coerced to vw (per breakpoint).
-  class CoercePanelWidth extends $e.modules.hookData.Dependency {
-    getCommand(): string {
-      return 'document/elements/settings'
-    }
-
-    getId(): string {
-      return 'arts-hs-coerce-panel-width'
-    }
-
-    getConditions(args: any): boolean {
-      const edited = args?.containers ?? (args?.container ? [args.container] : [])
-      return edited.some((c: any) => isOurWidget(c?.parent))
-    }
-
-    apply(args: any): boolean {
-      const edited = args?.containers ?? (args?.container ? [args.container] : [])
-      edited.forEach((container: any) => {
-        if (!isOurWidget(container?.parent)) {
-          return
-        }
-        const settings = args.isMultiSettings ? args.settings?.[container.id] : args.settings
-        if (!settings) {
-          return
-        }
-        // `width`, `width_tablet`, `width_mobile`, … — every responsive variant.
-        for (const key of Object.keys(settings)) {
-          if (/^width($|_)/.test(key) && '%' === settings[key]?.unit) {
-            settings[key] = { ...settings[key], unit: 'vw' }
+    // Guard 2: a percentage Width on a panel is coerced to vw (per breakpoint).
+    defineDependency(
+      'document/elements/settings',
+      'arts-hs-coerce-panel-width',
+      (args: any) => editedContainers(args).some((c: any) => isOurWidget(c?.parent)),
+      (args: any) => {
+        editedContainers(args).forEach((container: any) => {
+          if (!isOurWidget(container?.parent)) {
+            return
           }
-        }
-      })
-      return true // allow the (now-coerced) settings change
-    }
-  }
-
-  try {
-    $e.hooks.registerDataDependency(new DefaultPanelWidth())
-    $e.hooks.registerDataDependency(new CoercePanelWidth())
-  } catch (e) {
-    console.warn('[arts-horizontal-scroll] panel-width guard registration failed:', e)
-  }
+          const settings = args.isMultiSettings ? args.settings?.[container.id] : args.settings
+          if (!settings) {
+            return
+          }
+          // `width`, `width_tablet`, `width_mobile`, … — every responsive variant.
+          for (const key of Object.keys(settings)) {
+            if (/^width($|_)/.test(key) && '%' === settings[key]?.unit) {
+              settings[key] = { ...settings[key], unit: 'vw' }
+            }
+          }
+        })
+        return true // allow the (now-coerced) settings change
+      }
+    )
+  ])
 }

@@ -14,6 +14,8 @@
 // programmatic scroll into a long ease fighting Elementor's own scroll
 // actors (selection focus-scroll, repeater select replays). The user positions the
 // canvas by scrolling the pin themselves.
+import { WRAPPER_SELECTOR } from '../../contract'
+
 type WithScrollToView = {
   scrollToView?: (this: unknown, $element: any, ...rest: any[]) => unknown
 }
@@ -32,7 +34,7 @@ export const suppressNativeScrollForPanels = (): void => {
     const el = $element?.[0] ?? $element
     // Duck-typed, not instanceof: preview elements belong to the iframe
     // realm, whose HTMLElement is a different constructor than ours.
-    if (el && typeof el.closest === 'function' && el.closest('.js-arts-hs')) {
+    if (el && typeof el.closest === 'function' && el.closest(WRAPPER_SELECTOR)) {
       return
     }
     return original.call(this, $element, ...rest)

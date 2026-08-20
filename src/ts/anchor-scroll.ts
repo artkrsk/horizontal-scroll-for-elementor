@@ -6,35 +6,25 @@
 // explicit — Elementor's frontend CSS ships `html { scroll-behavior: smooth }`
 // (under prefers-reduced-motion: no-preference), which repaces any
 // non-explicit programmatic scroll.
-import { computeInsetStart, layoutDocTop } from './geometry'
+import {
+  distanceOf,
+  isEditMode,
+  isInverted,
+  isScrubbing,
+  pinWindowOf,
+  READY_EVENT,
+  resolveHashTarget,
+  resolvePanel,
+  resolveTrack,
+  resolveWrapper,
+  VAR_DISTANCE
+} from './contract'
+import { clamp01, computeInsetStart, layoutDocTop } from './geometry'
 
-// The frontend bundle also runs inside the editor's preview iframe. No
-// deep-link scrolling there: canvas scroll actors are the editor's own
-// territory, and scroll-to-panel was deliberately descoped after losing
-// a long fight with the editor's stacked scroll actors.
-const isEditMode = (): boolean => window.elementorFrontend?.isEditMode?.() === true
-
-export const resolveHashTarget = (hash: string): HTMLElement | null => {
-  if (hash.length < 2) {
-    return null
-  }
-  try {
-    // getElementById, not querySelector: ids like "#123" are invalid selectors
-    return document.getElementById(decodeURIComponent(hash.slice(1)))
-  } catch {
-    return null
-  }
-}
-
-// The track child the target sits in (or is); null when the target is the
-// track/wrapper itself — section-level anchors stay native.
-export const resolvePanel = (target: HTMLElement, track: HTMLElement): HTMLElement | null => {
-  let node = target
-  while (node.parentElement && node.parentElement !== track) {
-    node = node.parentElement
-  }
-  return node.parentElement === track ? node : null
-}
+// No deep-link scrolling inside the editor's preview iframe: canvas scroll
+// actors are the editor's own territory, and scroll-to-panel was deliberately
+// descoped after losing a long fight with the editor's stacked scroll actors.
+// Both entry points below gate on isEditMode().
 
 // measure() writes a plain px value; render() prints a cqw-based calc
 // ESTIMATE on the same inline property as the no-JS fallback — so "non-empty"
@@ -42,13 +32,13 @@ export const resolvePanel = (target: HTMLElement, track: HTMLElement): HTMLEleme
 // (readyState even hits complete first, skipping the load repass), and the
 // estimate-era runway height lands the page hundreds of px short.
 const hasMeasuredDistance = (wrapper: HTMLElement): boolean =>
-  /^[\d.]+px$/.test(wrapper.style.getPropertyValue('--arts-hs-distance').trim())
+  /^[\d.]+px$/.test(wrapper.style.getPropertyValue(VAR_DISTANCE).trim())
 
 // Document scrollY at which the panel is on stage; null means "leave the
 // navigation to the browser" — vertical states, zero travel, or before the
 // engine's first measure() (the wrapper height still rides the server-side
 // distance estimate then, so the runway math would be wrong).
-const computeTargetScrollY = (
+export const computeTargetScrollY = (
   wrapper: HTMLElement,
   track: HTMLElement,
   panel: HTMLElement
@@ -56,11 +46,13 @@ const computeTargetScrollY = (
   if (!hasMeasuredDistance(wrapper)) {
     return null
   }
-  if (getComputedStyle(track).position !== 'sticky') {
+  if (!isScrubbing(track)) {
     return null
   }
-  const distance = track.scrollWidth - wrapper.clientWidth
-  const pinWindow = wrapper.offsetHeight - track.offsetHeight
+  // distanceOf clamps at 0 where this used to allow a negative; the guard
+  // below takes the same early return either way.
+  const distance = distanceOf(wrapper, track)
+  const pinWindow = pinWindowOf(wrapper, track)
   if (distance <= 0 || pinWindow <= 0) {
     return null
   }
@@ -68,11 +60,10 @@ const computeTargetScrollY = (
   // of the track — not the contract's --arts-hs-panel-start, which is the
   // about-to-enter point. Clamped: a last panel narrower than the leftover
   // viewport lands at pin release instead.
-  const inverted = getComputedStyle(wrapper).getPropertyValue('--arts-hs-dir').trim() === '-1'
-  const raw = inverted
+  const raw = isInverted(wrapper)
     ? (track.scrollWidth - panel.offsetLeft - panel.offsetWidth) / distance
     : panel.offsetLeft / distance
-  const fraction = Math.min(1, Math.max(0, raw))
+  const fraction = clamp01(raw)
 
   // Layout-tree offset, not a rect: an entrance animation on the widget is
   // mid-transform exactly when the deep-link load correction runs.
@@ -84,11 +75,11 @@ const resolveContext = (
   hash: string
 ): { wrapper: HTMLElement; track: HTMLElement; panel: HTMLElement } | null => {
   const target = resolveHashTarget(hash)
-  const wrapper = target?.closest<HTMLElement>('.js-arts-hs')
+  const wrapper = target ? resolveWrapper(target) : null
   if (!target || !wrapper) {
     return null
   }
-  const track = wrapper.querySelector<HTMLElement>('.js-arts-hs__track')
+  const track = resolveTrack(wrapper)
   const panel = track ? resolvePanel(target, track) : null
   if (!track || !panel) {
     return null
@@ -186,9 +177,11 @@ const initLoadCorrection = (): void => {
   if (hasMeasuredDistance(ctx.wrapper)) {
     run()
   } else {
-    ctx.wrapper.addEventListener('arts-hs:ready', run, { once: true })
+    ctx.wrapper.addEventListener(READY_EVENT, run, { once: true })
   }
 }
 
-document.addEventListener('click', handleClick, { capture: true })
-window.addEventListener('elementor/frontend/init', initLoadCorrection)
+export const installAnchorScroll = (): void => {
+  document.addEventListener('click', handleClick, { capture: true })
+  window.addEventListener('elementor/frontend/init', initLoadCorrection)
+}
