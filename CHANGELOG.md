@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.0
+
+* improved: the pinned section now lives inside Elementor's standard widget wrapper instead of replacing it – themes and add-ons that expect regular widget markup see it.
+* fixed: the Advanced tab works again – margin, padding, background, border, shadow, and transform apply to the section on sites where Elementor's Optimized Markup experiment is off.
+* fixed: pages saved with earlier versions refresh on their own – the plugin clears Elementor's CSS and element cache once after updating, no "Regenerate CSS & Data" needed.
+
 ## 1.1.0
 
 * added: an Auto option for the Direction control, now the default – the section follows the page's language direction, so right-to-left sites mirror automatically.
