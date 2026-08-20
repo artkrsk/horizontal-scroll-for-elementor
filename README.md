@@ -77,7 +77,7 @@ transform: translateX(calc(120px * var(--arts-hs-move, 1)));
 | `--arts-hs-animation` | gate: `none` when vertical; invalid (your fallback wins) when horizontal |
 | `--arts-hs-move` | `0` vertical / `1` horizontal multiplier |
 | `--arts-hs-distance` | measured px the track travels |
-| `--arts-hs-dir` | `1` default / `-1` when Direction is Right to Left |
+| `--arts-hs-dir` | `1` default / `-1` on an RTL page (Direction: Auto) or when Direction is forced to Right to Left |
 | `--arts-hs-panel-start` / `--arts-hs-panel-end` | per panel: the % window during which that panel intersects the viewport; set on each panel element, inherits into its subtree |
 | `.arts-hs` / `.js-arts-hs` / `.js-arts-hs__track` | styling marker / DOM hooks |
 | `arts-hs:ready` | bubbling `CustomEvent` on the wrapper once the engine boots; `detail: { wrapper }` |

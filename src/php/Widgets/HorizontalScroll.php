@@ -316,19 +316,29 @@ class HorizontalScroll extends Widget_Nested_Base {
 			'scroll_direction',
 			array(
 				'label'                => esc_html__( 'Direction', 'horizontal-scroll-for-elementor' ),
+				'description'          => esc_html__( 'Auto follows the page\'s language direction. Force a direction to override it.', 'horizontal-scroll-for-elementor' ),
 				'type'                 => Controls_Manager::SELECT,
 				'options'              => array(
+					''    => esc_html__( 'Auto', 'horizontal-scroll-for-elementor' ),
 					'ltr' => esc_html__( 'Left to Right', 'horizontal-scroll-for-elementor' ),
 					'rtl' => esc_html__( 'Right to Left', 'horizontal-scroll-for-elementor' ),
 				),
-				'default'              => 'ltr',
+				'default'              => '',
 				'selectors_dictionary' => array(
-					// Empty `ltr` is safe here (unlike `layout`): this control
-					// isn't responsive, and both vars carry base defaults.
-					'ltr' => '',
-					// Flip the scrub AND start the track right-aligned so the
-					// reveal runs right-to-left; panels keep natural direction.
-					'rtl' => '--arts-hs-dir: -1; --arts-hs-track-shift: calc(100cqw - 100%);',
+					// Empty Auto is safe here (unlike `layout`): this control
+					// isn't responsive, and every var it touches has a base
+					// default — the RTL flip itself comes from the stylesheet's
+					// `body.rtl` gate, which needs no per-widget selector.
+					''    => '',
+					// A real `direction`, not a translate hack: the
+					// over-constrained `max-content` track anchors to whichever
+					// edge its containing block's `direction` points at, so the
+					// browser resolves the reveal edge natively. Forces the
+					// scroll direction regardless of the page's own language;
+					// panel content keeps the page direction via
+					// `--arts-hs-page-dir` (index.scss).
+					'ltr' => 'direction: ltr; --arts-hs-dir: 1;',
+					'rtl' => 'direction: rtl; --arts-hs-dir: -1;',
 				),
 				'selectors'            => array( '{{WRAPPER}}' => '{{VALUE}}' ),
 			)

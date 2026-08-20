@@ -117,15 +117,37 @@ class ControlsTest extends TestCase {
 		}
 	}
 
-	public function test_scroll_direction_rtl_flips_scrub_and_track_alignment(): void {
+	public function test_scroll_direction_defaults_to_auto_and_writes_nothing(): void {
 		$controls = $this->controls();
 
 		$this->assertArrayHasKey( 'scroll_direction', $controls );
+		$this->assertSame( '', $controls['scroll_direction']['default'] ?? null );
+
+		// Auto MUST stay empty: the control prints at {{WRAPPER}}'s
+		// three-class specificity, which would outrank the stylesheet's
+		// `body.rtl` gate that owns the page-following flip.
+		$dictionary = $this->array_value( $controls['scroll_direction']['selectors_dictionary'] ?? null );
+		$this->assertSame( '', $dictionary[''] ?? null );
+	}
+
+	public function test_scroll_direction_ltr_forces_left_to_right(): void {
+		$controls = $this->controls();
+
+		$dictionary = $this->array_value( $controls['scroll_direction']['selectors_dictionary'] ?? null );
+		$ltr        = $this->string_value( $dictionary['ltr'] ?? null );
+
+		$this->assertStringContainsString( 'direction: ltr', $ltr );
+		$this->assertStringContainsString( '--arts-hs-dir: 1', $ltr );
+	}
+
+	public function test_scroll_direction_rtl_forces_right_to_left(): void {
+		$controls = $this->controls();
+
 		$dictionary = $this->array_value( $controls['scroll_direction']['selectors_dictionary'] ?? null );
 		$rtl        = $this->string_value( $dictionary['rtl'] ?? null );
 
+		$this->assertStringContainsString( 'direction: rtl', $rtl );
 		$this->assertStringContainsString( '--arts-hs-dir: -1', $rtl );
-		$this->assertStringContainsString( '--arts-hs-track-shift: calc(100cqw - 100%)', $rtl );
 	}
 
 	public function test_scroll_controls_carry_no_layout_condition(): void {

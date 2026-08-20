@@ -50,6 +50,7 @@
   --arts-hs-height: 100vh;
   --arts-hs-factor: 1;
   --arts-hs-dir: 1;
+  --arts-hs-page-dir: ltr;
   --arts-hs-gap: 0px;
   --arts-hs-offset: 0px;
 
@@ -71,6 +72,18 @@
     @media screen and (max-width: 600px) {
       --arts-hs-admin-bar: 0px;
     }
+  }
+
+  // Auto direction: mirror the scrub on RTL pages. Keyed to the body class
+  // WP renders from the same is_rtl() that puts dir="rtl" on <html> — the
+  // native `direction` inheritance from that attribute is what right-anchors
+  // the over-constrained max-content track; this class only owns the scrub
+  // sign and the page-direction var (custom properties can't derive from
+  // `dir`). A forced Direction control value overrides both at {{WRAPPER}}'s
+  // higher specificity.
+  body.rtl & {
+    --arts-hs-dir: -1;
+    --arts-hs-page-dir: rtl;
   }
 
   // Value vars carry per-consumption fallbacks matching the defaults above:
@@ -136,13 +149,6 @@
     gap: var(--arts-hs-gap, 0px);
     width: var(--arts-hs-track-width, max-content);
 
-    // Inverted mode right-aligns the track start (set by the control).
-    // `translate`, not margin: margin percentages resolve against the
-    // containing block, so calc(100cqw - 100%) would always compute to 0
-    // there. Translate resolves % against the track's own width and
-    // composes with the animated transform on both scrub paths.
-    translate: var(--arts-hs-track-shift, 0px) 0;
-
     // `linear` is load-bearing: it keeps the track glued 1:1 to scroll
     // position. The shorthand is declared BEFORE the timeline/range
     // longhands — the shorthand resets them.
@@ -158,6 +164,11 @@
     // shrink against.
     > .e-con {
       flex-shrink: 0;
+
+      // Panel content keeps the page's real direction even when Direction
+      // is forced: the wrapper's `direction` is a geometry decision (track
+      // anchor edge + scrub sign), not an authored-content one.
+      direction: var(--arts-hs-page-dir, ltr);
     }
 
     // Boxed panels: Elementor's Width control (our 100vw default) only drives the
