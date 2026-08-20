@@ -1,7 +1,7 @@
 === Arts Horizontal Scroll for Elementor ===
 Contributors: artemsemkin
 Donate link: https://buymeacoffee.com/artemsemkin
-Tags: elementor, horizontal scroll, scrolling sections, pinned section, scroll animation
+Tags: elementor, horizontal scroll, scroll effects, sticky section, scroll animation
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
@@ -10,7 +10,7 @@ License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/
 
-Pinned horizontal scroll sections. Free-form panels – no templates or shortcodes, just Containers you design inline. CSS-driven, responsive.
+Pinned horizontal scroll sections for Elementor. Panels are real Containers you design inline – no templates or shortcodes. CSS-driven, responsive.
 
 == Description ==
 
@@ -20,7 +20,7 @@ One widget that adds a pinned horizontal scroll section to Elementor: the sectio
 
 Most ways to get horizontal scrolling in Elementor make you author the content somewhere else: a saved template picked from a dropdown, a section elsewhere on the page wired up by CSS ID, or a repeater with fixed image-and-text fields. Here a panel is a real Container. Drop widgets into it, nest layouts inside it, style it directly in the editor, next to the rest of your page. The pin runs live in the canvas too: scroll the editor and the section scrubs exactly like the frontend.
 
-= Built for small screens =
+= How it behaves on phones and tablets =
 
 On phones and tablets the section becomes a vertical stack by default: panels flow as normal full-width blocks, nothing to swipe against. You can keep horizontal scrolling on touch if you want it, and the responsive Layout control switches any breakpoint to the vertical stack – using your site's own Elementor breakpoints, not a hardcoded list. If a visitor's browser can't run the effect at all, it shows the same designed vertical layout – content is never trapped.
 
@@ -28,7 +28,7 @@ On phones and tablets the section becomes a vertical stack by default: panels fl
 
 The widget is a normal section in your page's vertical flow, not a whole-page takeover. Open the page with one, drop another between regular sections, use several on the same page – each pins and scrubs independently, and the page scrolls vertically as usual before, between, and after. You choose how much page scroll each section consumes, and the reveal can run right-to-left. Mixed vertical and horizontal scrolling, wherever it fits your layout.
 
-= Plays well with the rest of Elementor =
+= Works with Elementor Pro's effects and one-page menus =
 
 Elementor Pro's Scrolling Effects keep working inside the section – element and background effects follow each panel's ride across the stage instead of freezing while the section is pinned. One-page navigation works too: anchor links and shared URLs scroll to the exact panel, and with Elementor Pro's menu widget the highlighted menu item follows the panel on stage. Entrance animations, lazy-loaded media, and visibility-triggered widgets fire as their panel comes into view, and Pro's page Scroll Snap keeps working around the section.
 
@@ -47,7 +47,15 @@ Yes. There is no Pro version and nothing in the widget is locked – what you in
 
 = Does it require Elementor Pro? =
 
-No. The free Elementor plugin is the only requirement.
+No. The free Elementor plugin is the only requirement, and the horizontal scroll behaves identically with or without Pro – nothing about the effect is gated behind it.
+
+Pro is supported alongside it rather than required by it. Its Scrolling Effects and one-page menu highlighting keep working inside the section; page Scroll Snap keeps working around it, since the section takes itself out of the snap sequence instead of fighting the pin. The questions further down cover exactly how.
+
+= How is this different from Elementor Pro's Horizontal Scroll effect? =
+
+Pro's Horizontal Scroll is a motion effect, not a section. It slides one element sideways as the page scrolls past it, and the total distance it can travel is the Speed value times 100 pixels – so even at the maximum Speed of 10, the element moves 1000px in all. A four-panel full-width track needs several times that. The effect also never pins anything: the page keeps scrolling normally while the element slides, and the motion eases toward its target on a one-second transition rather than tracking the scroll position exactly.
+
+Which is why the tutorials for building a real horizontal section don't use it. They give each panel 100vw, make the container holding them sticky inside an over-tall wrapper, and paste in a JavaScript snippet that measures the track and maps scroll onto it – and you re-tune that whenever the content changes. This widget is the same arrangement as a real element: panels are Containers you add and remove, the travel is measured from the actual track width so it stays correct as the content changes, and Pro's own effects keep working on elements inside the panels.
 
 = Will it slow down my site? =
 
@@ -60,6 +68,10 @@ By default the section switches to a vertical stack on touch devices – panels 
 = Can I put any widget inside a panel? =
 
 Yes – panels are real Elementor Containers, Flexbox or Grid alike. Anything you can build in a Container works, including nested layouts.
+
+= The scroll feels too fast – what do I change? =
+
+Scroll Length. It sets how much page scroll the section consumes, so raising it stretches the same journey over more scrolling. Height is a different thing: it's the pinned viewport the panels fill, not the distance they travel. Adding panels doesn't speed anything up either – the section simply gets taller, and each panel still takes the same amount of scroll to cross.
 
 = I have a sticky header – will it get in the way? =
 
@@ -105,6 +117,9 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 4. Scroll: pinned section height, direction, how much page scroll the section consumes, and a pin offset for sticky headers.
 
 == Changelog ==
+
+= 1.0.3 =
+* improved: documentation only – the plugin page now covers what works without Elementor Pro, how the widget differs from Pro's Horizontal Scroll motion effect, and which control sets the scroll pacing.
 
 = 1.0.2 =
 * improved: the widget now sits in Elementor's Layout category, next to Container and Grid.
