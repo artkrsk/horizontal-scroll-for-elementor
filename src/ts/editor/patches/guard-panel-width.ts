@@ -14,9 +14,46 @@
 //      (keeping the number, so 50% -> 50vw) on the settings command. A `%`
 //      panel width is never sane here (it means "% of the track", never "one
 //      screen"), so this preserves intent in a unit that actually works.
+//
+// Both applies are plain object transforms, kept out of the defineDependency
+// callbacks so they can be exercised without an $e to extend.
 import { defineDependency, editedContainers, isOurWidget, registerDependencies } from './dependency'
 
-const PANEL_WIDTH = { unit: 'vw', size: 100 }
+/** Must equal panel_container()'s width in the PHP widget — pinned by phpParity.test.ts. */
+export const PANEL_WIDTH = { unit: 'vw', size: 100 }
+
+export const applyDefaultPanelWidth = (args: any): boolean => {
+  const model = args.model
+  model.settings = model.settings ?? {}
+  // Respect an already-authored width (initial panels carry the PHP default).
+  if (!model.settings.width) {
+    // Match panel_container(): `full` is required for the Width control to
+    // take effect (its `--width` selector is gated on content_width:full),
+    // and it's what the initial panels already use.
+    model.settings.content_width = 'full'
+    model.settings.width = { ...PANEL_WIDTH }
+  }
+  return true // allow the (now-enriched) create
+}
+
+export const coercePanelWidths = (args: any): boolean => {
+  editedContainers(args).forEach((container: any) => {
+    if (!isOurWidget(container?.parent)) {
+      return
+    }
+    const settings = args.isMultiSettings ? args.settings?.[container.id] : args.settings
+    if (!settings) {
+      return
+    }
+    // `width`, `width_tablet`, `width_mobile`, … — every responsive variant.
+    for (const key of Object.keys(settings)) {
+      if (/^width($|_)/.test(key) && '%' === settings[key]?.unit) {
+        settings[key] = { ...settings[key], unit: 'vw' }
+      }
+    }
+  })
+  return true // allow the (now-coerced) settings change
+}
 
 export const registerPanelWidthGuard = (): void => {
   registerDependencies('panel-width guard', () => [
@@ -25,19 +62,7 @@ export const registerPanelWidthGuard = (): void => {
       'document/elements/create',
       'arts-hs-default-panel-width',
       (args: any) => isOurWidget(args?.container) && 'container' === args?.model?.elType,
-      (args: any) => {
-        const model = args.model
-        model.settings = model.settings ?? {}
-        // Respect an already-authored width (initial panels carry the PHP default).
-        if (!model.settings.width) {
-          // Match panel_container(): `full` is required for the Width control to
-          // take effect (its `--width` selector is gated on content_width:full),
-          // and it's what the initial panels already use.
-          model.settings.content_width = 'full'
-          model.settings.width = { ...PANEL_WIDTH }
-        }
-        return true // allow the (now-enriched) create
-      }
+      applyDefaultPanelWidth
     ),
 
     // Guard 2: a percentage Width on a panel is coerced to vw (per breakpoint).
@@ -45,24 +70,7 @@ export const registerPanelWidthGuard = (): void => {
       'document/elements/settings',
       'arts-hs-coerce-panel-width',
       (args: any) => editedContainers(args).some((c: any) => isOurWidget(c?.parent)),
-      (args: any) => {
-        editedContainers(args).forEach((container: any) => {
-          if (!isOurWidget(container?.parent)) {
-            return
-          }
-          const settings = args.isMultiSettings ? args.settings?.[container.id] : args.settings
-          if (!settings) {
-            return
-          }
-          // `width`, `width_tablet`, `width_mobile`, … — every responsive variant.
-          for (const key of Object.keys(settings)) {
-            if (/^width($|_)/.test(key) && '%' === settings[key]?.unit) {
-              settings[key] = { ...settings[key], unit: 'vw' }
-            }
-          }
-        })
-        return true // allow the (now-coerced) settings change
-      }
+      coercePanelWidths
     )
   ])
 }

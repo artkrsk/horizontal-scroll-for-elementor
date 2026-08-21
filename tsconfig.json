@@ -1,4 +1,9 @@
 {
   "extends": "@arts/wp-plugin-tooling/tsconfig",
-  "include": ["src/ts/**/*", "vitest.config.ts"]
+  "compilerOptions": {
+    "paths": {
+      "@ts/*": ["./src/ts/*"]
+    }
+  },
+  "include": ["src/ts/**/*", "tests/**/*", "vitest.config.ts"]
 }

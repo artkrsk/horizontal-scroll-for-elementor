@@ -35,7 +35,7 @@ interface ISpyGroup {
   current: HTMLElement | null
 }
 
-const apply = (group: ISpyGroup): void => {
+export const apply = (group: ISpyGroup): void => {
   // Vertical states are Pro's home turf — its own spy handles stacked panels.
   const scrubbing = isScrubbing(group.track)
   for (const [link, panel] of group.links) {
@@ -49,7 +49,7 @@ const apply = (group: ISpyGroup): void => {
 
 // The panel a main-menu link points at, or null when it points elsewhere —
 // off-page, no hash, or a target outside any section.
-const resolveLinkPanel = (
+export const resolveLinkPanel = (
   link: HTMLAnchorElement
 ): { track: HTMLElement; panel: HTMLElement } | null => {
   if (link.pathname !== location.pathname || link.hash === '') {
@@ -65,7 +65,7 @@ const resolveLinkPanel = (
 // Pro's own spy scope: main-menu anchor items with same-page hashes. Keyed by
 // track because that is how the point observer resolves a panel back to its
 // group — a panel's parentElement IS its track.
-const collectGroups = (): {
+export const collectGroups = (): {
   byTrack: Map<HTMLElement, ISpyGroup>
   menuRoots: Set<HTMLElement>
 } => {
