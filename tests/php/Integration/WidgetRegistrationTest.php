@@ -2,17 +2,7 @@
 
 namespace Arts\HorizontalScroll\Tests\Integration;
 
-use Arts\HorizontalScroll\Widgets\HorizontalScroll;
-
 class WidgetRegistrationTest extends TestCase {
-
-	private function widget(): HorizontalScroll {
-		$widget = \Elementor\Plugin::$instance->widgets_manager->get_widget_types( 'arts-horizontal-scroll' );
-
-		$this->assertInstanceOf( HorizontalScroll::class, $widget );
-
-		return $widget;
-	}
 
 	public function test_widget_is_registered(): void {
 		$widgets = \Elementor\Plugin::$instance->widgets_manager->get_widget_types();

@@ -2,7 +2,8 @@
 
 namespace Arts\HorizontalScroll\Tests\Integration;
 
-use Arts\HorizontalScroll\Widgets\HorizontalScroll;
+use Arts\HorizontalScroll\Managers\Assets;
+
 
 class AssetsTest extends TestCase {
 
@@ -17,14 +18,6 @@ class AssetsTest extends TestCase {
 		\Elementor\Core\Kits\Manager::create_default_kit();
 
 		do_action( 'wp_enqueue_scripts' );
-	}
-
-	private function widget(): HorizontalScroll {
-		$widget = \Elementor\Plugin::$instance->widgets_manager->get_widget_types( 'arts-horizontal-scroll' );
-
-		$this->assertInstanceOf( HorizontalScroll::class, $widget );
-
-		return $widget;
 	}
 
 	public function test_widget_declares_conditional_assets(): void {
@@ -66,12 +59,18 @@ class AssetsTest extends TestCase {
 		$this->assertContains( 'arts-horizontal-scroll', $skipped );
 	}
 
-	public function test_built_stylesheet_defaults_vertical_and_gates_horizontal(): void {
+	private function built_stylesheet(): string {
 		$css = file_get_contents(
 			WP_PLUGIN_DIR . '/horizontal-scroll-for-elementor/src/php/libraries/horizontal-scroll-for-elementor/horizontal-scroll-for-elementor.css'
 		);
 
 		$this->assertIsString( $css );
+
+		return $css;
+	}
+
+	public function test_built_stylesheet_defaults_vertical_and_gates_horizontal(): void {
+		$css = $this->built_stylesheet();
 		// The gate probes the NAMED syntax the engine uses — probing view()
 		// misclassifies partial implementations.
 		$this->assertMatchesRegularExpression( '/@supports\s*\(view-timeline: --probe block\)/', $css );
@@ -174,6 +173,137 @@ class AssetsTest extends TestCase {
 		$this->assertFileDoesNotExist( $library . '/horizontal-scroll-for-elementor-scroll-timeline.js' );
 		$this->assertFileExists(
 			WP_PLUGIN_DIR . '/horizontal-scroll-for-elementor/vendor-prefixed/arts/scroll-timeline-polyfill/src/php/libraries/scroll-timeline/scroll-timeline.js'
+		);
+	}
+
+	/**
+	 * The wired Assets manager, not a fresh one: a manager built here would
+	 * restate the paths the plugin passes it, which is exactly what the URL
+	 * assertions below exist to catch drifting.
+	 */
+	private function assets_manager(): Assets {
+		$plugin   = \Arts\HorizontalScroll\Plugin::instance();
+		$property = new \ReflectionProperty( $plugin, 'managers' );
+		$property->setAccessible( true );
+
+		$managers = $property->getValue( $plugin );
+		$this->assertIsIterable( $managers );
+
+		foreach ( $managers as $manager ) {
+			if ( $manager instanceof Assets ) {
+				return $manager;
+			}
+		}
+
+		$this->fail( 'the plugin wired up no Assets manager' );
+	}
+
+	/**
+	 * Called rather than fired: Elementor's own AI module rides the same action
+	 * and reaches for an editor that no test request has bootstrapped. The hook
+	 * wiring is asserted separately, right below.
+	 */
+	private function enqueue_editor_assets(): void {
+		$this->assets_manager()->enqueue_editor_js();
+	}
+
+	public function test_editor_bundle_ships_behind_the_nested_elements_handle(): void {
+		// Every editor guard the plugin has — the move lock, both panel-width
+		// guards and the scroll suppression — is delivered by this one handle.
+		// Lose it and the editor silently loses all four while the rest of this
+		// suite stays green.
+		$this->assertNotFalse(
+			has_action( 'elementor/editor/before_enqueue_scripts', array( $this->assets_manager(), 'enqueue_editor_js' ) )
+		);
+
+		$this->enqueue_editor_assets();
+
+		$editor = wp_scripts()->query( 'arts-horizontal-scroll-editor', 'registered' );
+		$this->assertNotFalse( $editor );
+		$this->assertTrue( wp_script_is( 'arts-horizontal-scroll-editor', 'enqueued' ) );
+		// The bundle extends core's nested-elements exports at load.
+		$this->assertContains( 'nested-elements', $editor->deps );
+	}
+
+	public function test_every_registered_asset_url_resolves_to_a_file_that_ships(): void {
+		$this->register_frontend_assets();
+		$this->enqueue_editor_assets();
+
+		$registered = array(
+			wp_styles()->query( 'arts-horizontal-scroll', 'registered' ),
+			wp_scripts()->query( 'arts-horizontal-scroll', 'registered' ),
+			wp_scripts()->query( 'arts-horizontal-scroll-editor', 'registered' ),
+		);
+
+		foreach ( $registered as $dependency ) {
+			$this->assertNotFalse( $dependency );
+			$this->assertIsString( $dependency->src );
+			// The built-artifact assertions elsewhere in this file read those
+			// files by hardcoded path, so a broken asset_url() would ship a 404
+			// with every one of them still passing. This is that hole.
+			$this->assertFileExists(
+				str_replace( plugins_url(), WP_PLUGIN_DIR, $dependency->src ),
+				$dependency->handle . ' points at a file that is not in the build'
+			);
+			// filemtime suffix on the plugin version — cache busting for dev
+			// syncs and plugin updates alike.
+			$this->assertStringStartsWith(
+				ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION . '.',
+				(string) $dependency->ver,
+				$dependency->handle . ' carries no cache-busting version'
+			);
+		}
+	}
+
+	public function test_a_skip_list_that_is_not_a_list_still_yields_one(): void {
+		// Another plugin's callback can hand this filter anything; returning a
+		// non-array would take the polyfill's CSS layer back over our sheet.
+		$skipped = apply_filters( 'arts/scroll_timeline_polyfill/skipped_styles', null );
+
+		$this->assertSame( array( 'arts-horizontal-scroll' ), $skipped );
+	}
+
+	public function test_built_stylesheet_pins_what_the_pin_itself_depends_on(): void {
+		$css = $this->built_stylesheet();
+
+		// clip, never hidden: a scroll container hijacks the sticky scrollport
+		// and kills the pin outright.
+		$this->assertMatchesRegularExpression( '/\.arts-hs\{[^}]*overflow-x:\s*clip/', $css );
+		$this->assertDoesNotMatchRegularExpression( '/\.arts-hs\{[^}]*overflow-x:\s*hidden/', $css );
+		// cqw units throughout the track resolve against this.
+		$this->assertMatchesRegularExpression( '/\.arts-hs\{[^}]*container-type:\s*inline-size/', $css );
+		// The named timeline the README tells integrators to bind.
+		$this->assertMatchesRegularExpression( '/view-timeline:\s*--arts-hs block/', $css );
+		// The vertical multiplier that neutralises integrators' calc() maths.
+		$this->assertMatchesRegularExpression( '/--arts-hs-move:\s*0/', $css );
+		// Pro's page Scroll Snap catches the host section AND the panels.
+		$this->assertStringContainsString( '.arts-hs .e-con', $css );
+		$this->assertStringContainsString( '.elementor-section:has(.arts-hs)', $css );
+	}
+
+	public function test_built_stylesheet_keeps_the_three_orderings_that_are_load_bearing(): void {
+		$css = $this->built_stylesheet();
+
+		// The animation SHORTHAND resets animation-timeline and animation-range,
+		// so it has to be declared before them or the scrub never binds.
+		$this->assertLessThan(
+			strpos( $css, 'animation-timeline:' ),
+			strpos( $css, 'animation:var(--arts-hs-animation' ),
+			'the animation shorthand must precede its longhands'
+		);
+		// The polyfilled flip is LAYOUT only. If it also turned the CSS
+		// animation on, it would race the WAAPI one the engine builds.
+		$polyfilled = strpos( $css, '.arts-hs_polyfilled' );
+		$this->assertIsInt( $polyfilled );
+		$this->assertDoesNotMatchRegularExpression(
+			'/\.arts-hs_polyfilled\{[^}]*--arts-hs-animation:\s*initial/',
+			$css
+		);
+		// Touch wins at equal specificity only by coming last.
+		$this->assertGreaterThan(
+			$polyfilled,
+			strpos( $css, '.arts-hs_touch-vertical' ),
+			'the touch override must be declared after the polyfilled flip'
 		);
 	}
 }

@@ -7,41 +7,6 @@ use Elementor\Controls_Manager;
 
 class ControlsTest extends TestCase {
 
-	/** @return array<string, array<string, mixed>> */
-	private function controls(): array {
-		$widget = \Elementor\Plugin::$instance->widgets_manager->get_widget_types( 'arts-horizontal-scroll' );
-		$this->assertInstanceOf( HorizontalScroll::class, $widget );
-
-		// Optimized Control Loading files controls carrying `selectors` into
-		// a separate style_controls stack; get_controls() merges it back only
-		// under this flag — the editor's own read path.
-		\Elementor\Core\Frontend\Performance::set_use_style_controls( true );
-		$controls = $widget->get_controls();
-		\Elementor\Core\Frontend\Performance::set_use_style_controls( false );
-
-		$this->assertIsArray( $controls );
-
-		/** @var array<string, array<string, mixed>> $controls */
-		return $controls;
-	}
-
-	/**
-	 * @param mixed $value
-	 * @return array<mixed, mixed>
-	 */
-	private function array_value( $value ): array {
-		$this->assertIsArray( $value );
-
-		return $value;
-	}
-
-	/** @param mixed $value */
-	private function string_value( $value ): string {
-		$this->assertIsString( $value );
-
-		return $value;
-	}
-
 	public function test_sliders_write_scoped_css_vars(): void {
 		$controls = $this->controls();
 

@@ -32,13 +32,35 @@ class NoticesTest extends TestCase {
 		delete_option( $container_key );
 		delete_option( $nested_key );
 
+		$written = array();
+		$record  = static function ( $option ) use ( &$written ): void {
+			$written[] = $option;
+		};
+		add_action( 'add_option', $record );
+		add_action( 'update_option', $record );
+
 		$notices = new Notices();
 		$notices->activate_nested_elements();
+
+		remove_action( 'add_option', $record );
+		remove_action( 'update_option', $record );
 
 		// Container carries the dependency chain — while it is off, Elementor
 		// re-derives nested-elements as inactive on every load. nested-elements
 		// is an ordinary mutable feature though, so it needs its own write too.
 		$this->assertSame( 'active', get_option( $container_key ) );
 		$this->assertSame( 'active', get_option( $nested_key ) );
+
+		// Order is load-bearing, and both-are-active cannot see it: written the
+		// other way round, Elementor's own dependency validation throws and
+		// wp_die()s the request.
+		$ours = array();
+		foreach ( $written as $option ) {
+			if ( in_array( $option, array( $container_key, $nested_key ), true ) && ! in_array( $option, $ours, true ) ) {
+				$ours[] = $option;
+			}
+		}
+
+		$this->assertSame( array( $container_key, $nested_key ), $ours );
 	}
 }

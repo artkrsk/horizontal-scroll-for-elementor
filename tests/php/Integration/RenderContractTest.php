@@ -6,41 +6,6 @@ use Arts\HorizontalScroll\Widgets\HorizontalScroll;
 
 class RenderContractTest extends TestCase {
 
-	/**
-	 * @param array<int, array<string, string>> $panels
-	 */
-	private function render_widget( string $id, array $panels ): string {
-		$widget = \Elementor\Plugin::$instance->elements_manager->create_element_instance(
-			array(
-				'id'         => $id,
-				'elType'     => 'widget',
-				'widgetType' => 'arts-horizontal-scroll',
-				'settings'   => array( 'panels' => $panels ),
-				'elements'   => array(),
-			)
-		);
-
-		$this->assertInstanceOf( HorizontalScroll::class, $widget );
-
-		ob_start();
-		$widget->print_element();
-
-		return (string) ob_get_clean();
-	}
-
-	/** @return array<int, array<string, string>> */
-	private function panels( int $count ): array {
-		$panels = array();
-		for ( $i = 1; $i <= $count; $i++ ) {
-			$panels[] = array(
-				'_id'         => 'p' . $i,
-				'panel_title' => 'Panel ' . $i,
-			);
-		}
-
-		return $panels;
-	}
-
 	public function test_render_emits_wrapper_class_track_and_fallback_var(): void {
 		$html = $this->render_widget( 'ahs1', $this->panels( 3 ) );
 
@@ -66,6 +31,16 @@ class RenderContractTest extends TestCase {
 
 		$this->assertStringContainsString( '--arts-hs-distance: calc(1 * 80cqw)', $a );
 		$this->assertStringContainsString( '--arts-hs-distance: calc(4 * 80cqw)', $b );
+	}
+
+	public function test_an_empty_repeater_renders_a_section_with_no_travel(): void {
+		// The floor under count(): an author who deletes every panel, or an
+		// import that lands the widget with none, must get a normal block —
+		// not a runway sized by calc(-1 * 80cqw).
+		$html = $this->render_widget( 'ahsEmpty', array() );
+
+		$this->assertStringContainsString( '--arts-hs-distance: calc(0 * 80cqw)', $html );
+		$this->assertStringContainsString( 'js-arts-hs__track', $html );
 	}
 
 	public function test_render_and_content_template_share_placeholder_selector(): void {
