@@ -13,5 +13,10 @@ jobs:
   canary:
     uses: artkrsk/wordpress-plugin-workflows/.github/workflows/canary.yml@main
     with:
-      integration_suites: '[]'
-      # wp_env_ports: '8890,8891'
+      # The PHPUnit suites against PHP 8.0/8.4 and an Elementor beta when one is
+      # ahead of stable. Off by default across the family, on here: this is
+      # the most Elementor-coupled plugin of the set — nested elements,
+      # has_widget_inner_wrapper, e_optimized_markup and Optimized Control
+      # Loading are all core internals a beta can move under us.
+      integration_suites: '["tests/php/phpunit.xml.dist", "tests/php/phpunit-no-elementor.xml.dist"]'
+      wp_env_ports: '8892,8893'

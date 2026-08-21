@@ -23,6 +23,11 @@ jobs:
       blueprint_check: true
       integration_suites: '["tests/php/phpunit.xml.dist", "tests/php/phpunit-no-elementor.xml.dist"]'
       wp_env_ports: '8892,8893'
-      # coverage: true once a JS test suite exists (repo is public — Codecov is viable)
+      coverage: true
+      run_e2e: true
+      # Firefox is not redundant here: it is the only tier anywhere in the repo
+      # that runs the scroll-timeline polyfill rather than a stub of it.
+      playwright_browsers: chromium firefox
+      e2e_command: pnpm exec playwright test
     secrets:
       CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
