@@ -5,5 +5,5 @@
       "@ts/*": ["./src/ts/*"]
     }
   },
-  "include": ["src/ts/**/*", "tests/**/*", "vitest.config.ts"]
+  "include": ["src/ts/**/*", "tests/**/*", "vitest.config.ts", "playwright.config.ts"]
 }

@@ -19,6 +19,7 @@
     "@artemsemkin/elementor-types": "^1.0.10",
     "@arts/wp-plugin-tooling": "github:artkrsk/wp-plugin-tooling",
     "@biomejs/biome": "2.5.4",
+    "@playwright/test": "^1.62.1",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^4.1.10",
     "@wordpress/env": "11.11.0",
