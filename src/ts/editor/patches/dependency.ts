@@ -1,4 +1,4 @@
-// The $e data-dependency shape, four times over across the two guard modules:
+// The $e data-dependency shape, five times over across the two guard modules:
 // a Dependency subclass declaring a command, an id, a condition and an apply,
 // behind the same availability guard and the same registration try/catch.
 // This is lock-panel-moves' own lockRepeaterCommand factory generalized —

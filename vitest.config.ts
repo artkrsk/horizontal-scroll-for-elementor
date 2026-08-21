@@ -36,7 +36,7 @@ export default defineConfig({
     coverage: {
       ...base.test.coverage,
       exclude: [...excluded, ...EDITOR_ADAPTERS],
-      // Set just under the measured baseline (99.7 / 97.3 / 98.8 / 100). Raise
+      // Set just under the measured baseline (100 / 97.3 / 100 / 100). Raise
       // as coverage grows; never lower without discussion — the point is that a
       // future change cannot quietly stop covering what is covered today.
       thresholds: { statements: 99, branches: 97, functions: 98, lines: 99 }

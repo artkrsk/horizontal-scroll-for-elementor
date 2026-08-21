@@ -15,9 +15,11 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, section } from './support'
 
 /**
- * The committed surface. Every name here is in README's Integration contract
- * table, so these tests double as the executable statement of it — renaming a
- * hook class or flipping a probe's meaning fails here first.
+ * The committed surface. These probes are how the code reads the names README's
+ * Integration contract table commits to, so these tests double as the executable
+ * statement of it — renaming a hook class or flipping a probe's meaning fails
+ * here first. The helper names themselves are internal; contractParity.test.ts
+ * is what holds the table to the code.
  *
  * The probes need no stubbing: happy-dom resolves computed `position` and
  * computed custom properties for real. Only the layout metrics behind

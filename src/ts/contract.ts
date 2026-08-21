@@ -1,8 +1,10 @@
-// The committed public surface in one place. Every name below appears in
-// README.md's Integration contract table, so renaming any of them is a
-// breaking change that bumps `window.ARTS_HS.contract`; the probes underneath
-// are the documented reads of those names (the README points integrators at
-// the same track-position check `isScrubbing` performs).
+// The committed public surface in one place. The names README.md's Integration
+// contract table lists cannot be renamed without bumping
+// `window.ARTS_HS.contract`; the probes underneath are the documented reads of
+// them (the README points integrators at the same track-position check
+// `isScrubbing` performs). Two names here are NOT in that table: WIDGET_TYPE,
+// the Elementor type name phpParity.test.ts pins against PHP's get_name(), and
+// POLYFILLED_CLASS.
 //
 // DOM hooks are the `js-` family; `.arts-hs*` classes are styling-only and are
 // never selected from JS, though JS may still TOGGLE a styling modifier —
