@@ -108,6 +108,16 @@ describe('pinProgress', () => {
 
     expect(pinProgress(wrapper, state)).toBe(0)
   })
+
+  it('has no answer without a pin window, and clamp01 does not invent one', () => {
+    const { wrapper } = section()
+    setRect(wrapper, { top: 0 })
+
+    // Stated, not desired: the one caller gates on pinWindow > 0 before ever
+    // reaching here, and a second caller has to do the same. Math.min/max pass
+    // NaN straight through, so nothing downstream would flag it.
+    expect(pinProgress(wrapper, { ...state, pinWindow: 0 })).toBeNaN()
+  })
 })
 
 describe('the wrapped core utility', () => {

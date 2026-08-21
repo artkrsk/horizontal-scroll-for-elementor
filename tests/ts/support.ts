@@ -196,12 +196,25 @@ export interface IFakeDollarE {
   firstTraceQueries: string[]
 }
 
+export interface IFakeDollarEOptions {
+  /**
+   * The `nested-elements` NestedView the editor View extends at module
+   * evaluation time. A base without `filter` exercises View's own fallback.
+   */
+  nestedView?: unknown
+  /** Reject a repeated getId(), as $e.hooks does — ids are once per page load. */
+  rejectDuplicateIds?: boolean
+}
+
 /**
  * Install a minimal `$e` on the global scope. `firstTrace` decides what
  * isCurrentFirstTrace answers — the discriminator that separates core's own
  * repeater-driven sync from a foreign navigator drag.
  */
-export const fakeDollarE = (firstTrace = false): IFakeDollarE => {
+export const fakeDollarE = (
+  firstTrace = false,
+  { nestedView = class {}, rejectDuplicateIds = false }: IFakeDollarEOptions = {}
+): IFakeDollarE => {
   const registered: any[] = []
   const firstTraceQueries: string[] = []
 
@@ -209,8 +222,14 @@ export const fakeDollarE = (firstTrace = false): IFakeDollarE => {
 
   vi.stubGlobal('$e', {
     modules: { hookData: { Dependency } },
+    components: { get: () => ({ exports: { NestedView: nestedView } }) },
     hooks: {
-      registerDataDependency: (dependency: unknown) => registered.push(dependency)
+      registerDataDependency: (dependency: any) => {
+        if (rejectDuplicateIds && registered.some((d) => d.getId() === dependency.getId())) {
+          throw new Error(`hook id ${dependency.getId()} already registered`)
+        }
+        registered.push(dependency)
+      }
     },
     commands: {
       isCurrentFirstTrace: (command: string) => {
@@ -231,4 +250,40 @@ export const fakeDollarE = (firstTrace = false): IFakeDollarE => {
       return dependency
     }
   }
+}
+
+/**
+ * Install a minimal `elementor` on the global scope: the element-type registry
+ * the editor Module writes to, the nested base HorizontalScrollType extends at
+ * module scope, and a scrollToView for the suppression patch to wrap.
+ */
+export const fakeElementor = () => {
+  const registeredTypes: any[] = []
+  const scrolled: unknown[] = []
+  // Held by reference: scrollToView is absent from the types package's
+  // HelpersManager, so reading it back through the global would not typecheck.
+  const helpers = { scrollToView: (element: unknown) => scrolled.push(element) }
+
+  vi.stubGlobal('elementor', {
+    elementsManager: {
+      registerElementType: (type: unknown) => registeredTypes.push(type)
+    },
+    modules: { elements: { types: { NestedElementBase: class {} } } },
+    helpers
+  })
+
+  return { registeredTypes, scrolled, helpers }
+}
+
+/** The window event bus the editor bundle boots from. */
+export const fakeElementorCommon = () => {
+  const handlers = new Map<string, (...args: unknown[]) => unknown>()
+
+  vi.stubGlobal('elementorCommon', {
+    elements: {
+      $window: { on: (name: string, callback: () => unknown) => handlers.set(name, callback) }
+    }
+  })
+
+  return handlers
 }

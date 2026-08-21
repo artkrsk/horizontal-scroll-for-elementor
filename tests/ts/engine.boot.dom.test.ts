@@ -86,6 +86,21 @@ describe('boot on a browser with native scroll-driven animations', () => {
     expect(() => boot(wrapper)).not.toThrow()
     expect(ready).toHaveLength(0)
   })
+
+  it('never retries a section that booted without a track', async () => {
+    const { boot } = await loadEngine(true)
+    const { wrapper, track } = travelling()
+    track.remove()
+
+    boot(wrapper)
+    // Markup arrives late — boot() stamps the WeakSet before it resolves the
+    // track, so recovery is a re-render (a fresh wrapper), never a second call.
+    wrapper.appendChild(track)
+    const ready = readySignal(wrapper)
+    boot(wrapper)
+
+    expect(ready).toHaveLength(0)
+  })
 })
 
 describe('getTimeline', () => {
