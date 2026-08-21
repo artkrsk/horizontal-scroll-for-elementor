@@ -99,7 +99,25 @@ export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
 }
 
 const observe = (wrapper: HTMLElement, track: HTMLElement): void => {
-  const ro = new ResizeObserver(() => measure(wrapper, track))
+  const ro = new ResizeObserver(() => {
+    // Removing an observed element reports a 0x0 box, which is the only signal
+    // frontend code gets that an editor re-render replaced this section — every
+    // settings change builds a new wrapper, and without this each old one stays
+    // reachable through its observer with the whole panel tree behind it.
+    //
+    // CONNECTEDNESS, not that 0x0: a section inside a hidden tab reports the
+    // same box and has to keep observing so it re-measures when shown again.
+    //
+    // Best effort by design. A browser that never reports the box leaves this
+    // exactly what it was before — an observer nothing can reach. (A shared
+    // observer would be the opposite trade: permanently reachable itself, so it
+    // would pin every wrapper it ever saw rather than letting the cycle go.)
+    if (!wrapper.isConnected) {
+      ro.disconnect()
+      return
+    }
+    measure(wrapper, track)
+  })
   ro.observe(wrapper)
   ro.observe(track)
   measure(wrapper, track)

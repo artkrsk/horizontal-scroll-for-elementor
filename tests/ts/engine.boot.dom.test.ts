@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { nth, section } from './support'
+import { nth, observerSpy, section, setGeometry } from './support'
 
 /**
  * The tier half of the engine. SUPPORTS_NATIVE is evaluated at module scope on
@@ -100,6 +100,63 @@ describe('boot on a browser with native scroll-driven animations', () => {
     boot(wrapper)
 
     expect(ready).toHaveLength(0)
+  })
+})
+
+describe('the measurement observer', () => {
+  /** happy-dom constructs observers and never fires them, so deliver by hand. */
+  const observing = async () => {
+    const { spy, Fake } = observerSpy()
+    vi.stubGlobal('ResizeObserver', Fake)
+    const { boot } = await loadEngine(true)
+    const fixture = travelling()
+
+    boot(fixture.wrapper)
+
+    return { spy, ...fixture }
+  }
+
+  it('watches both boxes the measurement reads', async () => {
+    const { spy, wrapper, track } = await observing()
+
+    expect(spy.constructed).toBe(1)
+    expect(spy.observed).toEqual([wrapper, track])
+  })
+
+  it('re-measures the section when a box changes', async () => {
+    const { spy, wrapper, track } = await observing()
+
+    setGeometry(track, { scrollWidth: 5000 })
+    spy.deliver([])
+
+    expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe('4000px')
+  })
+
+  it('stands down once an editor re-render has replaced the section', async () => {
+    const { spy, wrapper, track } = await observing()
+    const measured = wrapper.style.getPropertyValue('--arts-hs-distance')
+
+    // What a re-render leaves behind: a detached tree whose observer would
+    // otherwise keep the whole thing reachable for the rest of the session.
+    wrapper.remove()
+    setGeometry(track, { scrollWidth: 5000 })
+    spy.deliver([])
+
+    expect(spy.disconnected).toBe(1)
+    expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe(measured)
+  })
+
+  it('keeps observing a section that is merely hidden', async () => {
+    const { spy, wrapper, track } = await observing()
+
+    // A section inside a collapsed tab reports the same 0x0 box a removed one
+    // does, and has to be measured again the moment it is shown.
+    wrapper.style.display = 'none'
+    setGeometry(track, { scrollWidth: 5000 })
+    spy.deliver([])
+
+    expect(spy.disconnected).toBe(0)
+    expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe('4000px')
   })
 })
 
