@@ -10,8 +10,8 @@
  * follows it (no wp-cli context there — the WP_CLI:: calls below are guarded
  * for that reason). Idempotent: finds the page by slug and rewrites it
  * wholesale. All styling is hard-coded (no kit globals, no fluid presets)
- * because the blueprint boots bare hello-elementor + free Elementor. The two
- * Motion FX garnishes are Elementor Pro settings that stay inert without Pro.
+ * because the blueprint boots bare hello-elementor + free Elementor. The three
+ * Motion FX garnish layers are Elementor Pro settings that stay inert without Pro.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -363,9 +363,10 @@ function ahs_panel_settings( string $title, int $width_vw, string $bg, array $ex
 				'size'  => $width_vw,
 				'sizes' => array(),
 			),
-			// Core's 100% width default is mobile-only; without this,
-			// tablet-width touch stacking leaves ragged right edges. vw, not %:
-			// percentages resolve against the max-content track in the
+			// Core re-declares its 100% width placeholder at mobile but not at
+			// tablet, so tablet inherits the authored desktop width; without
+			// this, tablet-width touch stacking leaves ragged right edges. vw,
+			// not %: percentages resolve against the max-content track in the
 			// horizontal state and blow the panels up.
 			'width_tablet'          => array(
 				'unit'  => 'vw',

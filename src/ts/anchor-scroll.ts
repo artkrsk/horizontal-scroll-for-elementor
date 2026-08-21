@@ -114,10 +114,11 @@ const handleClick = (event: MouseEvent): void => {
     return
   }
   // preventDefault only, no stopPropagation: menu-close / analytics listeners
-  // keep working, and Elementor's classic anchors handler is not bound in
-  // current core (verified live). pushState instead of assigning location.hash
-  // — hash assignment triggers a native fragment scroll that would race ours
-  // under `scroll-behavior: smooth`.
+  // keep working, and current core binds no anchor click handler of its own
+  // (it only stamps scroll-margin-top and lets the browser scroll natively),
+  // so there is nothing of Elementor's to race. pushState instead of assigning
+  // location.hash — hash assignment triggers a native fragment scroll that
+  // would race ours under `scroll-behavior: smooth`.
   event.preventDefault()
   history.pushState(null, '', anchor.hash)
   window.scrollTo({ top, behavior: 'smooth' })

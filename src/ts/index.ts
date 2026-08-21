@@ -20,8 +20,8 @@ window.ARTS_HS = { ...window.ARTS_HS, contract: 1, getTimeline }
 window.addEventListener('elementor/frontend/init', () => {
   // Spelled out, deliberately NOT composed from WIDGET_TYPE: AssetsTest greps
   // the BUILT bundle for this hook name, and an interpolated one leaves no
-  // literal to find. The widget type has to stay in sync with PHP's get_name()
-  // regardless, which no TS constant can enforce.
+  // literal to find. phpParity.test.ts pins this literal against WIDGET_TYPE
+  // and WIDGET_TYPE against PHP's get_name(), so the duplication can't drift.
   window.elementorFrontend.hooks.addAction(
     'frontend/element_ready/arts-horizontal-scroll.default',
     ($scope: unknown) => {

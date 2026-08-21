@@ -5,7 +5,8 @@
  * - `elementor.modules.elements` is `any` (no NestedElementBase typing)
  * - `elementorCommon.elements` (the $window/$document cache) is absent
  *   from ElementorCommon
- * - `$e.components.get()` returns ComponentBase | undefined, and the
+ * - `$e.components.get()` returns `any` (the $e type carries its own
+ *   ComponentRegistry, not the richer one the package also exports), so the
  *   nested-elements component's `exports` (NestedView) is untyped
  * - `$e.hooks` (registerDataDependency et al.) is absent from the $e type
  * - `$e.commands` (isCurrentFirstTrace et al.) is absent from the $e type

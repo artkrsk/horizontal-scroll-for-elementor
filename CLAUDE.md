@@ -10,7 +10,7 @@ Free wp.org plugin: one nested-elements widget — a pinned section whose child 
 ## Commands
 
 - `pnpm dev:plugin` — watch + mirror to a local WP site (`DEV_TARGET` in gitignored `.env`). `pnpm build` — full release build into `dist/` with release assertions. Both via `arts-wp` (@arts/wp-plugin-tooling — build/release/changelog/blueprint mechanics are documented there). Fixture sync: `node dev/sync-fixtures.js`.
-- PHP suites (CI's integration job; locally: `pnpm build && pnpm exec wp-env start` then `pnpm exec wp-env run tests-cli --env-cwd=test-workspace -- vendor/bin/phpunit -c tests/php/phpunit.xml.dist` / `-c tests/php/phpunit-no-elementor.xml.dist`, ports **8892/8893**). `pnpm test` runs the (currently empty) Vitest suite. Tests ALWAYS run against the built `dist/` artifact, never repo source. The test and canary workflows run on a repo-scoped self-hosted runner; the release/deploy jobs are GitHub-hosted.
+- PHP suites (CI's integration job; locally: `pnpm build && pnpm exec wp-env start` then `pnpm exec wp-env run tests-cli --env-cwd=test-workspace -- vendor/bin/phpunit -c tests/php/phpunit.xml.dist` / `-c tests/php/phpunit-no-elementor.xml.dist`, ports **8892/8893**). Those ALWAYS run against the built `dist/` artifact, never repo source. `pnpm test` runs the Vitest suite in `tests/ts/` against `src/ts` through the test-only `@ts/*` alias (`pnpm test:coverage` for coverage); DOM tests opt into happy-dom per file with a `@vitest-environment` pragma. The test and canary workflows run on a repo-scoped self-hosted runner; the release/deploy jobs are GitHub-hosted.
 - `pnpm exec biome check .`, `pnpm exec tsc --noEmit`, `vendor/bin/phpstan analyse --memory-limit=1G` (level max), `vendor/bin/phpcs`. Don't pipe these through `tail`/`grep` in `&&` chains — pipes mask exit codes and failures have slipped through that way.
 - After changing `render()` markup, a mirrored dev site keeps serving Elementor's cached output until the page's Element Caching is cleared (`wp post meta delete <id> _elementor_element_cache`). When updating `_elementor_data` directly, delete the page's revisions too — the editor prefers newer autosaves.
 
@@ -41,6 +41,8 @@ Free wp.org plugin: one nested-elements widget — a pinned section whose child 
 Editor/frontend globals are typed via `@artemsemkin/elementor-types`; `any` only at the documented package gaps listed in `src/ts/editor/globals.d.ts`. Untyped Elementor surfaces stay behind those seams.
 
 DOM hooks use the `js-` prefix (`.js-arts-hs`, `.js-arts-hs__track`) — `.arts-hs*` classes are styling-only and never selected from JS; markup renders both families. JS may still *toggle* styling modifiers (`arts-hs_polyfilled`).
+
+`tests/ts/phpParity.test.ts` parses the PHP widget and the stylesheet to pin the names the three languages share — widget type, the spelled-out `element_ready` hook literal, the DOM hook classes, the panel-width defaults the editor guard restates. Renaming on one side only fails there rather than shipping as "the engine stops finding its own markup".
 
 ## Release
 

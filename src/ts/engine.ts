@@ -63,10 +63,11 @@ export const stampPanelRanges = (
 
 let recalcTimer: number | undefined
 
-// Pro's Motion FX caches background-layer dimensions at init/resize only, but
-// panels also resize without a window resize (image/font load) — nudge its
-// public re-measure event once our geometry settles. Harmless with no
-// listeners; trailing debounce absorbs ResizeObserver bursts during load.
+// Pro's Motion FX recomputes cached background-layer dimensions on init and
+// window resize; nothing there watches the panels, which also resize without a
+// window resize (image/font load) — so nudge its public re-measure event once
+// our geometry settles. Harmless with no listeners; trailing debounce absorbs
+// ResizeObserver bursts during load.
 const scheduleMotionFxRecalc = (): void => {
   window.clearTimeout(recalcTimer)
   recalcTimer = window.setTimeout(() => {

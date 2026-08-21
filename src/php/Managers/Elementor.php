@@ -29,8 +29,8 @@ class Elementor extends BaseManager {
 	}
 
 	/**
-	 * Core auto-registers only its own nested widgets (hardcoded in
-	 * includes/managers/widgets.php) — third parties self-register here.
+	 * Core's own nested widgets are hardcoded into its promoted-widgets list
+	 * (includes/managers/widgets.php); third parties have only this hook.
 	 */
 	public function register_widgets( \Elementor\Widgets_Manager $widgets_manager ): void {
 		// The widget needs the Nested Elements module ACTIVE, not merely
