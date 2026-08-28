@@ -12,8 +12,9 @@ import { nth, observerSpy, section } from './support'
  * panel per group) and compare-before-write (never fight Pro's MutationObserver
  * with writes of our own).
  *
- * The observers themselves are not driven here: happy-dom constructs them but
- * never intersects, so what is worth asserting is the state machine they feed.
+ * Both observers are faked (see support.ts): happy-dom never intersects, so the
+ * crossings have to be stated, and a re-assert has to be triggerable on demand.
+ * What is worth asserting is the state machine they feed.
  */
 const ACTIVE = 'elementor-item-active'
 

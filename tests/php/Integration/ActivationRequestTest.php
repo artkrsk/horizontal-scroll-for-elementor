@@ -50,9 +50,9 @@ class ActivationRequestTest extends TestCase {
 	 * it, which would take the test runner with it. Carry the location out as
 	 * an exception instead, from the last point the request is still ours.
 	 *
-	 * The empty case returns, because wp_redirect() bails on an empty location
-	 * without ever reaching that exit — there is nothing to intercept there,
-	 * and a filter that can only throw is a filter that lies about its contract.
+	 * The empty case returns instead: wp_redirect() bails on an empty location
+	 * before sending any header, so there is no redirect to intercept — and a
+	 * filter that can only throw is a filter that lies about its contract.
 	 */
 	public function abort_before_exit( string $location ): string {
 		if ( '' !== $location ) {

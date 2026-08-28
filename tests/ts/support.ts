@@ -118,9 +118,11 @@ export const setRect = (el: Element, over: Partial<DOMRect>): void => {
 }
 
 /**
- * Captures an observer's callback so records can be delivered synchronously —
- * happy-dom constructs all three observers but never fires them, having no
- * layout or paint to observe.
+ * Captures an observer's callback so records can be delivered synchronously.
+ * happy-dom constructs ResizeObserver and IntersectionObserver but never fires
+ * them, having no layout to observe; its MutationObserver is real, but delivers
+ * on its own schedule and cannot be handed an empty batch. Faking all three
+ * makes every delivery a plain call the test controls.
  */
 export const observerSpy = () => {
   const spy = {

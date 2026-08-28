@@ -164,10 +164,13 @@ class HorizontalScroll extends Widget_Nested_Base {
 				// child on the same move command; duplicate clones the row but
 				// not the child container; correlation is index-only, so the
 				// desync then deletes wrong children). Add/remove are verified
-				// healthy and stay enabled. All four keys spelled out: the
-				// controls manager merges args shallowly, a partial array
-				// would silently disable the rest. The editor bundle
-				// additionally vetoes the two commands for this widget.
+				// healthy and stay enabled. All four keys spelled out rather
+				// than just the two vetoes: the editor deep-merges the control
+				// type's own four-key default over these, so an omitted key
+				// quietly reverts to `true` there — stating all four keeps this
+				// array the whole policy instead of a diff against a default
+				// that lives elsewhere. The editor bundle additionally vetoes
+				// the two commands for this widget.
 				'item_actions' => array(
 					'add'       => true,
 					'duplicate' => false,

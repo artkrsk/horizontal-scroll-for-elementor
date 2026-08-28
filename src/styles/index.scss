@@ -215,13 +215,14 @@
 // Elementor Pro's per-page Scroll Snap marks top-level sections/containers
 // as snap stops — a stop the height of the pin runway traps scrolling at
 // the section edge. Its selector (.e-con:not(.e-child)) can ALSO match the
-// panels: nested-elements children are created without `isInner`, so they
-// render as e-parent until the editor's container view stamps it on first
-// render. Neutralized on the widget, on whatever root section/container
-// hosts it, and on every container inside the track; Pro's rule ships in
-// Elementor's own generated CSS, which ties these selectors on specificity
-// and carries no guaranteed order against ours — hence the scoped
-// !important.
+// panels: nested-elements children are created without `isInner`, and the
+// class is computed once when the view is built — the editor sets the
+// attribute on first render, but the panel keeps `e-parent` until something
+// constructs it afresh. Neutralized on the widget, on whatever root
+// section/container hosts it, and on every container inside the track;
+// Pro's rule ships in Elementor's own generated CSS, which ties these
+// selectors on specificity and carries no guaranteed order against ours —
+// hence the scoped !important.
 .arts-hs,
 .arts-hs .e-con,
 .e-con:has(.arts-hs),
