@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.2.1
+
+* fixed: panels carry their own on-stage range in the Elementor editor again – effects built on that range now preview exactly as they behave on the published page.
+* fixed: the Pin Top Offset is respected in the editor preview – the section engages where it does on the live page instead of a little early.
+
 ## 1.2.0
 
 * improved: the pinned section now lives inside Elementor's standard widget wrapper instead of replacing it – themes and add-ons that expect regular widget markup see it.
