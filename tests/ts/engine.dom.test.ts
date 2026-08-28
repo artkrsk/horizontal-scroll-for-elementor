@@ -30,6 +30,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.useRealTimers()
+  vi.unstubAllGlobals()
 })
 
 /** Three full-viewport panels on a 1000px scrollport: 2000px of travel. */
@@ -77,6 +78,20 @@ describe('stampPanelRanges', () => {
     for (const panel of panels) {
       expect(panelVars(panel)).toEqual(['0.000%', '100.000%'])
     }
+  })
+
+  it('stamps panels the editor built in its own realm', () => {
+    // The canvas is assembled by the editor's window, so every panel in the
+    // preview iframe fails a same-realm instanceof — the check this guard used
+    // to make, which skipped the whole track and left the documented per-panel
+    // vars empty for anything authored in the editor.
+    const { wrapper, track, panels } = threePanels()
+    vi.stubGlobal('HTMLElement', class Foreign {})
+
+    stampPanelRanges(wrapper, track, 2000, false)
+
+    expect(panelVars(nth(panels, 0))).toEqual(['0.000%', '50.000%'])
+    expect(panelVars(nth(panels, 2))).toEqual(['50.000%', '100.000%'])
   })
 
   it('skips children that are not HTML elements', () => {

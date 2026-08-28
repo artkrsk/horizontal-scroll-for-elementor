@@ -40,6 +40,8 @@ Free wp.org plugin: one nested-elements widget — a pinned section whose child 
 
 Editor/frontend globals are typed via `@artemsemkin/elementor-types`; `any` only at the documented package gaps listed in `src/ts/editor/globals.d.ts`. Untyped Elementor surfaces stay behind those seams.
 
+Never `instanceof` a DOM node — use `utils/isHTMLElement.ts` (the same helper the other plugins carry). Inside the editor preview the whole section tree, wrapper and track included, is built by the editor's own window, so a same-realm `instanceof HTMLElement` is false for ALL of it, always. Written the other way it fails silently and only in the canvas: `stampPanelRanges` skipped every panel, and `layoutDocTop` returned 0 so the pin range started early. Unit tests can't catch it (happy-dom is single-realm) — verify in a real editor.
+
 DOM hooks use the `js-` prefix (`.js-arts-hs`, `.js-arts-hs__track`) — `.arts-hs*` classes are styling-only and never selected from JS; markup renders both families. JS may still *toggle* styling modifiers (`arts-hs_polyfilled`).
 
 `tests/ts/phpParity.test.ts` parses the PHP widget and the stylesheet to pin the names the three languages share — widget type, the spelled-out `element_ready` hook literal, the DOM hook classes, the panel-width defaults the editor guard restates. Renaming on one side only fails there rather than shipping as "the engine stops finding its own markup".

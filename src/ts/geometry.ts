@@ -1,3 +1,5 @@
+import { isHTMLElement } from './utils/isHTMLElement'
+
 // The wrapper's document offset from the layout tree, not from rects:
 // getBoundingClientRect() includes ancestor/self transforms, and transient
 // ones are real — a widget-level entrance animation translates the wrapper by
@@ -7,7 +9,7 @@
 export const layoutDocTop = (el: HTMLElement): number => {
   let top = 0
   let node: Element | null = el
-  while (node instanceof HTMLElement) {
+  while (isHTMLElement(node)) {
     top += node.offsetTop
     node = node.offsetParent
   }

@@ -25,6 +25,7 @@ import {
   resolveTrack,
   resolveWrapper
 } from './contract'
+import { isHTMLElement } from './utils/isHTMLElement'
 
 const ACTIVE = 'elementor-item-active'
 const MENU_SELECTOR = '.elementor-nav-menu--main'
@@ -108,7 +109,7 @@ const setup = (): void => {
     (entries) => {
       for (const entry of entries) {
         const panel = entry.target
-        if (!(panel instanceof HTMLElement) || !panel.parentElement) {
+        if (!isHTMLElement(panel) || !panel.parentElement) {
           continue
         }
         const group = byTrack.get(panel.parentElement)

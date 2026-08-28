@@ -18,6 +18,7 @@ import {
 } from './contract'
 import { clamp01, computeInsetStart } from './geometry'
 import { updateTrackState } from './motion-fx-compat'
+import { isHTMLElement } from './utils/isHTMLElement'
 
 // Probe the NAMED timeline syntax the engine actually uses — probing view()
 // misclassifies partial implementations. Module scope is load-bearing: the
@@ -44,20 +45,25 @@ export const stampPanelRanges = (
   inverted: boolean
 ): void => {
   const viewport = wrapper.clientWidth
-  for (const child of Array.from(track.children)) {
-    if (!(child instanceof HTMLElement)) {
+  for (const panel of Array.from(track.children)) {
+    // Never instanceof: the editor assembles the canvas in its own window, so
+    // inside the preview iframe EVERY panel failed a same-realm check and the
+    // whole track went unstamped there. isHTMLElement answers in any realm —
+    // but `nodeType === 1` also covers the SVG-shaped children this loop has
+    // to skip, so the layout box is tested separately.
+    if (!isHTMLElement(panel) || typeof panel.offsetLeft !== 'number') {
       continue
     }
     let start = 0
     let end = 1
     if (distance > 0) {
-      const enter = (child.offsetLeft - viewport) / distance
-      const exit = (child.offsetLeft + child.offsetWidth) / distance
+      const enter = (panel.offsetLeft - viewport) / distance
+      const exit = (panel.offsetLeft + panel.offsetWidth) / distance
       start = inverted ? 1 - exit : enter
       end = inverted ? 1 - enter : exit
     }
-    child.style.setProperty('--arts-hs-panel-start', `${(clamp01(start) * 100).toFixed(3)}%`)
-    child.style.setProperty('--arts-hs-panel-end', `${(clamp01(end) * 100).toFixed(3)}%`)
+    panel.style.setProperty('--arts-hs-panel-start', `${(clamp01(start) * 100).toFixed(3)}%`)
+    panel.style.setProperty('--arts-hs-panel-end', `${(clamp01(end) * 100).toFixed(3)}%`)
   }
 }
 

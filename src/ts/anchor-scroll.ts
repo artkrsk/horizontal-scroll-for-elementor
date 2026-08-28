@@ -20,6 +20,7 @@ import {
   VAR_DISTANCE
 } from './contract'
 import { clamp01, computeInsetStart, layoutDocTop } from './geometry'
+import { isHTMLElement } from './utils/isHTMLElement'
 
 // No deep-link scrolling inside the editor's preview iframe: canvas scroll
 // actors are the editor's own territory, and scroll-to-panel was deliberately
@@ -99,8 +100,9 @@ const handleClick = (event: MouseEvent): void => {
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
     return
   }
-  const anchor =
-    event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[href*="#"]') : null
+  const anchor = isHTMLElement(event.target)
+    ? event.target.closest<HTMLAnchorElement>('a[href*="#"]')
+    : null
   if (
     anchor?.target !== '' ||
     anchor.origin !== location.origin ||
