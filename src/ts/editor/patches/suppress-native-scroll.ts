@@ -16,27 +16,25 @@
 // canvas by scrolling the pin themselves.
 import { WRAPPER_SELECTOR } from '../../contract'
 
-type WithScrollToView = {
-  scrollToView?: (this: unknown, $element: any, ...rest: any[]) => unknown
-}
-
 export const suppressNativeScrollForPanels = (): void => {
-  // scrollToView is missing from the types package's HelpersManager
-  // (another documented gap — see ../globals.d.ts).
-  const helpers = elementor?.helpers as WithScrollToView | undefined
+  const helpers = elementor?.helpers
   if (!helpers || typeof helpers.scrollToView !== 'function') {
     return
   }
 
   const original = helpers.scrollToView
 
-  helpers.scrollToView = function (this: unknown, $element: any, ...rest: any[]) {
-    const el = $element?.[0] ?? $element
+  helpers.scrollToView = function ($element: JQuery, ...rest: unknown[]) {
+    const el = ($element as { 0?: Element })?.[0] ?? $element
     // Duck-typed, not instanceof: preview elements belong to the iframe
     // realm, whose HTMLElement is a different constructor than ours.
-    if (el && typeof el.closest === 'function' && el.closest(WRAPPER_SELECTOR)) {
+    if (
+      el &&
+      typeof (el as Element).closest === 'function' &&
+      (el as Element).closest(WRAPPER_SELECTOR)
+    ) {
       return
     }
-    return original.call(this, $element, ...rest)
+    return original.call(this, $element, ...(rest as [number?, JQuery?]))
   }
 }

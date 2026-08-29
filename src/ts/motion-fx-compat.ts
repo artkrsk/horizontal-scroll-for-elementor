@@ -67,7 +67,7 @@ const patchScrollUtility = (): void => {
   }
   installed = true
   scroll.getElementViewportPercentage = function (
-    $element: { 0?: Element },
+    $element: JQuery,
     offsetObj?: { start?: number; end?: number }
   ): number {
     // Nothing may escape: a throw here would kill Pro's rAF loop. The

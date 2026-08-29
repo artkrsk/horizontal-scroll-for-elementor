@@ -1,35 +1,10 @@
 /**
- * Editor globals, typed via @artemsemkin/elementor-types where the package
- * covers them. Verified gaps (upstream candidates for the types package):
- * - `elementor.elementsManager` is absent from ElementorEditor
- * - `elementor.modules.elements` is `any` (no NestedElementBase typing)
- * - `elementorCommon.elements` (the $window/$document cache) is absent
- *   from ElementorCommon
- * - `$e.components.get()` returns `any` (the $e type carries its own
- *   ComponentRegistry, not the richer one the package also exports), so the
- *   nested-elements component's `exports` (NestedView) is untyped
- * - `$e.hooks` (registerDataDependency et al.) is absent from the $e type
- * - `$e.commands` (isCurrentFirstTrace et al.) is absent from the $e type
- * - `$e.modules.hookData` is absent (hookUI is typed, hookData is not)
- * - `elementor.helpers.scrollToView` is absent from HelpersManager
+ * Editor globals, typed via @artemsemkin/elementor-types.
  */
-import type {
-  $e as EDollar,
-  Editor,
-  ElementorCommon,
-  ElementorEditor
-} from '@artemsemkin/elementor-types'
+import type { $e as EDollar, ElementorCommon, ElementorEditor } from '@artemsemkin/elementor-types'
 
 declare global {
-  const elementorCommon: ElementorCommon & {
-    elements: { $window: { on: (event: string, handler: () => void) => void } }
-  }
-  const elementor: ElementorEditor & {
-    elementsManager: Editor.Elements.ElementsManager
-  }
-  const $e: EDollar & {
-    hooks: any
-    commands: any
-    modules: EDollar['modules'] & { hookData: any }
-  }
+  const elementorCommon: ElementorCommon
+  const elementor: ElementorEditor
+  const $e: EDollar
 }

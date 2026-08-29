@@ -1,4 +1,4 @@
-import type { ElementorFrontend } from '@artemsemkin/elementor-types'
+import type { ElementorFrontend, ElementorModules } from '@artemsemkin/elementor-types'
 
 declare global {
   interface Window {
@@ -14,21 +14,8 @@ declare global {
      */
     __artsScrollTimelinePolyfillReady?: Promise<string>
     elementorFrontend: ElementorFrontend
-    /**
-     * Elementor core's frontend-modules global. Only the utility the Motion FX
-     * correction wraps is typed here — upstream candidate for
-     * `@artemsemkin/elementor-types`.
-     */
-    elementorModules?: {
-      utils?: {
-        Scroll?: {
-          getElementViewportPercentage?: (
-            $element: { 0?: Element },
-            offsetObj?: { start?: number; end?: number }
-          ) => number
-        }
-      }
-    }
+    /** Elementor core's frontend-modules global. */
+    elementorModules?: ElementorModules
     ViewTimeline?: new (options: {
       subject: Element
       axis: string
