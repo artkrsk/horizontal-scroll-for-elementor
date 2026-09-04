@@ -262,8 +262,8 @@ export const fakeDollarE = (
 export const fakeElementor = () => {
   const registeredTypes: any[] = []
   const scrolled: unknown[] = []
-  // Held by reference: scrollToView is absent from the types package's
-  // HelpersManager, so reading it back through the global would not typecheck.
+  // Handed back by reference so a test can watch the suppression patch swap
+  // the function out.
   const helpers = { scrollToView: (element: unknown) => scrolled.push(element) }
 
   vi.stubGlobal('elementor', {

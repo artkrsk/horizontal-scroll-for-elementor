@@ -38,7 +38,7 @@ Free wp.org plugin: one nested-elements widget — a pinned section whose child 
 
 ## TypeScript
 
-Editor/frontend globals are typed via `@artemsemkin/elementor-types`; `any` only at the documented package gaps listed in `src/ts/editor/globals.d.ts`. Untyped Elementor surfaces stay behind those seams.
+Editor/frontend globals are typed via `@artemsemkin/elementor-types` (`src/ts/global.d.ts`, `src/ts/editor/globals.d.ts`) — take the package types bare, never intersected with a local shim; a wrong type is a fix upstream. The `any` that remains is where the package itself stops: `elementor.modules.elements` (the nested element base the editor type extends) and the `$e` command-arg payloads, whose containers the package's own `HookArgs` also types `any`. Untyped Elementor surfaces stay behind those seams.
 
 Never `instanceof` a DOM node — use `utils/isHTMLElement.ts`. Inside the editor preview the whole section tree, wrapper and track included, is built by the editor's own window, so a same-realm `instanceof HTMLElement` is false for ALL of it, always. Written the other way it fails silently and only in the canvas: `stampPanelRanges` skipped every panel, and `layoutDocTop` returned 0 so the pin range started early. Unit tests can't catch it (happy-dom is single-realm) — verify in a real editor.
 

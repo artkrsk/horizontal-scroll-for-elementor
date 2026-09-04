@@ -75,9 +75,9 @@ const patchScrollUtility = (): void => {
     // path — Motion FX's scroll interaction never passes any.
     try {
       const el = $element?.[0]
-      // Duck-typed, not instanceof: in the editor preview a re-rendered
-      // element comes from the parent window's realm, where a same-realm
-      // instanceof check is false on the first re-render.
+      // Duck-typed, not instanceof: inside the editor preview the editor's own
+      // window builds the whole canvas subtree, so a same-realm instanceof is
+      // false for every element here — always, not only after a re-render.
       const wrapper =
         el && typeof el.closest === 'function' ? el.closest<HTMLElement>(WRAPPER_SELECTOR) : null
       const state = wrapper ? states.get(wrapper) : undefined

@@ -1,14 +1,12 @@
 // The $e data-dependency shape, five times over across the two guard modules:
 // a Dependency subclass declaring a command, an id, a condition and an apply,
 // behind the same availability guard and the same registration try/catch.
-// This is lock-panel-moves' own lockRepeaterCommand factory generalized —
-// nothing new, one copy.
 //
 // Mutating command args in a Dependency hook (then returning true) is the
 // sanctioned single-transaction path; returning false blocks the command.
 import { WIDGET_TYPE } from '../../contract'
 
-/** Both the base class and the registrar are untyped `$e` gaps — see ../globals.d.ts. */
+/** Runtime probe: a base class to extend AND a registrar to hand instances to. */
 export const hasDependencyApi = (): boolean =>
   typeof $e?.modules?.hookData?.Dependency === 'function' &&
   typeof $e?.hooks?.registerDataDependency === 'function'
