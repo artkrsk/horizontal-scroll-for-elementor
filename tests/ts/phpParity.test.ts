@@ -8,6 +8,7 @@ import {
   WIDGET_TYPE,
   WRAPPER_CLASS
 } from '@ts/contract'
+import { DIAGNOSTIC_CLASS, DIAGNOSTIC_MESSAGE_CLASS } from '@ts/diagnostics'
 import { applyDefaultPanelWidth } from '@ts/editor/patches/guard-panel-width'
 import { describe, expect, it } from 'vitest'
 
@@ -106,6 +107,9 @@ describe('a panel added in the editor matches a panel seeded by PHP', () => {
   })
 })
 
+/** The nested form the stylesheet authors: `.arts-hs__x` is written `&__x`. */
+const nested = (className: string): string => `&${className.replace('arts-hs', '')}`
+
 describe('the stylesheet and TS agree on the names they share', () => {
   it('flips layout on the class the engine toggles', () => {
     expect(STYLESHEET).toContain(`&.${POLYFILLED_CLASS}`)
@@ -114,6 +118,14 @@ describe('the stylesheet and TS agree on the names they share', () => {
   it('consumes the custom properties the engine writes', () => {
     expect(STYLESHEET).toContain(VAR_DISTANCE)
     expect(STYLESHEET).toContain(VAR_DIR)
+  })
+
+  it('styles the diagnostic bar the engine injects', () => {
+    // Renamed on one side only, the bar renders unstyled: a zero-height
+    // positioner with nothing visible in it, which is precisely the silent
+    // failure the bar exists to prevent.
+    expect(STYLESHEET).toContain(`${nested(DIAGNOSTIC_CLASS)} {`)
+    expect(STYLESHEET).toContain(`${nested(DIAGNOSTIC_MESSAGE_CLASS)} {`)
   })
 
   it('styles the wrapper through the styling class, never the js- hook', () => {

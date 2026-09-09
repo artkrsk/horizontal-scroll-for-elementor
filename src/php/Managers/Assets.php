@@ -63,6 +63,40 @@ class Assets extends BaseManager {
 		return $handles;
 	}
 
+	/**
+	 * Hand the frontend bundle its editor-only diagnostic strings.
+	 *
+	 * Hooked to the preview pass alone, so a public page ships none of this and
+	 * the bundle's diagnostic stays inert — the presence of the global IS the
+	 * gate, rather than a runtime isEditMode() branch.
+	 *
+	 * Translating here instead of in JS keeps the plugin on the single __() path
+	 * that already works: no wp-i18n dependency forced onto the frontend handle,
+	 * and no md5-of-bundle-path JSON lookup to drift silently into English the
+	 * first time the build moves the file.
+	 *
+	 * Registration order holds: register_frontend() runs on wp_enqueue_scripts
+	 * priority 1, Elementor's preview enqueue later on the same hook, and core
+	 * prints a 'before' payload ahead of the bundle's own script tag.
+	 */
+	public function enqueue_preview_diagnostics(): void {
+		$strings = array(
+			'blocked'  => __( 'Arts Horizontal Scroll: this section cannot pin.', 'horizontal-scroll-for-elementor' ),
+			/* translators: 1: the offending element, e.g. "body" or "div.e-con". 2: its computed declaration, e.g. "overflow-x: hidden". */
+			'overflow' => __( '%1$s has %2$s, which makes it a scroll container and takes the pin with it. Use overflow: clip, or drop the rule.', 'horizontal-scroll-for-elementor' ),
+			/* translators: 1: the offending element. 2: its computed declaration, e.g. "position: fixed". */
+			'fixed'    => __( '%1$s has %2$s, so this section never moves with the page and has nothing to scrub against.', 'horizontal-scroll-for-elementor' ),
+		);
+
+		$json = wp_json_encode( $strings );
+
+		if ( false === $json ) {
+			return;
+		}
+
+		wp_add_inline_script( self::HANDLE, 'window.ARTS_HS_DIAGNOSTICS = ' . $json . ';', 'before' );
+	}
+
 	public function enqueue_editor_js(): void {
 		wp_enqueue_script(
 			self::HANDLE_EDITOR,

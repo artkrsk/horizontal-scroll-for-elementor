@@ -4,6 +4,7 @@
 
 import { installAnchorScroll } from './anchor-scroll'
 import { WRAPPER_CLASS, WRAPPER_SELECTOR } from './contract'
+import { inspectSection } from './diagnostics'
 import { boot, getTimeline } from './engine'
 import { installMotionFx } from './motion-fx-compat'
 import { installScrollspy, requestScrollspyRescan } from './scrollspy'
@@ -32,6 +33,7 @@ window.addEventListener('elementor/frontend/init', () => {
       if (wrapper) {
         boot(wrapper)
         requestScrollspyRescan()
+        inspectSection(wrapper)
       }
     }
   )
