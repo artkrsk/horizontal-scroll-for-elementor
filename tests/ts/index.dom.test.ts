@@ -20,13 +20,17 @@ const mocks = vi.hoisted(() => {
     order,
     boot: vi.fn(),
     getTimeline: vi.fn(),
+    requestScrollspyRescan: vi.fn(),
     note: (name: string) => order.push(name)
   }
 })
 
 vi.mock('@ts/engine', () => ({ boot: mocks.boot, getTimeline: mocks.getTimeline }))
 vi.mock('@ts/anchor-scroll', () => ({ installAnchorScroll: () => mocks.note('anchor-scroll') }))
-vi.mock('@ts/scrollspy', () => ({ installScrollspy: () => mocks.note('scrollspy') }))
+vi.mock('@ts/scrollspy', () => ({
+  installScrollspy: () => mocks.note('scrollspy'),
+  requestScrollspyRescan: mocks.requestScrollspyRescan
+}))
 vi.mock('@ts/motion-fx-compat', () => ({ installMotionFx: () => mocks.note('motion-fx') }))
 
 const actions = new Map<string, (scope: unknown) => void>()
@@ -51,6 +55,7 @@ beforeEach(() => {
   document.body.innerHTML = ''
   mocks.order.length = 0
   mocks.boot.mockClear()
+  mocks.requestScrollspyRescan.mockClear()
   actions.clear()
   delete (window as { ARTS_HS?: unknown }).ARTS_HS
   vi.stubGlobal('elementorFrontend', {
@@ -106,6 +111,7 @@ describe('element_ready → boot', () => {
     elementorInit()({ 0: widget })
 
     expect(mocks.boot).toHaveBeenCalledWith(wrapper)
+    expect(mocks.requestScrollspyRescan).toHaveBeenCalledTimes(1)
   })
 
   it('boots when the scope is a raw element rather than a jQuery object', async () => {
@@ -138,5 +144,6 @@ describe('element_ready → boot', () => {
 
     expect(() => ready({ 0: stranger })).not.toThrow()
     expect(mocks.boot).not.toHaveBeenCalled()
+    expect(mocks.requestScrollspyRescan).not.toHaveBeenCalled()
   })
 })

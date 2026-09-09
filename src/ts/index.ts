@@ -6,7 +6,7 @@ import { installAnchorScroll } from './anchor-scroll'
 import { WRAPPER_CLASS, WRAPPER_SELECTOR } from './contract'
 import { boot, getTimeline } from './engine'
 import { installMotionFx } from './motion-fx-compat'
-import { installScrollspy } from './scrollspy'
+import { installScrollspy, requestScrollspyRescan } from './scrollspy'
 
 // Order matches the import-evaluation order these installs replaced, and all
 // three run before the element_ready hook below: anchor-scroll's capture-phase
@@ -31,6 +31,7 @@ window.addEventListener('elementor/frontend/init', () => {
         : el.querySelector<HTMLElement>(WRAPPER_SELECTOR)
       if (wrapper) {
         boot(wrapper)
+        requestScrollspyRescan()
       }
     }
   )

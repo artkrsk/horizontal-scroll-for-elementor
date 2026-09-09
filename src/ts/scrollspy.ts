@@ -96,7 +96,22 @@ export const collectGroups = (): {
   return { byTrack, menuRoots }
 }
 
+// Rebuilt every run, not reused — module scope only so a later run can
+// disconnect what an earlier one built. AJAX/PJAX themes re-invoke
+// elementorFrontend.init() after each transition, re-dispatching
+// elementor/frontend/init without this repo ever calling init() itself, and
+// menuRoots is typically a persistent header/nav that survives the
+// transition: an undisconnected pair would keep reacting to that live
+// menu's class writes with a byTrack captured from a page already gone.
+let pointObserver: IntersectionObserver | null = null
+let reassert: MutationObserver | null = null
+
 const setup = (): void => {
+  pointObserver?.disconnect()
+  reassert?.disconnect()
+  pointObserver = null
+  reassert = null
+
   if (isEditMode()) {
     return
   }
@@ -105,7 +120,7 @@ const setup = (): void => {
     return
   }
 
-  const pointObserver = new IntersectionObserver(
+  pointObserver = new IntersectionObserver(
     (entries) => {
       for (const entry of entries) {
         const panel = entry.target
@@ -132,7 +147,7 @@ const setup = (): void => {
     }
   }
 
-  const reassert = new MutationObserver(() => {
+  reassert = new MutationObserver(() => {
     for (const group of byTrack.values()) {
       apply(group)
     }
@@ -144,4 +159,23 @@ const setup = (): void => {
 
 export const installScrollspy = (): void => {
   window.addEventListener('elementor/frontend/init', setup)
+}
+
+// A page can mount several horizontal-scroll widgets in one synchronous
+// ready-trigger batch — index.ts calls this once per instance from its own
+// element_ready hook, and queueMicrotask collapses that batch into a single
+// rescan instead of one per widget. This is also the one signal every AJAX
+// re-init model still fires per new instance, including one that suppresses
+// repeat elementor/frontend/init dispatches after the first page load.
+let rescanQueued = false
+
+export const requestScrollspyRescan = (): void => {
+  if (rescanQueued) {
+    return
+  }
+  rescanQueued = true
+  queueMicrotask(() => {
+    rescanQueued = false
+    setup()
+  })
 }

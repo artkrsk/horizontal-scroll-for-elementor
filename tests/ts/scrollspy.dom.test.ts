@@ -1,6 +1,12 @@
 // @vitest-environment happy-dom
 
-import { apply, collectGroups, installScrollspy, resolveLinkPanel } from '@ts/scrollspy'
+import {
+  apply,
+  collectGroups,
+  installScrollspy,
+  requestScrollspyRescan,
+  resolveLinkPanel
+} from '@ts/scrollspy'
 import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, observerSpy, section } from './support'
 
@@ -384,5 +390,90 @@ describe('the installed spy', () => {
     start()
 
     expect(point.constructed).toBe(0)
+  })
+
+  describe('a repeated elementor/frontend/init (AJAX/PJAX re-init)', () => {
+    // installScrollspy() attaches setup() once, in the outer beforeAll — an
+    // AJAX/PJAX theme re-invoking elementorFrontend.init() re-fires the SAME
+    // listener, so what has to be idempotent is setup()'s own rebuild, not
+    // the attach. One pair of fakes stubbed ONCE and reused across both
+    // dispatches, so their constructed/disconnected counts span both runs —
+    // re-stubbing fresh fakes per dispatch (as start() does) would hide
+    // exactly the leak this guards against.
+    it('disconnects the previous pair before building the next one', () => {
+      panelSection()
+      menu(['#one', '#two'])
+      const intersection = observerSpy()
+      const mutation = observerSpy()
+      vi.stubGlobal('IntersectionObserver', intersection.Fake)
+      vi.stubGlobal('MutationObserver', mutation.Fake)
+
+      window.dispatchEvent(new Event('elementor/frontend/init'))
+      window.dispatchEvent(new Event('elementor/frontend/init'))
+
+      // Two scans are unavoidable — an AJAX swap needs its own groups — but
+      // only ever one live pair: the first must be gone before the second
+      // exists.
+      expect(intersection.spy.constructed).toBe(2)
+      expect(intersection.spy.disconnected).toBe(1)
+      expect(mutation.spy.constructed).toBe(2)
+      expect(mutation.spy.disconnected).toBe(1)
+    })
+
+    it('tears down the previous pair even when the next run finds nothing to watch', () => {
+      // The early-return path: a swapped-in page with no menu link into a
+      // section must not leave the OLD pair — still watching the persistent
+      // header/nav from before the transition — running forever.
+      panelSection()
+      menu(['#one'])
+      const intersection = observerSpy()
+      const mutation = observerSpy()
+      vi.stubGlobal('IntersectionObserver', intersection.Fake)
+      vi.stubGlobal('MutationObserver', mutation.Fake)
+      window.dispatchEvent(new Event('elementor/frontend/init'))
+
+      document.body.innerHTML = ''
+      window.dispatchEvent(new Event('elementor/frontend/init'))
+
+      expect(intersection.spy.constructed).toBe(1)
+      expect(intersection.spy.disconnected).toBe(1)
+      expect(mutation.spy.constructed).toBe(1)
+      expect(mutation.spy.disconnected).toBe(1)
+    })
+  })
+})
+
+describe('requestScrollspyRescan', () => {
+  it('rescans on the next microtask, not synchronously', async () => {
+    panelSection()
+    menu(['#one', '#two'])
+    const intersection = observerSpy()
+    const mutation = observerSpy()
+    vi.stubGlobal('IntersectionObserver', intersection.Fake)
+    vi.stubGlobal('MutationObserver', mutation.Fake)
+
+    requestScrollspyRescan()
+    expect(intersection.spy.constructed).toBe(0)
+
+    await Promise.resolve()
+
+    expect(intersection.spy.constructed).toBe(1)
+  })
+
+  it('collapses several calls in the same tick into a single rescan', async () => {
+    panelSection()
+    menu(['#one', '#two'])
+    const intersection = observerSpy()
+    const mutation = observerSpy()
+    vi.stubGlobal('IntersectionObserver', intersection.Fake)
+    vi.stubGlobal('MutationObserver', mutation.Fake)
+
+    requestScrollspyRescan()
+    requestScrollspyRescan()
+    requestScrollspyRescan()
+    await Promise.resolve()
+
+    expect(intersection.spy.constructed).toBe(1)
+    expect(mutation.spy.constructed).toBe(1)
   })
 })
