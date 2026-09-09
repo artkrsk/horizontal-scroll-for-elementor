@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.3.0
+
+* added: the Elementor editor now tells you when a pinned section can't pin, and names the element responsible – usually overflow-x: hidden set on both html and body. The notice shows only in the editor and clears itself once the rule is gone.
+* fixed: one-page menu highlighting keeps working after an AJAX page transition – the menu now follows panels in sections loaded after the first page.
+* fixed: sites with AJAX page transitions no longer accumulate leftover scroll watchers from previous pages.
+
 ## 1.2.1
 
 * fixed: panels carry their own on-stage range in the Elementor editor again – effects built on that range now preview exactly as they behave on the published page.
