@@ -40,6 +40,10 @@ final class Plugin extends Base\Plugin {
 		add_action( 'elementor/widgets/register', array( $this->managers->elementor, 'register_widgets' ) );
 		add_action( 'elementor/init', array( $this->managers->elementor, 'maybe_clear_cache_on_version_change' ) );
 		add_action( 'elementor/editor/before_enqueue_scripts', array( $this->managers->assets, 'enqueue_editor_js' ) );
+		add_action(
+			'elementor/preview/enqueue_scripts',
+			array( $this->managers->assets, 'enqueue_preview_diagnostics' )
+		);
 		add_action( 'admin_notices', array( $this->managers->notices, 'maybe_render_activation_notice' ) );
 		add_action(
 			'admin_post_' . Managers\Notices::ACTIVATE_ACTION,

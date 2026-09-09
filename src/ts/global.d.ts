@@ -8,6 +8,16 @@ declare global {
       getTimeline?: (el: Element) => AnimationTimeline | null
     }
     /**
+     * Editor-only diagnostic strings, already translated by PHP and emitted
+     * into the Elementor preview only. Its ABSENCE is the gate: a public page
+     * never carries it, so diagnostics.ts stays inert there by construction.
+     */
+    ARTS_HS_DIAGNOSTICS?: {
+      blocked: string
+      overflow: string
+      fixed: string
+    }
+    /**
      * Published by the shared arts/scroll-timeline-polyfill loader, which our
      * script handle depends on. Settles 'native' | 'polyfilled' | 'unavailable';
      * never rejects.

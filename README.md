@@ -151,7 +151,7 @@ Per-panel windows on this path: read the stamped vars — `getComputedStyle(pane
 
 - Don't redeclare `view-timeline: --arts-hs` inside a section — it shadows the section's timeline for your subtree.
 - Don't select by `.arts-hs*` classes from JS, and don't style the `js-` classes.
-- Don't wrap the section in transformed or overflow-scrolling ancestors.
+- Don't give any ancestor of the section a scrolling `overflow` (`hidden`, `auto`, `scroll`) — it becomes a scroll container and takes the pin and the timeline with it. `overflow: clip` is safe on either axis. On `html`/`body` the rule is subtler: either one alone is fine, because the root's overflow propagates to the viewport, but `html, body { overflow-x: hidden }` together does break it. `position: fixed` on an ancestor breaks it too. Logged into the Elementor editor, the section says so itself and names the element.
 - Don't read `--arts-hs-*` vars not listed above — they're internal.
 
 ## License

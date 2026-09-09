@@ -50,6 +50,33 @@ class AssetsTest extends TestCase {
 		);
 	}
 
+	/**
+	 * The editor-only diagnostic strings. Their presence is the gate the bundle
+	 * reads, so "absent on a public page" is not a nicety — it is what keeps the
+	 * diagnostic from ever running for a visitor.
+	 */
+	public function test_diagnostic_strings_reach_only_the_editor_preview(): void {
+		$this->register_frontend_assets();
+
+		$this->assertSame(
+			array(),
+			wp_scripts()->get_data( Assets::HANDLE, 'before' ) ?: array(),
+			'a plain frontend pass must carry no diagnostic strings'
+		);
+
+		do_action( 'elementor/preview/enqueue_scripts' );
+
+		$before = wp_scripts()->get_data( Assets::HANDLE, 'before' );
+		$this->assertIsArray( $before );
+		$inline = implode( "\n", array_filter( $before, 'is_string' ) );
+		$this->assertStringContainsString( 'window.ARTS_HS_DIAGNOSTICS =', $inline );
+		// The keys diagnostics.ts indexes by blocker kind, plus the two it always
+		// prints. A rename on either side leaves the bar with an empty sentence.
+		foreach ( array( 'blocked', 'overflow', 'fixed' ) as $key ) {
+			$this->assertStringContainsString( '"' . $key . '":', $inline );
+		}
+	}
+
 	public function test_our_stylesheet_opts_out_of_polyfill_transpiling(): void {
 		/** @var array<int, string> $skipped */
 		$skipped = apply_filters( 'arts/scroll_timeline_polyfill/skipped_styles', array() );

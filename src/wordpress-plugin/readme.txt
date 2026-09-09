@@ -5,7 +5,7 @@ Tags: elementor, horizontal scroll, scroll effects, sticky section, scroll anima
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.2.1
+Stable tag: 1.3.0
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/
@@ -125,6 +125,9 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 4. Scroll: pinned section height, direction, how much page scroll the section consumes, and a pin offset for sticky headers.
 
 == Changelog ==
+
+= 1.3.0 =
+* added: when a pinned section can't pin because something around it scrolls or fixes the page, the Elementor editor now says so on the section itself, and names the element responsible – the usual cause is overflow-x: hidden set on both html and body. The notice appears only in the editor and clears itself as soon as the rule is gone.
 
 = 1.2.1 =
 * fixed: panels carry their own on-stage range in the Elementor editor again – effects built on that range now preview exactly as they behave on the published page.
