@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7917a470180f5efa1c3b629dca5581a7",
+    "content-hash": "203b18c247a4c7b968c6eb82b7de36bc",
     "packages": [
         {
             "name": "arts/base",
@@ -109,16 +109,16 @@
     "packages-dev": [
         {
             "name": "arts/elementor-stubs",
-            "version": "v4.1.5",
+            "version": "v4.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/artkrsk/elementor-stubs.git",
-                "reference": "f896a5d7c6d8e25dc6b5f20902119cbdceeed0e1"
+                "reference": "4d4860e49b7827940bc2ae308645dc21ff48c2e8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/artkrsk/elementor-stubs/zipball/f896a5d7c6d8e25dc6b5f20902119cbdceeed0e1",
-                "reference": "f896a5d7c6d8e25dc6b5f20902119cbdceeed0e1",
+                "url": "https://api.github.com/repos/artkrsk/elementor-stubs/zipball/4d4860e49b7827940bc2ae308645dc21ff48c2e8",
+                "reference": "4d4860e49b7827940bc2ae308645dc21ff48c2e8",
                 "shasum": ""
             },
             "require": {
@@ -164,7 +164,7 @@
             ],
             "support": {
                 "issues": "https://github.com/artkrsk/elementor-stubs/issues",
-                "source": "https://github.com/artkrsk/elementor-stubs/tree/v4.1.5"
+                "source": "https://github.com/artkrsk/elementor-stubs/tree/v4.2.1"
             },
             "funding": [
                 {
@@ -172,7 +172,7 @@
                     "type": "buy_me_a_coffee"
                 }
             ],
-            "time": "2026-07-15T00:37:27+00:00"
+            "time": "2026-08-01T13:49:57+00:00"
         },
         {
             "name": "arts/wp-plugin-standards",
@@ -216,17 +216,78 @@
             "time": "2026-08-13T10:48:19+00:00"
         },
         {
-            "name": "brianhenryie/simple-php-code-parser",
-            "version": "0.15.6",
+            "name": "brianhenryie/bh-php-flysystem-readonly",
+            "version": "1.0.1",
             "source": {
                 "type": "git",
-                "url": "https://github.com/BrianHenryIE/Simple-PHP-Code-Parser.git",
-                "reference": "f8ce87b92595b2770f23f89d2be9dd4e6129043f"
+                "url": "https://github.com/BrianHenryIE/bh-php-flysystem-readonly.git",
+                "reference": "09256c996bd80e92d3f4a7438463160ac1b8c66f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BrianHenryIE/Simple-PHP-Code-Parser/zipball/f8ce87b92595b2770f23f89d2be9dd4e6129043f",
-                "reference": "f8ce87b92595b2770f23f89d2be9dd4e6129043f",
+                "url": "https://api.github.com/repos/BrianHenryIE/bh-php-flysystem-readonly/zipball/09256c996bd80e92d3f4a7438463160ac1b8c66f",
+                "reference": "09256c996bd80e92d3f4a7438463160ac1b8c66f",
+                "shasum": ""
+            },
+            "require": {
+                "ext-fileinfo": "*",
+                "league/flysystem": "^2.5 || ^3.0",
+                "league/flysystem-memory": "^2.0 || ^3.0",
+                "php": "^7.4 || ^8.0"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.4",
+                "phpstan/extension-installer": "^1.3",
+                "phpstan/phpstan": "^1.11 || ^2.0",
+                "phpstan/phpstan-phpunit": "^1.4 || ^2.0",
+                "phpunit/phpunit": "^9.6 || ^10 || ^11 || ^12",
+                "squizlabs/php_codesniffer": "^3.9 || ^4.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "BrianHenryIE\\FlysystemReadOnly\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Brian Henry",
+                    "email": "BrianHenryIE@gmail.com"
+                }
+            ],
+            "description": "A League Flysystem adapter which wraps another adapter: reads pass through, writes and deletes are captured in memory so nothing ever touches the underlying filesystem. For --dry-run modes.",
+            "keywords": [
+                "Flysystem",
+                "Read-Only",
+                "adapter",
+                "copy-on-write",
+                "dry-run",
+                "filesystem",
+                "in-memory",
+                "readonly"
+            ],
+            "support": {
+                "issues": "https://github.com/BrianHenryIE/bh-php-flysystem-readonly/issues",
+                "source": "https://github.com/BrianHenryIE/bh-php-flysystem-readonly/tree/1.0.1"
+            },
+            "time": "2026-08-12T03:57:26+00:00"
+        },
+        {
+            "name": "brianhenryie/simple-php-code-parser",
+            "version": "0.17.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/BrianHenryIE/Simple-PHP-Code-Parser.git",
+                "reference": "5025da610fa7c5d538847d8a58478d9513aae5fa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/BrianHenryIE/Simple-PHP-Code-Parser/zipball/5025da610fa7c5d538847d8a58478d9513aae5fa",
+                "reference": "5025da610fa7c5d538847d8a58478d9513aae5fa",
                 "shasum": ""
             },
             "require": {
@@ -269,7 +330,7 @@
                 "phpdoc"
             ],
             "support": {
-                "source": "https://github.com/BrianHenryIE/Simple-PHP-Code-Parser/tree/0.15.6"
+                "source": "https://github.com/BrianHenryIE/Simple-PHP-Code-Parser/tree/0.17.0"
             },
             "funding": [
                 {
@@ -285,24 +346,25 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2026-06-25T20:32:36+00:00"
+            "time": "2026-08-13T01:10:34+00:00"
         },
         {
             "name": "brianhenryie/strauss",
-            "version": "0.28.1",
+            "version": "0.29.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/BrianHenryIE/strauss.git",
-                "reference": "5b87573a18d446ac85c0f3d0153d8e2ab49d4a78"
+                "reference": "14b0f51cc6f274f0232246016ff79c974c09ebf9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/BrianHenryIE/strauss/zipball/5b87573a18d446ac85c0f3d0153d8e2ab49d4a78",
-                "reference": "5b87573a18d446ac85c0f3d0153d8e2ab49d4a78",
+                "url": "https://api.github.com/repos/BrianHenryIE/strauss/zipball/14b0f51cc6f274f0232246016ff79c974c09ebf9",
+                "reference": "14b0f51cc6f274f0232246016ff79c974c09ebf9",
                 "shasum": ""
             },
             "require": {
-                "brianhenryie/simple-php-code-parser": "^0.15.6",
+                "brianhenryie/bh-php-flysystem-readonly": "^1.0",
+                "brianhenryie/simple-php-code-parser": "^0.17",
                 "composer-runtime-api": "^2.0",
                 "composer/class-map-generator": "^1.7.3",
                 "composer/composer": "^2.10",
@@ -311,7 +373,7 @@
                 "inmarelibero/gitignore-checker": "^1.0",
                 "json-mapper/json-mapper": "^2.0.0",
                 "league/flysystem": "^2.5.0 || ^3.35.1",
-                "league/flysystem-memory": "*",
+                "league/flysystem-memory": "^2.0.6 || ^3.31.0",
                 "monolog/monolog": "^2.11 || ^3.10",
                 "nikic/php-parser": "^5.8.0",
                 "symfony/console": "^4 || ^5 || ^6 || ^7",
@@ -325,6 +387,9 @@
             },
             "require-dev": {
                 "brianhenryie/color-logger": "*",
+                "brianhenryie/phpstan-checkstyle": "^0.1.1",
+                "ext-json": "*",
+                "ext-zip": "*",
                 "mockery/mockery": "^1.6",
                 "php": "^7.4 || ^8.0",
                 "phpstan/extension-installer": "*",
@@ -339,6 +404,13 @@
                 "bin/strauss"
             ],
             "type": "library",
+            "extra": {
+                "strauss": {
+                    "updateCallSites": true,
+                    "namespace_prefix": "BrianHenryIE\\Strauss\\",
+                    "target_directory": "vendor"
+                }
+            },
             "autoload": {
                 "files": [
                     "bootstrap.php"
@@ -364,9 +436,9 @@
             "description": "Prefixes dependencies namespaces so they are unique to your plugin",
             "support": {
                 "issues": "https://github.com/BrianHenryIE/strauss/issues",
-                "source": "https://github.com/BrianHenryIE/strauss/tree/0.28.1"
+                "source": "https://github.com/BrianHenryIE/strauss/tree/0.29.2"
             },
-            "time": "2026-07-11T00:08:54+00:00"
+            "time": "2026-09-10T22:53:25+00:00"
         },
         {
             "name": "composer/ca-bundle",
@@ -2942,11 +3014,11 @@
         },
         {
             "name": "phpstan/phpstan",
-            "version": "2.2.5",
+            "version": "2.2.14",
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
-                "reference": "909c1e5fef7989ac0d0c1c5c42e32a5c4f6198a0",
+                "url": "https://api.github.com/repos/phpstan/phpstan/zipball/9c672e7a8e791dfc3d30e55f683e73fc0b63a3ac",
+                "reference": "9c672e7a8e791dfc3d30e55f683e73fc0b63a3ac",
                 "shasum": ""
             },
             "require": {
@@ -3002,7 +3074,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-07-05T06:31:06+00:00"
+            "time": "2026-09-12T21:39:33+00:00"
         },
         {
             "name": "phpstan/phpstan-phpunit",
@@ -3383,16 +3455,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.6.35",
+            "version": "9.6.36",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "0edba2f3a0c48df3553cb9b640810b30df60302b"
+                "reference": "abab27ed286d3e1246fbbfe6b56bfd732d945ec9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/0edba2f3a0c48df3553cb9b640810b30df60302b",
-                "reference": "0edba2f3a0c48df3553cb9b640810b30df60302b",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/abab27ed286d3e1246fbbfe6b56bfd732d945ec9",
+                "reference": "abab27ed286d3e1246fbbfe6b56bfd732d945ec9",
                 "shasum": ""
             },
             "require": {
@@ -3417,7 +3489,7 @@
                 "sebastian/comparator": "^4.0.10",
                 "sebastian/diff": "^4.0.6",
                 "sebastian/environment": "^5.1.5",
-                "sebastian/exporter": "^4.0.8",
+                "sebastian/exporter": "^4.0.9",
                 "sebastian/global-state": "^5.0.8",
                 "sebastian/object-enumerator": "^4.0.4",
                 "sebastian/resource-operations": "^3.0.4",
@@ -3466,7 +3538,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.35"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.36"
             },
             "funding": [
                 {
@@ -3474,7 +3546,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2026-07-06T14:48:07+00:00"
+            "time": "2026-08-11T06:25:15+00:00"
         },
         {
             "name": "psr/cache",
@@ -4193,16 +4265,16 @@
         },
         {
             "name": "sebastian/exporter",
-            "version": "4.0.8",
+            "version": "4.0.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/exporter.git",
-                "reference": "14c6ba52f95a36c3d27c835d65efc7123c446e8c"
+                "reference": "4352c1a3df741a7ba9e61af6fed51d1fee41cbf7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/14c6ba52f95a36c3d27c835d65efc7123c446e8c",
-                "reference": "14c6ba52f95a36c3d27c835d65efc7123c446e8c",
+                "url": "https://api.github.com/repos/sebastianbergmann/exporter/zipball/4352c1a3df741a7ba9e61af6fed51d1fee41cbf7",
+                "reference": "4352c1a3df741a7ba9e61af6fed51d1fee41cbf7",
                 "shasum": ""
             },
             "require": {
@@ -4258,7 +4330,7 @@
             ],
             "support": {
                 "issues": "https://github.com/sebastianbergmann/exporter/issues",
-                "source": "https://github.com/sebastianbergmann/exporter/tree/4.0.8"
+                "source": "https://github.com/sebastianbergmann/exporter/tree/4.0.9"
             },
             "funding": [
                 {
@@ -4278,7 +4350,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2025-09-24T06:03:27+00:00"
+            "time": "2026-08-11T04:55:59+00:00"
         },
         {
             "name": "sebastian/global-state",
@@ -6580,21 +6652,21 @@
         },
         {
             "name": "szepeviktor/phpstan-wordpress",
-            "version": "v2.0.3",
+            "version": "v2.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/szepeviktor/phpstan-wordpress.git",
-                "reference": "aa722f037b2d034828cd6c55ebe9e5c74961927e"
+                "reference": "84577e2ea1e4c2a95537fe5ea2ac8e18f4ceab1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/szepeviktor/phpstan-wordpress/zipball/aa722f037b2d034828cd6c55ebe9e5c74961927e",
-                "reference": "aa722f037b2d034828cd6c55ebe9e5c74961927e",
+                "url": "https://api.github.com/repos/szepeviktor/phpstan-wordpress/zipball/84577e2ea1e4c2a95537fe5ea2ac8e18f4ceab1a",
+                "reference": "84577e2ea1e4c2a95537fe5ea2ac8e18f4ceab1a",
                 "shasum": ""
             },
             "require": {
                 "php": "^7.4 || ^8.0",
-                "php-stubs/wordpress-stubs": "^6.6.2",
+                "php-stubs/wordpress-stubs": ">=6.6.2",
                 "phpstan/phpstan": "^2.0"
             },
             "require-dev": {
@@ -6637,9 +6709,9 @@
             ],
             "support": {
                 "issues": "https://github.com/szepeviktor/phpstan-wordpress/issues",
-                "source": "https://github.com/szepeviktor/phpstan-wordpress/tree/v2.0.3"
+                "source": "https://github.com/szepeviktor/phpstan-wordpress/tree/v2.0.4"
             },
-            "time": "2025-09-14T02:58:22+00:00"
+            "time": "2026-05-22T16:22:09+00:00"
         },
         {
             "name": "theseer/tokenizer",
@@ -6902,16 +6974,16 @@
         },
         {
             "name": "wp-phpunit/wp-phpunit",
-            "version": "7.0.2",
+            "version": "7.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wp-phpunit/wp-phpunit.git",
-                "reference": "0d17335392d78b12b3e7e6b519cd53db728df52a"
+                "reference": "797edc710afc958854852d859c93d9aa1de6447d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/0d17335392d78b12b3e7e6b519cd53db728df52a",
-                "reference": "0d17335392d78b12b3e7e6b519cd53db728df52a",
+                "url": "https://api.github.com/repos/wp-phpunit/wp-phpunit/zipball/797edc710afc958854852d859c93d9aa1de6447d",
+                "reference": "797edc710afc958854852d859c93d9aa1de6447d",
                 "shasum": ""
             },
             "type": "library",
@@ -6946,7 +7018,7 @@
                 "issues": "https://github.com/wp-phpunit/issues",
                 "source": "https://github.com/wp-phpunit/wp-phpunit"
             },
-            "time": "2026-07-10T02:38:55+00:00"
+            "time": "2026-08-20T00:59:59+00:00"
         },
         {
             "name": "yoast/phpunit-polyfills",
