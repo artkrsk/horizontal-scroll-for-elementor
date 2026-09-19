@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   deploy-assets:
-    uses: artkrsk/wordpress-plugin-workflows/.github/workflows/deploy-assets.yml@main
+    uses: artkrsk/wordpress-plugin-workflows/.github/workflows/deploy-assets.yml@e6a2fdf517588bf09377a052a59709f152316244 # main
     with:
       plugin_slug: 'horizontal-scroll-for-elementor'
       dry_run: ${{ inputs.dry_run }}
