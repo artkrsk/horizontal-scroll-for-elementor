@@ -1,4 +1,22 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["github>artkrsk/renovate-config"]
+  "extends": ["github>artkrsk/renovate-config"],
+  "packageRules": [
+    {
+      "description": "The shared reusable workflows are consumed from @main on purpose: that is how a wordpress-plugin-workflows change reaches every plugin at once. A digest pin turns each of those changes into a per-repo PR.",
+      "matchManagers": ["github-actions"],
+      "matchDepNames": ["artkrsk/wordpress-plugin-workflows"],
+      "pinDigests": false
+    },
+    {
+      "description": "instantiator 2.x declares php ^8.4 and uses typed class constants. The canary installs the dev tree on the host at 8.4 but runs PHPUnit in-container down to 8.2, where it fatals on the first createMock(). See 5e5c0ff.",
+      "matchPackageNames": ["doctrine/instantiator"],
+      "allowedVersions": "<2"
+    },
+    {
+      "description": "yoast/phpunit-polyfills 4.0 constrains PHPUnit to ^12 and below. Lift this once it supports 13.",
+      "matchPackageNames": ["phpunit/phpunit"],
+      "allowedVersions": "<13"
+    }
+  ]
 }
