@@ -14,9 +14,9 @@
       "allowedVersions": "<2"
     },
     {
-      "description": "yoast/phpunit-polyfills 4.0 constrains PHPUnit to ^12 and below. Lift this once it supports 13.",
+      "description": "PHPUnit 12 declares php >=8.3 and 13 declares >=8.4, but the canary runs the host-built dev tree in-container down to PHP 8.2. 11.x (php >=8.2) is the ceiling this repo can actually execute; polyfills 4.0 supports it. Raise this together with the canary's php_matrix low leg.",
       "matchPackageNames": ["phpunit/phpunit"],
-      "allowedVersions": "<13"
+      "allowedVersions": "<12"
     }
   ]
 }
