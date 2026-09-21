@@ -36,6 +36,10 @@ Elementor Pro's Scrolling Effects keep working inside the section – element an
 
 On a right-to-left page the section mirrors itself – panels lay out right-to-left and the ride runs the other way, with the first panel still shown first. Nothing to configure, and either direction can be forced per section. WPML, Polylang, TranslatePress, and Weglot need no setup either: panels translate like the rest of the page, and every language keeps its own scroll direction.
 
+= See it running =
+
+The [plugin page on artemsemkin.com](https://artemsemkin.com/plugins/horizontal-scroll-for-elementor/) has a live demo, the settings explained one by one, and how this compares with the other ways of building a horizontal section in Elementor.
+
 == Installation ==
 
 1. Install and activate the plugin. The free Elementor plugin is the only requirement.
@@ -115,7 +119,7 @@ With Elementor Pro's menu widget, yes. Point menu items at panels – or anythin
 
 = Can my own animations follow the horizontal scroll? =
 
-Yes. The section publishes a small stable surface: a named CSS scroll timeline, state variables to gate on, per-panel range variables, and a JavaScript timeline API that works the same whether the browser is native or polyfilled. Your own scroll-driven animations can ride the same scroll as the track – the README in the GitHub repository documents the full contract.
+Yes. The section publishes a small stable surface: a named CSS scroll timeline, state variables to gate on, per-panel range variables, and a JavaScript timeline API that works the same whether the browser is native or polyfilled. Your own scroll-driven animations can ride the same scroll as the track – the [README in the GitHub repository](https://github.com/artkrsk/horizontal-scroll-for-elementor#readme) documents the full contract, and the whole plugin is open source there if you'd rather read the code.
 
 == Screenshots ==
 

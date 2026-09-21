@@ -5,7 +5,7 @@
 [![Installs](https://img.shields.io/wordpress/plugin/installs/horizontal-scroll-for-elementor?style=flat-square)](https://wordpress.org/plugins/horizontal-scroll-for-elementor/)
 [![Rating](https://img.shields.io/wordpress/plugin/rating/horizontal-scroll-for-elementor?style=flat-square)](https://wordpress.org/plugins/horizontal-scroll-for-elementor/reviews/)
 
-Pinned horizontal-scroll sections for Elementor. The section holds still while its panels travel sideways as the page scrolls — and every panel is a real nested Container you design inline, not a template picked from a dropdown.
+Pinned horizontal-scroll sections for Elementor. The section holds still while its panels travel sideways as the page scrolls — and every panel is a real nested Container you design inline, not a template picked from a dropdown. Part of the free plugin collection at [artemsemkin.com/plugins/horizontal-scroll-for-elementor/](https://artemsemkin.com/plugins/horizontal-scroll-for-elementor/).
 
 - **Pure CSS engine.** The browser's own scroll-driven animations move the track — no per-frame JavaScript, no GSAP, no jQuery. A few kilobytes of assets, loaded only on pages that use the widget.
 - **Free-form panels.** Real Elementor Containers (Flexbox or Grid) on the same nested-elements foundation as Elementor's own widgets. The pin runs live in the editor canvas.
