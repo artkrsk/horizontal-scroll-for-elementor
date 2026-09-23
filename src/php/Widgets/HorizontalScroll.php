@@ -115,11 +115,15 @@ class HorizontalScroll extends Widget_Nested_Base {
 	}
 
 	/**
-	 * Editor correctness for repeater mutations: core's repeater-move hook
-	 * re-sorts the Marionette child-view registry (sortViewsByModels) only
-	 * under this flag — without it the registry drifts after a drag reorder
-	 * and the next repeater operation resolves the wrong child or drops one.
-	 * Nested Tabs and Nested Accordion both set it.
+	 * Keeps "+ Add Panel" and panel removal from re-rendering the whole widget.
+	 * Without `support_improved_repeaters`, core's repeater insert/remove
+	 * re-render every panel and every widget inside it — hundreds of ms per
+	 * click. With it, core patches the DOM instead, driven by
+	 * `target_container`: empty here, because the only per-row DOM is the
+	 * child container, which the nested-elements hooks create and delete
+	 * themselves. The insert half of that path would still render a
+	 * `-content-single` template this widget doesn't have, so the editor bundle
+	 * switches it off (patches/skip-insert-render.ts).
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -128,6 +132,7 @@ class HorizontalScroll extends Widget_Nested_Base {
 		$config = parent::get_initial_config();
 
 		$config['support_improved_repeaters'] = true;
+		$config['target_container']           = array();
 
 		return $config;
 	}

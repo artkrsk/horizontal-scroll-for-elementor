@@ -9,13 +9,14 @@ import { fakeDollarE, fakeElementor, fakeElementorCommon } from '../support'
  * its module-scope feature probe.
  */
 
-/** Every id the two guard modules claim, and nothing else. */
+/** Every id the three guard modules claim, and nothing else. */
 const GUARD_IDS = [
   'arts-hs-lock-panel-moves',
   'arts-hs-lock-repeater-sort',
   'arts-hs-lock-repeater-duplicate',
   'arts-hs-default-panel-width',
-  'arts-hs-coerce-panel-width'
+  'arts-hs-coerce-panel-width',
+  'arts-hs-skip-insert-render'
 ]
 
 const loadModule = async () => (await import('@ts/editor/module')).default
@@ -78,7 +79,7 @@ describe('editor Module', () => {
     expect(() => new Module()).not.toThrow()
 
     // One per guard module: each contains its own registration loop.
-    expect(warn).toHaveBeenCalledTimes(2)
+    expect(warn).toHaveBeenCalledTimes(3)
   })
 })
 

@@ -1,6 +1,7 @@
 import HorizontalScrollType from './horizontal-scroll-type'
 import { registerPanelWidthGuard } from './patches/guard-panel-width'
 import { registerPanelMoveLock } from './patches/lock-panel-moves'
+import { registerInsertRenderSkip } from './patches/skip-insert-render'
 import { suppressNativeScrollForPanels } from './patches/suppress-native-scroll'
 
 export default class Module {
@@ -9,5 +10,6 @@ export default class Module {
     suppressNativeScrollForPanels()
     registerPanelMoveLock()
     registerPanelWidthGuard()
+    registerInsertRenderSkip()
   }
 }

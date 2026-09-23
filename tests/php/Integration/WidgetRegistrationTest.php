@@ -29,7 +29,7 @@ class WidgetRegistrationTest extends TestCase {
 		);
 	}
 
-	public function test_initial_config_supports_improved_repeaters(): void {
+	public function test_initial_config_patches_repeater_changes_with_no_dom_targets(): void {
 		$widget = $this->widget();
 
 		$method = new \ReflectionMethod( $widget, 'get_initial_config' );
@@ -38,9 +38,11 @@ class WidgetRegistrationTest extends TestCase {
 		/** @var array<string, mixed> $config */
 		$config = $method->invoke( $widget );
 
-		// Without this flag core's repeater-move hook skips sortViewsByModels
-		// and the editor's child-view registry drifts after drag reorders.
+		// Without the flag, core re-renders the whole widget on every panel
+		// add/remove. With it, core's remove walks target_container, which must
+		// stay empty: the nested-elements hooks own the child containers.
 		$this->assertTrue( $config['support_improved_repeaters'] ?? false );
+		$this->assertSame( array(), $config['target_container'] ?? null );
 	}
 
 	public function test_default_children_are_three_containers(): void {
