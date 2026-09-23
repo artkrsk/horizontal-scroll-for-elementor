@@ -108,12 +108,23 @@ describe('the measurement observer', () => {
   const observing = async () => {
     const { spy, Fake } = observerSpy()
     vi.stubGlobal('ResizeObserver', Fake)
+    const frames: FrameRequestCallback[] = []
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) =>
+      frames.push(callback)
+    )
     const { boot } = await loadEngine(true)
     const fixture = travelling()
 
     boot(fixture.wrapper)
 
-    return { spy, ...fixture }
+    /** Runs whatever the observer deferred to the next frame. */
+    const nextFrame = () => {
+      for (const callback of frames.splice(0)) {
+        callback(0)
+      }
+    }
+
+    return { spy, nextFrame, ...fixture }
   }
 
   it('watches both boxes the measurement reads', async () => {
@@ -123,17 +134,24 @@ describe('the measurement observer', () => {
     expect(spy.observed).toEqual([wrapper, track])
   })
 
-  it('re-measures the section when a box changes', async () => {
-    const { spy, wrapper, track } = await observing()
+  it('re-measures the section on the frame after a box changes', async () => {
+    const { spy, nextFrame, wrapper, track } = await observing()
 
     setGeometry(track, { scrollWidth: 5000 })
     spy.deliver([])
+
+    // Never inside the callback: the runway height is built from this var, so
+    // writing it there resizes an observed box mid-delivery and the browser
+    // reports a ResizeObserver loop error on window.
+    expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe('2000px')
+
+    nextFrame()
 
     expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe('4000px')
   })
 
   it('stands down once an editor re-render has replaced the section', async () => {
-    const { spy, wrapper, track } = await observing()
+    const { spy, nextFrame, wrapper, track } = await observing()
     const measured = wrapper.style.getPropertyValue('--arts-hs-distance')
 
     // What a re-render leaves behind: a detached tree whose observer would
@@ -141,19 +159,21 @@ describe('the measurement observer', () => {
     wrapper.remove()
     setGeometry(track, { scrollWidth: 5000 })
     spy.deliver([])
+    nextFrame()
 
     expect(spy.disconnected).toBe(1)
     expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe(measured)
   })
 
   it('keeps observing a section that is merely hidden', async () => {
-    const { spy, wrapper, track } = await observing()
+    const { spy, nextFrame, wrapper, track } = await observing()
 
     // A section inside a collapsed tab reports the same 0x0 box a removed one
     // does, and has to be measured again the moment it is shown.
     wrapper.style.display = 'none'
     setGeometry(track, { scrollWidth: 5000 })
     spy.deliver([])
+    nextFrame()
 
     expect(spy.disconnected).toBe(0)
     expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe('4000px')

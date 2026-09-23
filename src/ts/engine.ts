@@ -122,7 +122,15 @@ const observe = (wrapper: HTMLElement, track: HTMLElement): void => {
       ro.disconnect()
       return
     }
-    measure(wrapper, track)
+    // Next frame, never here: the runway height is built from the
+    // --arts-hs-distance measure() writes, so a travel change would resize the
+    // wrapper (and <body>) mid-delivery, and the browser reports that as a
+    // ResizeObserver loop error on window for every such resize. Stepping this
+    // observer aside can't help — the guard is document-wide, and the polyfill
+    // (subject + source children) and smooth-scroll libraries observe those
+    // same boxes. Written before the next layout, every observer sees the new
+    // height in its first pass. Cost: that one frame paints the old runway.
+    requestAnimationFrame(() => measure(wrapper, track))
   })
   ro.observe(wrapper)
   ro.observe(track)

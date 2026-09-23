@@ -106,3 +106,44 @@ test('scrubs the track across the pin window without scrolling the page sideways
   // hijack the sticky scrollport and kill the pin outright.
   expect(travel.pageScrolledSideways).toBe(0)
 })
+
+test('re-measures on resize without tripping the ResizeObserver loop guard', async ({ page }) => {
+  // The demo panels are vw-sized, so every width below changes the travel —
+  // exactly the resize that used to report a loop error on window. On Firefox
+  // the polyfill's own observers watch the same boxes, which is the case a
+  // fix confined to our observer would still fail.
+  const errors = await page.evaluateHandle(() => {
+    const seen: string[] = []
+    window.addEventListener('error', (event) => seen.push(event.message))
+    return seen
+  })
+
+  for (const width of [1100, 1440, 1280]) {
+    await page.setViewportSize({ width, height: 800 })
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+        )
+    )
+  }
+
+  const state = await page.evaluate(() => {
+    const wrapper = document.querySelector<HTMLElement>('.js-arts-hs')
+    const track = wrapper?.querySelector<HTMLElement>('.js-arts-hs__track')
+    if (!wrapper || !track) {
+      throw new Error('the demo page rendered no horizontal scroll section')
+    }
+    return {
+      distance: wrapper.style.getPropertyValue('--arts-hs-distance'),
+      expected: `${Math.max(0, track.scrollWidth - wrapper.clientWidth)}px`
+    }
+  })
+
+  expect(
+    await errors.evaluate((seen) => seen.filter((message) => message.includes('ResizeObserver')))
+  ).toEqual([])
+  expect(state.distance).toBe(state.expected)
+})
