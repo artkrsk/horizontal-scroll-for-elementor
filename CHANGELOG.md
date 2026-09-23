@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.2
+
+* fixed: adding or removing a panel in the Elementor editor no longer triggers error messages in the browser console – panels were always added and removed correctly.
+
 ## 1.3.1
 
 * fixed: resizing the browser window no longer triggers a harmless "ResizeObserver loop" error message – the page itself always displayed correctly.
