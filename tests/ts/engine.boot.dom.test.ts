@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, observerSpy, section, setGeometry } from './support'
 
 /**
@@ -50,6 +50,12 @@ const travelling = () =>
 beforeEach(() => {
   document.body.innerHTML = ''
 })
+
+// Every boot() measures, and measure() arms the 100 ms Motion FX recalc on a
+// real timer. Let the last one fire while happy-dom's window still exists: on
+// a slow runner the file can finish first, and the timer then throws
+// "window is not defined" into the run after teardown.
+afterAll(() => new Promise((resolve) => setTimeout(resolve, 150)))
 
 describe('boot on a browser with native scroll-driven animations', () => {
   it('measures and announces readiness', async () => {
