@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.3.1
+
+* fixed: resizing the browser window no longer triggers a harmless "ResizeObserver loop" error message – the page itself always displayed correctly.
+
 ## 1.3.0
 
 * added: the Elementor editor now tells you when a pinned section can't pin, and names the element responsible – usually overflow-x: hidden set on both html and body. The notice shows only in the editor and clears itself once the rule is gone.
