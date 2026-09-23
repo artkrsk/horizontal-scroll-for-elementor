@@ -15,9 +15,9 @@
 // The `h-` twins ($ns: 'h-') are "what horizontal resolves to HERE,
 // given capability and touch policy". The Layout control's horizontal
 // state can't write real values (Elementor prints control selectors at
-// {{WRAPPER}}'s three-class specificity, which outranks the @supports
-// gate — @supports adds none — so it would force the track in browsers
-// that can't scrub it), so it chains through the twins instead:
+// `{{WRAPPER}} .arts-hs`'s four-class specificity, which outranks the
+// @supports gate — @supports adds none — so it would force the track in
+// browsers that can't scrub it), so it chains through the twins instead:
 // `--arts-hs-track-position: var(--arts-hs-h-track-position)` etc. The
 // gates flip the twins to `initial` (guaranteed-invalid propagates
 // through the chain, so every consumption falls back to its horizontal

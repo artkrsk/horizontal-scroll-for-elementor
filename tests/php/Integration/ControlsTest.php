@@ -63,7 +63,7 @@ class ControlsTest extends TestCase {
 		$horizontal = $this->string_value( $dictionary['horizontal'] ?? null );
 
 		// Horizontal must never write real values (Elementor prints control
-		// selectors at {{WRAPPER}}'s three-class specificity, which outranks
+		// selectors at `{{WRAPPER}} .arts-hs`'s four-class specificity, which outranks
 		// the stylesheet's @supports gate — it would force the track in
 		// browsers that can't scrub it). It chains every state var through its
 		// `h-` twin, which only the capability gates flip to horizontal.
@@ -88,8 +88,8 @@ class ControlsTest extends TestCase {
 		$this->assertArrayHasKey( 'scroll_direction', $controls );
 		$this->assertSame( '', $controls['scroll_direction']['default'] ?? null );
 
-		// Auto MUST stay empty: the control prints at {{WRAPPER}}'s
-		// three-class specificity, which would outrank the stylesheet's
+		// Auto MUST stay empty: the control prints at `{{WRAPPER}} .arts-hs`'s
+		// four-class specificity, which would outrank the stylesheet's
 		// `body.rtl` gate that owns the page-following flip.
 		$dictionary = $this->array_value( $controls['scroll_direction']['selectors_dictionary'] ?? null );
 		$this->assertSame( '', $dictionary[''] ?? null );

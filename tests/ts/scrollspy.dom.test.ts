@@ -15,8 +15,8 @@ import { nth, observerSpy, section } from './support'
  * viewport-midpoint band, which inside a scrubbing section double-highlights
  * at every flush landing. We own the active state for links whose targets live
  * in a section — and the two rules that make that safe are exclusivity (one
- * panel per group) and compare-before-write (never fight Pro's MutationObserver
- * with writes of our own).
+ * panel per group) and compare-before-write (our own writes must never
+ * retrigger the MutationObserver that watches Pro's).
  *
  * Both observers are faked (see support.ts): happy-dom never intersects, so the
  * crossings have to be stated, and a re-assert has to be triggerable on demand.

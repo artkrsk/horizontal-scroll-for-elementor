@@ -26,7 +26,7 @@ const wp = (command: string): string =>
   }).toString()
 
 export default function globalSetup(): void {
-  // The blueprint's landingPage is a pretty permalink, and so is DEMO_PAGE.
+  // The specs address the demo page by its pretty permalink (/ahs-demo/).
   wp("wp rewrite structure '/%postname%/' --hard")
   wp('wp rewrite flush')
 

@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { section } from './support'
 
 /**
- * The bundle entry. The shared vitest config excludes entry files from coverage
+ * The bundle entry. The shared vitest config excludes this file from coverage
  * as wiring, but two things here are not wiring: the `$scope` unwrap decides
  * whether the engine ever finds its own markup (the runway moved inside
  * Elementor's widget container in 1.2.0, so the descendant branch is now the

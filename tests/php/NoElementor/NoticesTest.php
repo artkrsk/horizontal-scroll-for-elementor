@@ -5,11 +5,11 @@ namespace Arts\HorizontalScroll\Tests\NoElementor;
 use Arts\HorizontalScroll\Managers\Notices;
 
 /**
- * The activation path with Elementor absent. Every guard in Notices reads
- * \Elementor\Plugin::$instance, so each one is a fatal error waiting for the
- * moment a site deactivates Elementor with an admin-post URL still open in a
- * tab — and the Integration suite, which always has Elementor loaded, is
- * structurally unable to see it.
+ * The activation path with Elementor absent. Every path in Notices reads
+ * \Elementor\Plugin::$instance past its did_action() guard, so each guard is
+ * all that stands between a site that deactivated Elementor with an admin-post
+ * URL still open in a tab and a fatal error — and the Integration suite, which
+ * always has Elementor loaded, is structurally unable to see it.
  */
 class NoticesTest extends \WP_UnitTestCase {
 

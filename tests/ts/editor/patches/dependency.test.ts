@@ -12,8 +12,9 @@ import { fakeDollarE } from '../../support'
  * The two predicates the editor guards are built on. Both take plain command
  * args, so they are testable without an $e in sight — which is the whole
  * reason they live here rather than inline in each guard. The registration
- * machinery around them (defineDependency, registerDependencies) is Elementor
- * plumbing and is deliberately left to the editor itself.
+ * machinery around them (hasDependencyApi, defineDependency,
+ * registerDependencies) runs against the minimal $e from support.ts: what is
+ * asserted is our wiring and failure containment, never Elementor's hooks.
  */
 const container = (widgetType?: string) => ({
   model: { get: (key: string) => (key === 'widgetType' ? widgetType : undefined) }

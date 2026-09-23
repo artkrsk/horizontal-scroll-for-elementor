@@ -8,7 +8,7 @@ use Arts\HorizontalScroll\Managers\Elementor as ElementorManager;
  * The one-clear-per-version pass that keeps EXISTING sites correct across an
  * update. Elementor caches generated post CSS and rendered element markup
  * against saved pages; a release that moves the runway or retargets a control
- * selector — 1.1.0 did both — otherwise keeps serving the old pairing until
+ * selector — 1.2.0 did both — otherwise keeps serving the old pairing until
  * something clears them. Nothing exercised either branch: the callback runs
  * once during bootstrap, when the option already matches, so the clear path had
  * never executed at all.

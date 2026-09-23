@@ -21,7 +21,7 @@ const base = createVitestConfig({
 const EDITOR_ADAPTERS = ['src/ts/editor/horizontal-scroll-type.ts']
 
 /**
- * The shared config excludes every entry file as wiring. That premise stopped
+ * The shared config excludes the bundle entry as wiring. That premise stopped
  * holding here when the runway moved inside Elementor's widget container: the
  * `$scope` unwrap in src/ts/index.ts is what decides whether the engine ever
  * finds its own markup, and it publishes `window.ARTS_HS` — a committed public
@@ -36,7 +36,7 @@ export default defineConfig({
     coverage: {
       ...base.test.coverage,
       exclude: [...excluded, ...EDITOR_ADAPTERS],
-      // Set just under the measured baseline (100 / 97.3 / 100 / 100). Raise
+      // Set just under the measured baseline (100 / 97.86 / 100 / 100). Raise
       // as coverage grows; never lower without discussion — the point is that a
       // future change cannot quietly stop covering what is covered today.
       thresholds: { statements: 99, branches: 97, functions: 98, lines: 99 }

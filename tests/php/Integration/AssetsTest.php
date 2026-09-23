@@ -70,8 +70,8 @@ class AssetsTest extends TestCase {
 		$this->assertIsArray( $before );
 		$inline = implode( "\n", array_filter( $before, 'is_string' ) );
 		$this->assertStringContainsString( 'window.ARTS_HS_DIAGNOSTICS =', $inline );
-		// The keys diagnostics.ts indexes by blocker kind, plus the two it always
-		// prints. A rename on either side leaves the bar with an empty sentence.
+		// The two keys diagnostics.ts indexes by blocker kind, plus the one it
+		// always prints. A rename on either side leaves the bar with an empty sentence.
 		foreach ( array( 'blocked', 'overflow', 'fixed' ) as $key ) {
 			$this->assertStringContainsString( '"' . $key . '":', $inline );
 		}
