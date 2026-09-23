@@ -69,7 +69,6 @@ describe('what counts as a blocker', () => {
     const { findBlocker } = await load()
     const { wrapper } = nest(1)
     document.documentElement.style.overflowX = 'hidden'
-    document.documentElement.style.overflowX = 'hidden'
     document.body.style.overflowX = 'hidden'
 
     expect(findBlocker(wrapper)).toEqual({
@@ -103,7 +102,6 @@ describe('what counts as a blocker', () => {
     const { findBlocker } = await load()
     const { wrapper } = nest(1)
     document.documentElement.style.overflowX = 'clip'
-    document.documentElement.style.overflowX = 'hidden'
     document.body.style.overflowX = 'hidden'
 
     expect(findBlocker(wrapper)?.label).toBe('body')

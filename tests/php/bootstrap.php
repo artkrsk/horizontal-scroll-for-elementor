@@ -19,7 +19,7 @@ if ( false === $ahs_wp_phpunit_dir || ! is_dir( $ahs_wp_phpunit_dir ) ) {
 }
 
 if ( false === $ahs_tests_config || ! file_exists( $ahs_tests_config ) ) {
-	fwrite( STDERR, "Tests config not found — run through wp-env: `pnpm test` (or `pnpm exec wp-env start`, then `pnpm test:php`).\n" );
+	fwrite( STDERR, "Tests config not found — run through wp-env: `pnpm build && pnpm exec wp-env start`, then `pnpm exec wp-env run tests-cli --env-cwd=test-workspace -- vendor/bin/phpunit -c tests/php/phpunit.xml.dist`.\n" );
 	exit( 1 );
 }
 
