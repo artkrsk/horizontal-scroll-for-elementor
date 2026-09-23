@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "255f265385255be55a3f9b0075c17db2",
+    "content-hash": "09c352f777bd2ff6aef8e5ef99e94b54",
     "packages": [
         {
             "name": "arts/base",
@@ -57,16 +57,16 @@
         },
         {
             "name": "arts/scroll-timeline-polyfill",
-            "version": "v1.0.1",
+            "version": "v1.0.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/artkrsk/arts-scroll-timeline-polyfill.git",
-                "reference": "f139337e890a6aa4da48a4cda778fa4e9043c8f3"
+                "reference": "7893ebde98c3832ca98364ea543801b70c63629d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/artkrsk/arts-scroll-timeline-polyfill/zipball/f139337e890a6aa4da48a4cda778fa4e9043c8f3",
-                "reference": "f139337e890a6aa4da48a4cda778fa4e9043c8f3",
+                "url": "https://api.github.com/repos/artkrsk/arts-scroll-timeline-polyfill/zipball/7893ebde98c3832ca98364ea543801b70c63629d",
+                "reference": "7893ebde98c3832ca98364ea543801b70c63629d",
                 "shasum": ""
             },
             "require": {
@@ -101,9 +101,9 @@
             "description": "Registers the flackr scroll-timeline polyfill as a self-gating WordPress script for browsers without native CSS scroll-driven animations, plus an opt-out API for stylesheets the polyfill must not transpile.",
             "support": {
                 "issues": "https://github.com/artkrsk/arts-scroll-timeline-polyfill/issues",
-                "source": "https://github.com/artkrsk/arts-scroll-timeline-polyfill/tree/v1.0.1"
+                "source": "https://github.com/artkrsk/arts-scroll-timeline-polyfill/tree/v1.0.4"
             },
-            "time": "2026-07-17T11:47:23+00:00"
+            "time": "2026-09-23T19:26:45+00:00"
         }
     ],
     "packages-dev": [

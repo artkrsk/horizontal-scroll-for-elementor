@@ -85,7 +85,9 @@
           "/phpcs\\.xml/",
           "/phpstan/",
           "/\\.github/",
-          "/\\.gitignore/"
+          "/\\.gitignore/",
+          "/scroll-timeline-polyfill\\/(?:src\\/js|tests|scripts)\\//",
+          "/scroll-timeline-polyfill\\/(?:composer\\.lock|pnpm-lock\\.yaml|package\\.json|tsconfig\\.json|vite\\.config\\.ts|playwright\\.config\\.ts|biome\\.json|UPSTREAM\\.md|README\\.md)$/"
         ]
       }
     }
