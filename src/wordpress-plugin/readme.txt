@@ -130,6 +130,12 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
+= 1.4.0 =
+* added: links to a panel now land exactly on it in themes that run their own smooth scrolling, such as Rhye – menu links, buttons and links shared with a #panel address.
+* added: for theme developers – getScrollRange() and an arts-hs:layout event let a theme's own scroll effects follow the sideways movement inside panels (see the Integration contract in the plugin's README).
+* fixed: on sites with AJAX page transitions that start Elementor only once, a horizontal section on a page you reach through a transition now sets itself up fully – before, it could end too early or too late, and in Firefox it stayed a vertical stack.
+* fixed: in Firefox, pages with a horizontal section no longer flash unstyled for a moment – e.g. a header jumping out of place – while loading or after an AJAX page transition.
+
 = 1.3.2 =
 * fixed: adding or removing a panel in the Elementor editor no longer triggers error messages in the browser console – panels were always added and removed correctly.
 
