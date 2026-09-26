@@ -6,6 +6,7 @@ declare global {
     ARTS_HS?: {
       contract?: number
       getTimeline?: (el: Element) => AnimationTimeline | null
+      getScrollTop?: (target: Element) => number | null
     }
     /**
      * Editor-only diagnostic strings, already translated by PHP and emitted

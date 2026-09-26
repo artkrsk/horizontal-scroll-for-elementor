@@ -82,6 +82,7 @@ transform: translateX(calc(120px * var(--arts-hs-move, 1)));
 | `.arts-hs` / `.js-arts-hs` / `.js-arts-hs__track` | styling marker / DOM hooks |
 | `arts-hs:ready` | bubbling `CustomEvent` on the wrapper once the engine boots; `detail: { wrapper }` |
 | `window.ARTS_HS.getTimeline(el)` | the section timeline as a WAAPI object — see the JS path below |
+| `window.ARTS_HS.getScrollTop(el)` | document scrollY that puts `el`'s panel on stage — the position anchor links scroll to; `null` outside a panel, in vertical states, or before the first measure |
 | `window.ARTS_HS.contract` | integer API level, currently `1` |
 
 ### Recipe: animate while your panel is on stage

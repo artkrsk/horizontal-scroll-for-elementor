@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 // @vitest-environment-options { "settings": { "navigation": { "disableMainFrameNavigation": true } } }
 
-import { computeTargetScrollY, installAnchorScroll } from '@ts/anchor-scroll'
+import { computeTargetScrollY, getScrollTop, installAnchorScroll } from '@ts/anchor-scroll'
 import { beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 import { nth, section } from './support'
 
@@ -110,6 +110,35 @@ describe('computeTargetScrollY', () => {
     const { wrapper, track, panels } = measured({ runwayHeight: 800, trackHeight: 800 })
 
     expect(computeTargetScrollY(wrapper, track, nth(panels, 0))).toBeNull()
+  })
+})
+
+describe('getScrollTop', () => {
+  it('maps an element inside a panel to that panel stage position', () => {
+    measured()
+    const child = document.createElement('p')
+    document.getElementById('two')?.appendChild(child)
+
+    expect(getScrollTop(child)).toBe(2100)
+  })
+
+  it('returns null outside any section', () => {
+    measured()
+    const orphan = document.body.appendChild(document.createElement('p'))
+
+    expect(getScrollTop(orphan)).toBeNull()
+  })
+
+  it('returns null for the track itself', () => {
+    const { track } = measured()
+
+    expect(getScrollTop(track)).toBeNull()
+  })
+
+  it('returns null in a vertical state', () => {
+    measured({ sticky: false })
+
+    expect(getScrollTop(document.getElementById('two') as HTMLElement)).toBeNull()
   })
 })
 

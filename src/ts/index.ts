@@ -2,7 +2,7 @@
 // compatibility feature exposes an install*() seam instead of registering
 // listeners at import time.
 
-import { installAnchorScroll } from './anchor-scroll'
+import { getScrollTop, installAnchorScroll } from './anchor-scroll'
 import { WRAPPER_CLASS, WRAPPER_SELECTOR } from './contract'
 import { inspectSection } from './diagnostics'
 import { boot, getTimeline } from './engine'
@@ -16,7 +16,7 @@ installAnchorScroll()
 installScrollspy()
 installMotionFx()
 
-window.ARTS_HS = { ...window.ARTS_HS, contract: 1, getTimeline }
+window.ARTS_HS = { ...window.ARTS_HS, contract: 1, getTimeline, getScrollTop }
 
 window.addEventListener('elementor/frontend/init', () => {
   // Spelled out, deliberately NOT composed from WIDGET_TYPE: AssetsTest greps

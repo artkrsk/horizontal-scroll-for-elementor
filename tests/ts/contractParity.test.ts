@@ -120,6 +120,11 @@ describe('the names the README and the code both spell out', () => {
     expect(SOURCE).toMatch(/window\.ARTS_HS = \{[^}]*getTimeline/)
   })
 
+  it('exposes getScrollTop on the documented global', () => {
+    expect(NAMES).toContain('window.ARTS_HS.getScrollTop(el)')
+    expect(SOURCE).toMatch(/window\.ARTS_HS = \{[^}]*getScrollTop/)
+  })
+
   it('ships the API level the README says it is at', () => {
     // "currently `1`" in the prose above the table, `contract: 1` in the entry.
     const documentedLevel = README.match(/`window\.ARTS_HS\.contract` \(currently `(\d+)`\)/)

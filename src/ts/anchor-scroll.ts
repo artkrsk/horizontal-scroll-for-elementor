@@ -72,25 +72,35 @@ export const computeTargetScrollY = (
   return engage + fraction * pinWindow
 }
 
-const resolveContext = (
-  hash: string
+const contextOf = (
+  target: HTMLElement
 ): { wrapper: HTMLElement; track: HTMLElement; panel: HTMLElement } | null => {
-  const target = resolveHashTarget(hash)
-  const wrapper = target ? resolveWrapper(target) : null
-  if (!target || !wrapper) {
-    return null
-  }
-  const track = resolveTrack(wrapper)
+  const wrapper = resolveWrapper(target)
+  const track = wrapper ? resolveTrack(wrapper) : null
   const panel = track ? resolvePanel(target, track) : null
-  if (!track || !panel) {
+  if (!wrapper || !track || !panel) {
     return null
   }
   return { wrapper, track, panel }
 }
 
-const resolveTop = (hash: string): number | null => {
-  const ctx = resolveContext(hash)
+const resolveContext = (
+  hash: string
+): { wrapper: HTMLElement; track: HTMLElement; panel: HTMLElement } | null => {
+  const target = resolveHashTarget(hash)
+  return target ? contextOf(target) : null
+}
+
+// Public (README: Integration contract) — lets a theme's own smooth scroller
+// land exactly where the anchor-click path would.
+export const getScrollTop = (target: Element): number | null => {
+  const ctx = isHTMLElement(target) ? contextOf(target) : null
   return ctx ? computeTargetScrollY(ctx.wrapper, ctx.track, ctx.panel) : null
+}
+
+const resolveTop = (hash: string): number | null => {
+  const target = resolveHashTarget(hash)
+  return target ? getScrollTop(target) : null
 }
 
 const handleClick = (event: MouseEvent): void => {
