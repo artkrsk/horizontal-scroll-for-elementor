@@ -9,6 +9,7 @@ import {
   distanceOf,
   isInverted,
   isScrubbing,
+  LAYOUT_EVENT,
   POLYFILLED_CLASS,
   pinWindowOf,
   READY_EVENT,
@@ -81,6 +82,39 @@ const scheduleMotionFxRecalc = (): void => {
   }, 100)
 }
 
+interface ILayoutSnapshot {
+  distance: number
+  pinWindow: number
+  insetStart: number
+  horizontal: boolean
+}
+
+const snapshots = new WeakMap<HTMLElement, ILayoutSnapshot>()
+
+// Themes and runtimes keep their own scroll engines in sync with the runway
+// (trigger refreshes, switching an effect between its horizontal and stacked
+// mode) — announce only what changed, never per frame. A continuous window
+// resize still re-measures every frame, so listeners debounce heavy work.
+const announceLayout = (wrapper: HTMLElement, next: ILayoutSnapshot): void => {
+  const previous = snapshots.get(wrapper)
+  if (
+    previous &&
+    previous.distance === next.distance &&
+    previous.pinWindow === next.pinWindow &&
+    previous.insetStart === next.insetStart &&
+    previous.horizontal === next.horizontal
+  ) {
+    return
+  }
+  snapshots.set(wrapper, next)
+  wrapper.dispatchEvent(
+    new CustomEvent(LAYOUT_EVENT, {
+      bubbles: true,
+      detail: { wrapper, horizontal: next.horizontal }
+    })
+  )
+}
+
 export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
   const distance = distanceOf(wrapper, track)
   wrapper.style.setProperty(VAR_DISTANCE, `${distance}px`)
@@ -95,13 +129,16 @@ export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
   // own vertical math is the correct answer again — hence the distance gate.
   // pinWindowOf reads offsetHeight after the fresh --arts-hs-distance write,
   // so the runway height is already current.
+  const horizontal = distance > 0 && isScrubbing(track)
+  const pinWindow = pinWindowOf(wrapper, track)
   updateTrackState(wrapper, {
-    active: distance > 0 && isScrubbing(track),
+    active: horizontal,
     inverted,
     insetStart,
-    pinWindow: pinWindowOf(wrapper, track)
+    pinWindow
   })
   scheduleMotionFxRecalc()
+  announceLayout(wrapper, { distance, pinWindow, insetStart, horizontal })
 }
 
 const observe = (wrapper: HTMLElement, track: HTMLElement): void => {

@@ -16,6 +16,7 @@ export const WRAPPER_SELECTOR = `.${WRAPPER_CLASS}`
 export const TRACK_SELECTOR = `.${TRACK_CLASS}`
 export const POLYFILLED_CLASS = 'arts-hs_polyfilled'
 export const READY_EVENT = 'arts-hs:ready'
+export const LAYOUT_EVENT = 'arts-hs:layout'
 export const WIDGET_TYPE = 'arts-horizontal-scroll'
 export const VAR_DISTANCE = '--arts-hs-distance'
 export const VAR_DIR = '--arts-hs-dir'

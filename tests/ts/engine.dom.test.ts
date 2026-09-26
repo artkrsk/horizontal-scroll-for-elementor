@@ -3,7 +3,7 @@
 import { measure, stampPanelRanges } from '@ts/engine'
 import { updateTrackState } from '@ts/motion-fx-compat'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { nth, section } from './support'
+import { nth, section, setGeometry } from './support'
 
 /**
  * The measuring half of the engine. The boot/tier half needs control over
@@ -179,5 +179,77 @@ describe('measure', () => {
     measure(wrapper, track)
 
     expect(() => vi.advanceTimersByTime(100)).not.toThrow()
+  })
+})
+
+describe('the layout event', () => {
+  /** Every arts-hs:layout the wrapper announced, in order. */
+  const listen = (wrapper: HTMLElement) => {
+    const seen: CustomEvent[] = []
+    document.addEventListener('arts-hs:layout', (event) => seen.push(event as CustomEvent), {
+      once: false
+    })
+    return { seen: () => seen.filter((event) => event.detail?.wrapper === wrapper) }
+  }
+
+  it('announces the first measure, bubbling, with the horizontal state', () => {
+    const { wrapper, track } = threePanels()
+    const { seen } = listen(wrapper)
+
+    measure(wrapper, track)
+
+    expect(seen()).toHaveLength(1)
+    expect(seen()[0]?.bubbles).toBe(true)
+    expect(seen()[0]?.detail).toEqual({ wrapper, horizontal: true })
+  })
+
+  it('stays quiet when a re-measure changed nothing', () => {
+    const { wrapper, track } = threePanels()
+    const { seen } = listen(wrapper)
+
+    measure(wrapper, track)
+    measure(wrapper, track)
+
+    expect(seen()).toHaveLength(1)
+  })
+
+  it('announces again when the travel changed', () => {
+    const { wrapper, track } = threePanels()
+    const { seen } = listen(wrapper)
+
+    measure(wrapper, track)
+    setGeometry(track, { scrollWidth: 4000 })
+    measure(wrapper, track)
+
+    expect(seen()).toHaveLength(2)
+  })
+
+  it('reports a vertical state as not horizontal', () => {
+    const { wrapper, track } = section({ viewport: 1000, trackWidth: 3000, sticky: false })
+    const { seen } = listen(wrapper)
+
+    measure(wrapper, track)
+
+    expect(seen()[0]?.detail.horizontal).toBe(false)
+  })
+
+  it('reports a section without travel as not horizontal', () => {
+    const { wrapper, track } = section({ viewport: 1000, trackWidth: 600 })
+    const { seen } = listen(wrapper)
+
+    measure(wrapper, track)
+
+    expect(seen()[0]?.detail.horizontal).toBe(false)
+  })
+
+  it('announces a flip between horizontal and stacked', () => {
+    const { wrapper, track } = threePanels()
+    const { seen } = listen(wrapper)
+
+    measure(wrapper, track)
+    track.style.position = 'static'
+    measure(wrapper, track)
+
+    expect(seen().map((event) => event.detail.horizontal)).toEqual([true, false])
   })
 })

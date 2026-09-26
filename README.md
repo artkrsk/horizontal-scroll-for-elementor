@@ -80,7 +80,8 @@ transform: translateX(calc(120px * var(--arts-hs-move, 1)));
 | `--arts-hs-dir` | `1` default / `-1` on an RTL page (Direction: Auto) or when Direction is forced to Right to Left |
 | `--arts-hs-panel-start` / `--arts-hs-panel-end` | per panel: the % window during which that panel intersects the viewport; set on each panel element, inherits into its subtree |
 | `.arts-hs` / `.js-arts-hs` / `.js-arts-hs__track` | styling marker / DOM hooks |
-| `arts-hs:ready` | bubbling `CustomEvent` on the wrapper once the engine boots; `detail: { wrapper }` |
+| `arts-hs:ready` | bubbling `CustomEvent` on the wrapper once the engine boots (after its first measure); `detail: { wrapper }` |
+| `arts-hs:layout` | bubbling `CustomEvent` on the wrapper whenever a measure changed the geometry or flipped between horizontal and stacked (including the first one); `detail: { wrapper, horizontal }`. A continuous window resize re-measures every frame — debounce heavy work such as trigger refreshes |
 | `window.ARTS_HS.getTimeline(el)` | the section timeline as a WAAPI object — see the JS path below |
 | `window.ARTS_HS.getScrollTop(el)` | document scrollY that puts `el`'s panel on stage — the position anchor links scroll to; `null` outside a panel, in vertical states, or before the first measure |
 | `window.ARTS_HS.contract` | integer API level, currently `1` |

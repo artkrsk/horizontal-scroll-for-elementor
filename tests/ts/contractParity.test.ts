@@ -1,6 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { READY_EVENT, TRACK_SELECTOR, WRAPPER_SELECTOR } from '@ts/contract'
+import { LAYOUT_EVENT, READY_EVENT, TRACK_SELECTOR, WRAPPER_SELECTOR } from '@ts/contract'
 import { describe, expect, it } from 'vitest'
 
 /**
@@ -113,6 +113,10 @@ describe('the names the README and the code both spell out', () => {
 
   it('dispatches the readiness event under its documented name', () => {
     expect(NAMES).toContain(READY_EVENT)
+  })
+
+  it('dispatches the layout event under its documented name', () => {
+    expect(NAMES).toContain(LAYOUT_EVENT)
   })
 
   it('exposes getTimeline on the documented global', () => {
