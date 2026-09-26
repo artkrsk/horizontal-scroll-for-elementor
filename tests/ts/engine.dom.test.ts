@@ -218,7 +218,7 @@ describe('the layout event', () => {
     const { seen } = listen(wrapper)
 
     measure(wrapper, track)
-    setGeometry(track, { scrollWidth: 4000 })
+    setGeometry(track, { offsetWidth: 4000 })
     measure(wrapper, track)
 
     expect(seen()).toHaveLength(2)

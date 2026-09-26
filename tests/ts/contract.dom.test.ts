@@ -12,7 +12,7 @@ import {
   resolveWrapper
 } from '@ts/contract'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { nth, section } from './support'
+import { nth, section, setGeometry } from './support'
 
 /**
  * The committed surface. These probes are how the code reads the names README's
@@ -149,6 +149,13 @@ describe('isInverted', () => {
 describe('distanceOf', () => {
   it('is the track overhang past the scrollport', () => {
     const { wrapper, track } = section({ viewport: 1000, trackWidth: 3000 })
+
+    expect(distanceOf(wrapper, track)).toBe(2000)
+  })
+
+  it('ignores content overflowing the track box, which the slide never reaches', () => {
+    const { wrapper, track } = section({ viewport: 1000, trackWidth: 3000 })
+    setGeometry(track, { scrollWidth: 3174 })
 
     expect(distanceOf(wrapper, track)).toBe(2000)
   })

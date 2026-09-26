@@ -82,7 +82,7 @@ export const computeTargetScrollY = (
   // about-to-enter point. Clamped: a last panel narrower than the leftover
   // viewport lands at pin release instead.
   const raw = frame.inverted
-    ? (track.scrollWidth - panel.offsetLeft - panel.offsetWidth) / frame.distance
+    ? (track.offsetWidth - panel.offsetLeft - panel.offsetWidth) / frame.distance
     : panel.offsetLeft / frame.distance
   return frame.engage + clamp01(raw) * frame.pinWindow
 }
@@ -91,8 +91,20 @@ export const computeTargetScrollY = (
 // which the target crosses the stage — the same enter/exit rule and inversion
 // as the per-panel range vars, clamped to the pinned traversal — so a theme can
 // hand exact numbers to its own scroll engine instead of reading rects every
-// frame. Null in the same cases as getScrollTop.
-export const getScrollRange = (target: Element): { start: number; end: number } | null => {
+// frame. Clamping gives a target already on stage at pin engage the same
+// `start` as one whose edge only reaches the stage then (100vw panels put every
+// other panel exactly there), yet only the former is seen while the section
+// still scrolls vertically — onStageAtEngage tells them apart. `inset` narrows
+// the stage from both sides by that fraction of its width, as a negative
+// IntersectionObserver rootMargin would: the window then opens once the target
+// is that far in and closes that far before it leaves, which is how a reveal
+// "trigger point" maps onto sideways travel — mapped here because the scroll
+// per pixel of travel (runway factor) and the direction are this engine's.
+// Null in the same cases as getScrollTop.
+export const getScrollRange = (
+  target: Element,
+  options?: { inset?: number }
+): { start: number; end: number; onStageAtEngage: boolean } | null => {
   const wrapper = resolveWrapper(target)
   const track = wrapper ? resolveTrack(wrapper) : null
   if (!wrapper || !track || !isHTMLElement(target) || target === track || !track.contains(target)) {
@@ -103,12 +115,16 @@ export const getScrollRange = (target: Element): { start: number; end: number } 
   if (!frame || left === null) {
     return null
   }
-  const enter = (left - wrapper.clientWidth) / frame.distance
-  const exit = (left + target.offsetWidth) / frame.distance
+  const inset = (options?.inset ?? 0) * wrapper.clientWidth
+  const enter = (left - wrapper.clientWidth + inset) / frame.distance
+  const exit = (left + target.offsetWidth - inset) / frame.distance
   const [from, to] = frame.inverted ? [1 - exit, 1 - enter] : [enter, exit]
   return {
     start: frame.engage + clamp01(from) * frame.pinWindow,
-    end: frame.engage + clamp01(to) * frame.pinWindow
+    end: frame.engage + clamp01(to) * frame.pinWindow,
+    // More than a pixel on stage: panel and stage widths both round to whole
+    // pixels, so an edge sitting on the stage edge can land a pixel inside it.
+    onStageAtEngage: from * frame.distance < -1 && to > 0
   }
 }
 
@@ -144,7 +160,10 @@ const resolveTop = (hash: string): number | null => {
 }
 
 const handleClick = (event: MouseEvent): void => {
-  if (isEditMode()) {
+  // Another script already took the click — a smooth-scroll library landing
+  // the panel through its own engine (a native scroll here would be
+  // overwritten by its running animation), a menu, a tab.
+  if (event.defaultPrevented || isEditMode()) {
     return
   }
   if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {

@@ -143,7 +143,7 @@ describe('the measurement observer', () => {
   it('re-measures the section on the frame after a box changes', async () => {
     const { spy, nextFrame, wrapper, track } = await observing()
 
-    setGeometry(track, { scrollWidth: 5000 })
+    setGeometry(track, { offsetWidth: 5000 })
     spy.deliver([])
 
     // Never inside the callback: the runway height is built from this var, so
@@ -163,7 +163,7 @@ describe('the measurement observer', () => {
     // What a re-render leaves behind: a detached tree whose observer would
     // otherwise keep the whole thing reachable for the rest of the session.
     wrapper.remove()
-    setGeometry(track, { scrollWidth: 5000 })
+    setGeometry(track, { offsetWidth: 5000 })
     spy.deliver([])
     nextFrame()
 
@@ -177,7 +177,7 @@ describe('the measurement observer', () => {
     // A section inside a collapsed tab reports the same 0x0 box a removed one
     // does, and has to be measured again the moment it is shown.
     wrapper.style.display = 'none'
-    setGeometry(track, { scrollWidth: 5000 })
+    setGeometry(track, { offsetWidth: 5000 })
     spy.deliver([])
     nextFrame()
 

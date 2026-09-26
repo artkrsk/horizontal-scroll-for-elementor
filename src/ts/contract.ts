@@ -38,9 +38,12 @@ export const isScrubbing = (track: HTMLElement): boolean =>
 export const isInverted = (wrapper: HTMLElement): boolean =>
   getComputedStyle(wrapper).getPropertyValue(VAR_DIR).trim() === '-1'
 
-// The px the track must travel for its trailing edge to land.
+// The px the track must travel for its trailing edge to land. The track's own
+// box, never scrollWidth: the slide is `-100% + 100cqw`, a % of that box, so
+// content overflowing the last panel is never travelled to — counting it made
+// the runway, and every scroll position mapped onto it, outrun the real slide.
 export const distanceOf = (wrapper: HTMLElement, track: HTMLElement): number =>
-  Math.max(0, track.scrollWidth - wrapper.clientWidth)
+  Math.max(0, track.offsetWidth - wrapper.clientWidth)
 
 // The scroll span the pin occupies: runway height minus the pinned track's.
 export const pinWindowOf = (wrapper: HTMLElement, track: HTMLElement): number =>

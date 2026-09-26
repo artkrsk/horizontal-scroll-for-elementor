@@ -42,7 +42,7 @@ export interface ISectionSpec {
   viewport?: number
   /** wrapper.offsetHeight — the pin runway. */
   runwayHeight?: number
-  /** track.scrollWidth — the full width of the panel row. */
+  /** track.offsetWidth — the full width of the panel row. */
   trackWidth?: number
   /** track.offsetHeight — the pinned track. */
   trackHeight?: number
@@ -104,7 +104,7 @@ export const section = (spec: ISectionSpec = {}) => {
   // Terminate the offsetParent chain here so layoutDocTop(wrapper) is exactly
   // docTop. The chain walk itself is covered in geometry.dom.test.ts.
   Object.defineProperty(wrapper, 'offsetParent', { value: null, configurable: true })
-  setGeometry(track, { scrollWidth: trackWidth, offsetHeight: trackHeight })
+  setGeometry(track, { offsetWidth: trackWidth, offsetHeight: trackHeight })
 
   return { wrapper, track, panels }
 }

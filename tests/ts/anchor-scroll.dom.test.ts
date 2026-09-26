@@ -160,19 +160,31 @@ describe('getScrollRange', () => {
   it('spans a leading panel from pin engage until it has left the stage', () => {
     const { panels } = linked()
 
-    expect(getScrollRange(nth(panels, 0))).toEqual({ start: 1000, end: 2100 })
+    expect(getScrollRange(nth(panels, 0))).toEqual({
+      start: 1000,
+      end: 2100,
+      onStageAtEngage: true
+    })
   })
 
   it('spans a middle panel across the whole traversal', () => {
     const { panels } = linked()
 
-    expect(getScrollRange(nth(panels, 1))).toEqual({ start: 1000, end: 3200 })
+    expect(getScrollRange(nth(panels, 1))).toEqual({
+      start: 1000,
+      end: 3200,
+      onStageAtEngage: false
+    })
   })
 
   it('starts a trailing panel when its leading edge reaches the stage', () => {
     const { panels } = linked()
 
-    expect(getScrollRange(nth(panels, 2))).toEqual({ start: 2100, end: 3200 })
+    expect(getScrollRange(nth(panels, 2))).toEqual({
+      start: 2100,
+      end: 3200,
+      onStageAtEngage: false
+    })
   })
 
   it('measures an element nested inside a panel by its own offset and width', () => {
@@ -181,13 +193,74 @@ describe('getScrollRange', () => {
     setGeometry(child, { offsetLeft: 200, offsetWidth: 300 })
     Object.defineProperty(child, 'offsetParent', { value: nth(panels, 2), configurable: true })
 
-    expect(getScrollRange(child)).toEqual({ start: 2320, end: 3200 })
+    expect(getScrollRange(child)).toEqual({ start: 2320, end: 3200, onStageAtEngage: false })
   })
 
   it('mirrors the window when the traversal is inverted', () => {
     const { panels } = linked({ dir: -1 })
 
-    expect(getScrollRange(nth(panels, 2))).toEqual({ start: 1000, end: 2100 })
+    expect(getScrollRange(nth(panels, 2))).toEqual({
+      start: 1000,
+      end: 2100,
+      onStageAtEngage: true
+    })
+  })
+
+  it('tells a panel whose edge only reaches the stage at pin engage from one already on it', () => {
+    // 100vw panels: the second one's leading edge sits exactly on the stage
+    // edge at engage, and a pixel of rounding either way must not count.
+    const { panels } = linked({
+      panels: [
+        { left: 0, width: 999, id: 'one' },
+        { left: 999, width: 1000, id: 'two' },
+        { left: 1999, width: 1001, id: 'three' }
+      ]
+    })
+
+    expect(getScrollRange(nth(panels, 1))?.start).toBe(1000)
+    expect(getScrollRange(nth(panels, 1))?.onStageAtEngage).toBe(false)
+  })
+
+  it('narrows the stage from both sides by the inset fraction', () => {
+    const { panels } = linked()
+
+    // 200px in: 0.6 of the 2000px travel over the 2200px pin window.
+    expect(getScrollRange(nth(panels, 2), { inset: 0.2 })).toEqual({
+      start: 2320,
+      end: 3200,
+      onStageAtEngage: false
+    })
+    expect(getScrollRange(nth(panels, 1), { inset: 0.2 })).toEqual({
+      start: 1220,
+      end: 2980,
+      onStageAtEngage: false
+    })
+  })
+
+  it('counts a target less than the inset on stage at engage as entering', () => {
+    const { panels } = linked({
+      panels: [
+        { left: 0, width: 900, id: 'one' },
+        { left: 900, width: 1000, id: 'two' },
+        { left: 1900, width: 1100, id: 'three' }
+      ]
+    })
+
+    expect(getScrollRange(nth(panels, 1))?.onStageAtEngage).toBe(true)
+    expect(getScrollRange(nth(panels, 1), { inset: 0.2 })).toMatchObject({
+      start: 1110,
+      onStageAtEngage: false
+    })
+  })
+
+  it('mirrors the inset when the traversal is inverted', () => {
+    const { panels } = linked({ dir: -1 })
+
+    expect(getScrollRange(nth(panels, 0), { inset: 0.2 })).toEqual({
+      start: 2320,
+      end: 3200,
+      onStageAtEngage: false
+    })
   })
 
   it('returns null outside any section', () => {
@@ -250,6 +323,18 @@ describe('the click path', () => {
     // pushState rather than assigning location.hash: a hash assignment fires a
     // native fragment scroll that would race ours under scroll-behavior: smooth.
     expect(pushState).toHaveBeenCalledWith(null, '', '#two')
+  })
+
+  it('stands down on a click another script already took', () => {
+    measured()
+    const take = (event: Event): void => event.preventDefault()
+    window.addEventListener('click', take, { capture: true })
+
+    click(linkTo('#two'))
+    window.removeEventListener('click', take, { capture: true })
+
+    expect(scrollTo).not.toHaveBeenCalled()
+    expect(pushState).not.toHaveBeenCalled()
   })
 
   it('leaves modified clicks to the browser', () => {
