@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { computeInsetStart, layoutDocTop } from '@ts/geometry'
+import { computeInsetStart, layoutDocTop, layoutOffsetLeftWithin } from '@ts/geometry'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, section } from './support'
 
@@ -78,5 +78,42 @@ describe('computeInsetStart', () => {
     const { wrapper, track } = section({ docTop: 0, stickyTop: -50 })
 
     expect(computeInsetStart(wrapper, track)).toBe(0)
+  })
+})
+
+describe('layoutOffsetLeftWithin', () => {
+  /** A stated offsetParent link — happy-dom computes none. */
+  const parentOf = (el: HTMLElement, parent: Element | null) =>
+    Object.defineProperty(el, 'offsetParent', { value: parent, configurable: true })
+
+  it('sums offsetLeft up to the track', () => {
+    const track = document.body.appendChild(document.createElement('div'))
+    const panel = track.appendChild(document.createElement('div'))
+    const child = panel.appendChild(document.createElement('div'))
+    Object.defineProperty(panel, 'offsetLeft', { value: 2000, configurable: true })
+    Object.defineProperty(child, 'offsetLeft', { value: 200, configurable: true })
+    parentOf(panel, track)
+    parentOf(child, panel)
+
+    expect(layoutOffsetLeftWithin(child, track)).toBe(2200)
+  })
+
+  it('never reads a rect, so a transformed element measures where it is laid out', () => {
+    const track = document.body.appendChild(document.createElement('div'))
+    const panel = track.appendChild(document.createElement('div'))
+    Object.defineProperty(panel, 'offsetLeft', { value: 1000, configurable: true })
+    parentOf(panel, track)
+    const rect = vi.spyOn(panel, 'getBoundingClientRect')
+
+    expect(layoutOffsetLeftWithin(panel, track)).toBe(1000)
+    expect(rect).not.toHaveBeenCalled()
+  })
+
+  it('gives up when the chain never reaches the track', () => {
+    const track = document.body.appendChild(document.createElement('div'))
+    const stray = document.body.appendChild(document.createElement('div'))
+    parentOf(stray, null)
+
+    expect(layoutOffsetLeftWithin(stray, track)).toBeNull()
   })
 })

@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => {
     boot: vi.fn(),
     getTimeline: vi.fn(),
     getScrollTop: vi.fn(),
+    getScrollRange: vi.fn(),
     requestScrollspyRescan: vi.fn(),
     note: (name: string) => order.push(name)
   }
@@ -29,7 +30,8 @@ const mocks = vi.hoisted(() => {
 vi.mock('@ts/engine', () => ({ boot: mocks.boot, getTimeline: mocks.getTimeline }))
 vi.mock('@ts/anchor-scroll', () => ({
   installAnchorScroll: () => mocks.note('anchor-scroll'),
-  getScrollTop: mocks.getScrollTop
+  getScrollTop: mocks.getScrollTop,
+  getScrollRange: mocks.getScrollRange
 }))
 vi.mock('@ts/scrollspy', () => ({
   installScrollspy: () => mocks.note('scrollspy'),
@@ -159,6 +161,7 @@ describe('bundle entry', () => {
     expect(window.ARTS_HS?.contract).toBe(1)
     expect(window.ARTS_HS?.getTimeline).toBe(mocks.getTimeline)
     expect(window.ARTS_HS?.getScrollTop).toBe(mocks.getScrollTop)
+    expect(window.ARTS_HS?.getScrollRange).toBe(mocks.getScrollRange)
   })
 
   it('merges into an existing ARTS_HS rather than replacing it', async () => {

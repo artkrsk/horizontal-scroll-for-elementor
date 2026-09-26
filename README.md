@@ -84,6 +84,7 @@ transform: translateX(calc(120px * var(--arts-hs-move, 1)));
 | `arts-hs:layout` | bubbling `CustomEvent` on the wrapper whenever a measure changed the geometry or flipped between horizontal and stacked (including the first one); `detail: { wrapper, horizontal }`. A continuous window resize re-measures every frame — debounce heavy work such as trigger refreshes |
 | `window.ARTS_HS.getTimeline(el)` | the section timeline as a WAAPI object — see the JS path below |
 | `window.ARTS_HS.getScrollTop(el)` | document scrollY that puts `el`'s panel on stage — the position anchor links scroll to; `null` outside a panel, in vertical states, or before the first measure |
+| `window.ARTS_HS.getScrollRange(el)` | `{ start, end }` — the document scrollY window during which `el` crosses the stage (its leading edge enters → its trailing edge leaves), clamped to the pinned traversal; hand the numbers to your own scroll engine (e.g. ScrollTrigger `start`/`end`) and re-read them on `arts-hs:layout`; `null` in the same cases as `getScrollTop` |
 | `window.ARTS_HS.contract` | integer API level, currently `1` |
 
 ### Recipe: animate while your panel is on stage

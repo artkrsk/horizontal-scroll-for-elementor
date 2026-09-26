@@ -19,7 +19,7 @@ import {
   resolveWrapper,
   VAR_DISTANCE
 } from './contract'
-import { clamp01, computeInsetStart, layoutDocTop } from './geometry'
+import { clamp01, computeInsetStart, layoutDocTop, layoutOffsetLeftWithin } from './geometry'
 import { isHTMLElement } from './utils/isHTMLElement'
 import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 
@@ -36,15 +36,18 @@ import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 const hasMeasuredDistance = (wrapper: HTMLElement): boolean =>
   /^[\d.]+px$/.test(wrapper.style.getPropertyValue(VAR_DISTANCE).trim())
 
-// Document scrollY at which the panel is on stage; null means "leave the
-// navigation to the browser" — vertical states, zero travel, or before the
-// engine's first measure() (the wrapper height still rides the server-side
-// distance estimate then, so the runway math would be wrong).
-export const computeTargetScrollY = (
-  wrapper: HTMLElement,
-  track: HTMLElement,
-  panel: HTMLElement
-): number | null => {
+interface IPinFrame {
+  distance: number
+  pinWindow: number
+  engage: number
+  inverted: boolean
+}
+
+// The traversal every position below maps onto; null means "leave it to the
+// browser" — vertical states, zero travel, or before the engine's first
+// measure() (the wrapper height still rides the server-side distance estimate
+// then, so the runway math would be wrong).
+const pinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null => {
   if (!hasMeasuredDistance(wrapper)) {
     return null
   }
@@ -58,19 +61,55 @@ export const computeTargetScrollY = (
   if (distance <= 0 || pinWindow <= 0) {
     return null
   }
+  // Layout-tree offset, not a rect: an entrance animation on the widget is
+  // mid-transform exactly when the deep-link load correction runs.
+  const engage = layoutDocTop(wrapper) - computeInsetStart(wrapper, track)
+  return { distance, pinWindow, engage, inverted: isInverted(wrapper) }
+}
+
+// Document scrollY at which the panel is on stage; null when pinFrame is.
+export const computeTargetScrollY = (
+  wrapper: HTMLElement,
+  track: HTMLElement,
+  panel: HTMLElement
+): number | null => {
+  const frame = pinFrame(wrapper, track)
+  if (!frame) {
+    return null
+  }
   // Flush-on-stage fraction: the panel's offset from the traversal-start edge
   // of the track — not the contract's --arts-hs-panel-start, which is the
   // about-to-enter point. Clamped: a last panel narrower than the leftover
   // viewport lands at pin release instead.
-  const raw = isInverted(wrapper)
-    ? (track.scrollWidth - panel.offsetLeft - panel.offsetWidth) / distance
-    : panel.offsetLeft / distance
-  const fraction = clamp01(raw)
+  const raw = frame.inverted
+    ? (track.scrollWidth - panel.offsetLeft - panel.offsetWidth) / frame.distance
+    : panel.offsetLeft / frame.distance
+  return frame.engage + clamp01(raw) * frame.pinWindow
+}
 
-  // Layout-tree offset, not a rect: an entrance animation on the widget is
-  // mid-transform exactly when the deep-link load correction runs.
-  const engage = layoutDocTop(wrapper) - computeInsetStart(wrapper, track)
-  return engage + fraction * pinWindow
+// Public (README: Integration contract). The document scrollY window during
+// which the target crosses the stage — the same enter/exit rule and inversion
+// as the per-panel range vars, clamped to the pinned traversal — so a theme can
+// hand exact numbers to its own scroll engine instead of reading rects every
+// frame. Null in the same cases as getScrollTop.
+export const getScrollRange = (target: Element): { start: number; end: number } | null => {
+  const wrapper = resolveWrapper(target)
+  const track = wrapper ? resolveTrack(wrapper) : null
+  if (!wrapper || !track || !isHTMLElement(target) || target === track || !track.contains(target)) {
+    return null
+  }
+  const frame = pinFrame(wrapper, track)
+  const left = frame ? layoutOffsetLeftWithin(target, track) : null
+  if (!frame || left === null) {
+    return null
+  }
+  const enter = (left - wrapper.clientWidth) / frame.distance
+  const exit = (left + target.offsetWidth) / frame.distance
+  const [from, to] = frame.inverted ? [1 - exit, 1 - enter] : [enter, exit]
+  return {
+    start: frame.engage + clamp01(from) * frame.pinWindow,
+    end: frame.engage + clamp01(to) * frame.pinWindow
+  }
 }
 
 const contextOf = (

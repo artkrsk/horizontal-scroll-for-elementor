@@ -2,7 +2,7 @@
 // compatibility feature exposes an install*() seam instead of registering
 // listeners at import time.
 
-import { getScrollTop, installAnchorScroll } from './anchor-scroll'
+import { getScrollRange, getScrollTop, installAnchorScroll } from './anchor-scroll'
 import { WRAPPER_CLASS, WRAPPER_SELECTOR } from './contract'
 import { inspectSection } from './diagnostics'
 import { boot, getTimeline } from './engine'
@@ -17,7 +17,7 @@ installAnchorScroll()
 installScrollspy()
 installMotionFx()
 
-window.ARTS_HS = { ...window.ARTS_HS, contract: 1, getTimeline, getScrollTop }
+window.ARTS_HS = { ...window.ARTS_HS, contract: 1, getTimeline, getScrollTop, getScrollRange }
 
 // Elementor rebuilds its hooks object on every init(); an action added to one
 // object must not be added to it twice when both the immediate path and a

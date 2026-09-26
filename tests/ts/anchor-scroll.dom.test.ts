@@ -1,9 +1,14 @@
 // @vitest-environment happy-dom
 // @vitest-environment-options { "settings": { "navigation": { "disableMainFrameNavigation": true } } }
 
-import { computeTargetScrollY, getScrollTop, installAnchorScroll } from '@ts/anchor-scroll'
+import {
+  computeTargetScrollY,
+  getScrollRange,
+  getScrollTop,
+  installAnchorScroll
+} from '@ts/anchor-scroll'
 import { beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
-import { nth, section } from './support'
+import { nth, section, setGeometry } from './support'
 
 /**
  * Deep-linking into a panel. Elementor's anchor machinery is vertical-only and
@@ -139,6 +144,76 @@ describe('getScrollTop', () => {
     measured({ sticky: false })
 
     expect(getScrollTop(document.getElementById('two') as HTMLElement)).toBeNull()
+  })
+})
+
+describe('getScrollRange', () => {
+  /** The layout-tree links happy-dom leaves out: every panel sits in the track. */
+  const linked = (over: Parameters<typeof measured>[0] = {}) => {
+    const built = measured(over)
+    for (const panel of built.panels) {
+      Object.defineProperty(panel, 'offsetParent', { value: built.track, configurable: true })
+    }
+    return built
+  }
+
+  it('spans a leading panel from pin engage until it has left the stage', () => {
+    const { panels } = linked()
+
+    expect(getScrollRange(nth(panels, 0))).toEqual({ start: 1000, end: 2100 })
+  })
+
+  it('spans a middle panel across the whole traversal', () => {
+    const { panels } = linked()
+
+    expect(getScrollRange(nth(panels, 1))).toEqual({ start: 1000, end: 3200 })
+  })
+
+  it('starts a trailing panel when its leading edge reaches the stage', () => {
+    const { panels } = linked()
+
+    expect(getScrollRange(nth(panels, 2))).toEqual({ start: 2100, end: 3200 })
+  })
+
+  it('measures an element nested inside a panel by its own offset and width', () => {
+    const { panels } = linked()
+    const child = nth(panels, 2).appendChild(document.createElement('div'))
+    setGeometry(child, { offsetLeft: 200, offsetWidth: 300 })
+    Object.defineProperty(child, 'offsetParent', { value: nth(panels, 2), configurable: true })
+
+    expect(getScrollRange(child)).toEqual({ start: 2320, end: 3200 })
+  })
+
+  it('mirrors the window when the traversal is inverted', () => {
+    const { panels } = linked({ dir: -1 })
+
+    expect(getScrollRange(nth(panels, 2))).toEqual({ start: 1000, end: 2100 })
+  })
+
+  it('returns null outside any section', () => {
+    linked()
+    const orphan = document.body.appendChild(document.createElement('p'))
+
+    expect(getScrollRange(orphan)).toBeNull()
+  })
+
+  it('returns null for the track itself', () => {
+    const { track } = linked()
+
+    expect(getScrollRange(track)).toBeNull()
+  })
+
+  it('returns null in a vertical state', () => {
+    const { panels } = linked({ sticky: false })
+
+    expect(getScrollRange(nth(panels, 1))).toBeNull()
+  })
+
+  it('returns null before the engine has measured', () => {
+    const { wrapper, panels } = linked()
+    wrapper.style.setProperty('--arts-hs-distance', 'calc(2 * 80cqw)')
+
+    expect(getScrollRange(nth(panels, 1))).toBeNull()
   })
 })
 

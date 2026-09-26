@@ -7,6 +7,7 @@ declare global {
       contract?: number
       getTimeline?: (el: Element) => AnimationTimeline | null
       getScrollTop?: (target: Element) => number | null
+      getScrollRange?: (target: Element) => { start: number; end: number } | null
     }
     /**
      * Editor-only diagnostic strings, already translated by PHP and emitted
