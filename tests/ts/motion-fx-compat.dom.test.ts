@@ -235,6 +235,20 @@ describe('the wrapped core utility', () => {
     expect(original).toHaveBeenCalledTimes(1)
   })
 
+  it('patches straight away when Elementor started before the bundle loaded', async () => {
+    vi.resetModules()
+    const original = vi.fn(() => ORIGINAL_ANSWER)
+    const scroll = { getElementViewportPercentage: original }
+    vi.stubGlobal('elementorModules', { utils: { Scroll: scroll } })
+    vi.stubGlobal('elementorFrontend', { hooks: {} })
+
+    const { installMotionFx } = await import('@ts/motion-fx-compat')
+    installMotionFx()
+
+    expect(scroll.getElementViewportPercentage).not.toBe(original)
+    vi.stubGlobal('elementorFrontend', undefined)
+  })
+
   it('does nothing when the core utility is absent', async () => {
     vi.resetModules()
     vi.stubGlobal('elementorModules', undefined)

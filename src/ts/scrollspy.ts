@@ -26,6 +26,7 @@ import {
   resolveWrapper
 } from './contract'
 import { isHTMLElement } from './utils/isHTMLElement'
+import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 
 const ACTIVE = 'elementor-item-active'
 const MENU_SELECTOR = '.elementor-nav-menu--main'
@@ -158,7 +159,7 @@ const setup = (): void => {
 }
 
 export const installScrollspy = (): void => {
-  window.addEventListener('elementor/frontend/init', setup)
+  onElementorFrontendInit(setup)
 }
 
 // A page can mount several horizontal-scroll widgets in one synchronous

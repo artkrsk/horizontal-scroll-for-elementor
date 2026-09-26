@@ -11,6 +11,7 @@
 
 import { TRACK_CLASS, WRAPPER_SELECTOR } from './contract'
 import { clamp01 } from './geometry'
+import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 
 interface ITrackState {
   active: boolean
@@ -104,5 +105,5 @@ const patchScrollUtility = (): void => {
 }
 
 export const installMotionFx = (): void => {
-  window.addEventListener('elementor/frontend/init', patchScrollUtility)
+  onElementorFrontendInit(patchScrollUtility)
 }

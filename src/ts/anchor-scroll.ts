@@ -21,6 +21,7 @@ import {
 } from './contract'
 import { clamp01, computeInsetStart, layoutDocTop } from './geometry'
 import { isHTMLElement } from './utils/isHTMLElement'
+import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 
 // No deep-link scrolling inside the editor's preview iframe: canvas scroll
 // actors are the editor's own territory, and scroll-to-panel was deliberately
@@ -196,5 +197,5 @@ const initLoadCorrection = (): void => {
 
 export const installAnchorScroll = (): void => {
   document.addEventListener('click', handleClick, { capture: true })
-  window.addEventListener('elementor/frontend/init', initLoadCorrection)
+  onElementorFrontendInit(initLoadCorrection)
 }

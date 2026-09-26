@@ -1,6 +1,6 @@
 // @vitest-environment happy-dom
 
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { section } from './support'
 
 /**
@@ -39,14 +39,29 @@ vi.mock('@ts/motion-fx-compat', () => ({ installMotionFx: () => mocks.note('moti
 
 const actions = new Map<string, (scope: unknown) => void>()
 
+/** Registrations per hooks object — Elementor rebuilds that object on every init(). */
+const registrations = new Map<object, number>()
+
+/** A fresh hooks object, as Elementor's init() builds one. */
+const createHooks = () => {
+  const hooks = {
+    addAction: (name: string, callback: (scope: unknown) => void) => {
+      actions.set(name, callback)
+      registrations.set(hooks, (registrations.get(hooks) ?? 0) + 1)
+    }
+  }
+  return hooks
+}
+
 /** Re-evaluate the entry: its installs and the ARTS_HS write are module-scope. */
 const load = async (): Promise<void> => {
   vi.resetModules()
   await import('@ts/index')
 }
 
-/** The hook only exists once Elementor announces itself. */
+/** Elementor's init(): rebuild the hooks object, then announce. */
 const elementorInit = (): ((scope: unknown) => void) => {
+  ;(window.elementorFrontend as { hooks?: object }).hooks = createHooks()
   window.dispatchEvent(new Event('elementor/frontend/init'))
   const ready = actions.get(HOOK)
   if (!ready) {
@@ -55,18 +70,38 @@ const elementorInit = (): ((scope: unknown) => void) => {
   return ready
 }
 
+// Every load() evaluates a fresh module instance that subscribes to
+// elementor/frontend/init; a real page evaluates the bundle once. Unsubscribe each
+// test's instance so earlier ones can't answer a later test's init.
+const initListeners: EventListenerOrEventListenerObject[] = []
+const addEventListener = window.addEventListener.bind(window)
+
+beforeEach(() => {
+  vi.spyOn(window, 'addEventListener').mockImplementation((type, listener, options) => {
+    if (type === 'elementor/frontend/init' && listener) {
+      initListeners.push(listener)
+    }
+    addEventListener(type, listener, options)
+  })
+})
+
+afterEach(() => {
+  for (const listener of initListeners.splice(0)) {
+    window.removeEventListener('elementor/frontend/init', listener)
+  }
+  vi.restoreAllMocks()
+})
+
 beforeEach(() => {
   document.body.innerHTML = ''
   mocks.order.length = 0
   mocks.boot.mockClear()
   mocks.requestScrollspyRescan.mockClear()
   actions.clear()
+  registrations.clear()
   delete (window as { ARTS_HS?: unknown }).ARTS_HS
-  vi.stubGlobal('elementorFrontend', {
-    hooks: {
-      addAction: (name: string, callback: (scope: unknown) => void) => actions.set(name, callback)
-    }
-  })
+  // Before init() Elementor's frontend object exists but has no hooks yet.
+  vi.stubGlobal('elementorFrontend', {})
 })
 
 describe('bundle entry', () => {
@@ -81,6 +116,41 @@ describe('bundle entry', () => {
     elementorInit()
 
     expect(actions.has(HOOK)).toBe(true)
+  })
+
+  it('registers straight away when Elementor started before the bundle loaded', async () => {
+    // An AJAX navigator that runs init() once per page lifetime loads this
+    // bundle on a later page, long after elementor/frontend/init fired.
+    const hooks = createHooks()
+    ;(window.elementorFrontend as { hooks?: object }).hooks = hooks
+
+    await load()
+
+    expect(actions.has(HOOK)).toBe(true)
+    expect(registrations.get(hooks)).toBe(1)
+  })
+
+  it('registers only once on the same hooks object', async () => {
+    const hooks = createHooks()
+    ;(window.elementorFrontend as { hooks?: object }).hooks = hooks
+
+    await load()
+    window.dispatchEvent(new Event('elementor/frontend/init'))
+
+    expect(registrations.get(hooks)).toBe(1)
+  })
+
+  it('registers again when init() rebuilds the hooks', async () => {
+    const first = createHooks()
+    ;(window.elementorFrontend as { hooks?: object }).hooks = first
+
+    await load()
+    elementorInit()
+
+    const rebuilt = (window.elementorFrontend as { hooks?: object }).hooks as object
+    expect(rebuilt).not.toBe(first)
+    expect(registrations.get(first)).toBe(1)
+    expect(registrations.get(rebuilt)).toBe(1)
   })
 
   it('exposes the documented ARTS_HS surface', async () => {
