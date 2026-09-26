@@ -439,3 +439,23 @@ describe('the page-load correction', () => {
     expect(scrollTo).not.toHaveBeenCalled()
   })
 })
+
+// Last in the file on purpose: a fresh module instance keeps its capture-phase
+// click listener and init subscription for good.
+describe('when Elementor started before the bundle loaded', () => {
+  it('corrects a deep link without waiting for an init event', async () => {
+    const scrollTo = vi.fn()
+    vi.stubGlobal('scrollTo', scrollTo)
+    measured()
+    history.replaceState(null, '', '#two')
+    // An AJAX navigator that runs init() once loads this bundle on a later page.
+    vi.stubGlobal('elementorFrontend', { hooks: {}, isEditMode: () => false })
+    vi.resetModules()
+    const fresh = await import('@ts/anchor-scroll')
+
+    fresh.installAnchorScroll()
+
+    expect(scrollTo).toHaveBeenCalledWith({ top: 2100, behavior: 'instant' })
+    vi.unstubAllGlobals()
+  })
+})

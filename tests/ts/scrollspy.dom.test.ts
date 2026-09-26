@@ -477,3 +477,24 @@ describe('requestScrollspyRescan', () => {
     expect(mutation.spy.constructed).toBe(1)
   })
 })
+
+// Last in the file on purpose: a fresh module instance subscribes to
+// elementor/frontend/init for good, and would answer every later test's init.
+describe('when Elementor started before the bundle loaded', () => {
+  it('arms the spy without waiting for an init event', async () => {
+    const { panels } = panelSection()
+    menu(['#one', '#two'])
+    const intersection = observerSpy()
+    vi.stubGlobal('IntersectionObserver', intersection.Fake)
+    vi.stubGlobal('MutationObserver', observerSpy().Fake)
+    // An AJAX navigator that runs init() once loads this bundle on a later page.
+    vi.stubGlobal('elementorFrontend', { hooks: {} })
+    vi.resetModules()
+    const fresh = await import('@ts/scrollspy')
+
+    fresh.installScrollspy()
+
+    expect(intersection.spy.observed).toEqual(panels)
+    vi.unstubAllGlobals()
+  })
+})
