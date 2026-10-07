@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.4.1
+
+* improved: for theme developers – getScrollRange() now identifies elements already visible when pinning starts and supports an inset for timing reveal effects farther inside the section’s edges.
+* fixed: content overflowing the last panel no longer extends the pinned scroll distance or throws off panel-link destinations and custom scroll-effect timing.
+* fixed: panel links no longer start a competing scroll when a theme or another plugin has already taken over the click.
+
 ## 1.4.0
 
 * added: links to a panel now land exactly on it in themes that run their own smooth scrolling, such as [Rhye](https://artemsemkin.com/themes/rhye/) – menu links, buttons and links shared with a #panel address.
