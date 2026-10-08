@@ -14,9 +14,9 @@
       "allowedVersions": "<2"
     },
     {
-      "description": "PHPUnit 12 declares php >=8.3 and 13 declares >=8.4, but the canary runs the host-built dev tree in-container down to PHP 8.2. 11.x (php >=8.2) is the ceiling this repo can actually execute; polyfills 4.0 supports it. Raise this together with the canary's php_matrix low leg.",
+      "description": "Tightened to match the fleet-wide cap in artkrsk/renovate-config: PR #24 proved wp-phpunit/wp-phpunit 7.1.1 and yoast/phpunit-polyfills 4.0.0 do NOT support PHPUnit 11 (parseTestMethodAnnotations() removed; MockObject's method()/expects() signature changed). 9.x is the real ceiling until a coordinated bump lands — raise both caps together then.",
       "matchPackageNames": ["phpunit/phpunit"],
-      "allowedVersions": "<12"
+      "allowedVersions": "<11"
     }
   ]
 }
