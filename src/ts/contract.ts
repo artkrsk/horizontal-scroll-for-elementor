@@ -1,10 +1,10 @@
-// The committed public surface in one place. The names README.md's Integration
-// contract table lists cannot be renamed without bumping
-// `window.ARTS_HS.contract`; the probes underneath are the documented reads of
-// them (the README points integrators at the same track-position check
-// `isScrubbing` performs). Two names here are NOT in that table: WIDGET_TYPE,
-// the Elementor type name phpParity.test.ts pins against PHP's get_name(), and
-// POLYFILLED_CLASS.
+// The committed public surface in one place, and the package's `/contract`
+// entry: constants and types only — no DOM access, no globals, no engine. The
+// names README.md's Integration contract table lists cannot be renamed without
+// bumping `window.artsHorizontalScroll.contract`; the documented reads of them
+// (the track-position check `isScrubbing` performs, …) live in ./probes. Two
+// names here are NOT in that table: WIDGET_TYPE, the Elementor type name
+// phpParity.test.ts pins against PHP's get_name(), and POLYFILLED_CLASS.
 //
 // DOM hooks are the `js-` family; `.arts-hs*` classes are styling-only and are
 // never selected from JS, though JS may still TOGGLE a styling modifier —
@@ -21,56 +21,30 @@ export const WIDGET_TYPE = 'arts-horizontal-scroll'
 export const VAR_DISTANCE = '--arts-hs-distance'
 export const VAR_DIR = '--arts-hs-dir'
 
-export const resolveWrapper = (el: Element): HTMLElement | null =>
-  el.closest<HTMLElement>(WRAPPER_SELECTOR)
-
-export const resolveTrack = (wrapper: HTMLElement): HTMLElement | null =>
-  wrapper.querySelector<HTMLElement>(TRACK_SELECTOR)
-
-// The README's state probe: `sticky` means the horizontal engine is active,
-// `static` means a vertical state (touch devices, a vertical Layout
-// breakpoint, a browser without support).
-export const isScrubbing = (track: HTMLElement): boolean =>
-  getComputedStyle(track).position === 'sticky'
-
-// An RTL page (Direction: Auto) and a forced Right to Left both mirror the
-// traversal — the stylesheet owns the sign, this only reads it.
-export const isInverted = (wrapper: HTMLElement): boolean =>
-  getComputedStyle(wrapper).getPropertyValue(VAR_DIR).trim() === '-1'
-
-// The px the track must travel for its trailing edge to land. The track's own
-// box, never scrollWidth: the slide is `-100% + 100cqw`, a % of that box, so
-// content overflowing the last panel is never travelled to — counting it made
-// the runway, and every scroll position mapped onto it, outrun the real slide.
-export const distanceOf = (wrapper: HTMLElement, track: HTMLElement): number =>
-  Math.max(0, track.offsetWidth - wrapper.clientWidth)
-
-// The scroll span the pin occupies: runway height minus the pinned track's.
-export const pinWindowOf = (wrapper: HTMLElement, track: HTMLElement): number =>
-  wrapper.offsetHeight - track.offsetHeight
-
-// The frontend bundle also runs inside the editor's preview iframe, where
-// canvas scroll actors are the editor's own territory.
-export const isEditMode = (): boolean => window.elementorFrontend?.isEditMode?.() === true
-
-export const resolveHashTarget = (hash: string): HTMLElement | null => {
-  if (hash.length < 2) {
-    return null
-  }
-  try {
-    // getElementById, not querySelector: ids like "#123" are invalid selectors
-    return document.getElementById(decodeURIComponent(hash.slice(1)))
-  } catch {
-    return null
-  }
+/** What `getScrollRange()` answers: a document scrollY window. */
+export interface IHorizontalScrollRange {
+  start: number
+  end: number
+  /** The target is already on stage as the pin engages; `start` is then the engage point. */
+  onStageAtEngage: boolean
 }
 
-// The track child the target sits in (or is); null when the target is the
-// track/wrapper itself — section-level anchors stay native.
-export const resolvePanel = (target: HTMLElement, track: HTMLElement): HTMLElement | null => {
-  let node = target
-  while (node.parentElement && node.parentElement !== track) {
-    node = node.parentElement
-  }
-  return node.parentElement === track ? node : null
+/** `window.artsHorizontalScroll` — README: Integration contract. */
+export interface IArtsHorizontalScrollGlobal {
+  /** Integer API level; bumps only on breaking changes. */
+  readonly contract: number
+  getTimeline(el: Element): AnimationTimeline | null
+  getScrollTop(target: Element): number | null
+  getScrollRange(target: Element, options?: { inset?: number }): IHorizontalScrollRange | null
+}
+
+/** `arts-hs:ready` detail, dispatched on the wrapper. */
+export interface IHorizontalScrollReadyDetail {
+  wrapper: HTMLElement
+}
+
+/** `arts-hs:layout` detail, dispatched on the wrapper. */
+export interface IHorizontalScrollLayoutDetail {
+  wrapper: HTMLElement
+  horizontal: boolean
 }

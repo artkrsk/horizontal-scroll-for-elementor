@@ -190,6 +190,9 @@ importers:
       '@wordpress/env':
         specifier: 11.16.0
         version: 11.16.0(@types/node@26.6.4)(supports-color@10.2.2)
+      esbuild:
+        specifier: ^0.28.2
+        version: 0.28.2
       fallow:
         specifier: ^3.15.0
         version: 3.31.0
@@ -202,6 +205,9 @@ importers:
       lefthook:
         specifier: ^2.1.10
         version: 2.1.16
+      sass:
+        specifier: ^1.103.1
+        version: 1.103.1
       stylelint:
         specifier: ^17.14.1
         version: 17.16.0(supports-color@10.2.2)(typescript@7.0.2)

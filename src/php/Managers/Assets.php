@@ -94,7 +94,7 @@ class Assets extends BaseManager {
 			return;
 		}
 
-		wp_add_inline_script( self::HANDLE, 'window.ARTS_HS_DIAGNOSTICS = ' . $json . ';', 'before' );
+		wp_add_inline_script( self::HANDLE, 'window.artsHorizontalScrollDiagnostics = ' . $json . ';', 'before' );
 	}
 
 	public function enqueue_editor_js(): void {

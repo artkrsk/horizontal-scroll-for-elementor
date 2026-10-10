@@ -55,11 +55,11 @@ beforeEach(() => {
   document.body.removeAttribute('style')
   document.documentElement.removeAttribute('style')
   document.head.innerHTML = ''
-  window.ARTS_HS_DIAGNOSTICS = { ...STRINGS }
+  window.artsHorizontalScrollDiagnostics = { ...STRINGS }
 })
 
 afterEach(() => {
-  delete window.ARTS_HS_DIAGNOSTICS
+  delete window.artsHorizontalScrollDiagnostics
   vi.useRealTimers()
   vi.unstubAllGlobals()
 })
@@ -222,7 +222,7 @@ describe('what counts as a blocker', () => {
 describe('the bar', () => {
   it('stays absent on a public page, where PHP emits no strings', async () => {
     const { inspectSection } = await load()
-    delete window.ARTS_HS_DIAGNOSTICS
+    delete window.artsHorizontalScrollDiagnostics
     const { wrapper } = nest(1)
     document.documentElement.style.overflowX = 'hidden'
     document.body.style.overflowX = 'hidden'

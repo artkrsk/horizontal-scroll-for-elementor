@@ -5,9 +5,10 @@ import {
   computeTargetScrollY,
   getScrollRange,
   getScrollTop,
+  initLoadCorrection,
   installAnchorScroll
 } from '@ts/anchor-scroll'
-import { beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
+import { afterEach, beforeAll, beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 import { nth, section, setGeometry } from './support'
 
 /**
@@ -43,7 +44,7 @@ const measured = (over: Parameters<typeof section>[0] = {}) => {
 // Installed once, as on a real page: the capture-phase click listener is
 // attached at bundle evaluation, long before any section boots.
 beforeAll(() => {
-  installAnchorScroll()
+  installAnchorScroll(new AbortController().signal)
 })
 
 beforeEach(() => {
@@ -404,8 +405,10 @@ describe('the click path', () => {
 
 describe('the page-load correction', () => {
   let scrollTo: ReturnType<typeof vi.fn>
+  let lifetime: AbortController
 
   beforeEach(() => {
+    lifetime = new AbortController()
     // Drain any load-repass listener a previous test armed but never fired,
     // before the fixture and the spy for this one exist.
     window.dispatchEvent(new Event('load'))
@@ -420,8 +423,11 @@ describe('the page-load correction', () => {
     vi.stubGlobal('scrollTo', scrollTo)
   })
 
-  /** What Elementor fires once its frontend is up. */
-  const frontendInit = () => window.dispatchEvent(new Event('elementor/frontend/init'))
+  // Release whatever a test left armed — the host's teardown does the same.
+  afterEach(() => lifetime.abort())
+
+  /** What the host runs once its page is up (the Elementor boot: every frontend init). */
+  const frontendInit = () => initLoadCorrection(lifetime.signal)
 
   it('corrects the browser landing instantly', () => {
     // The browser has already scrolled to the section top by now — every panel
@@ -525,22 +531,45 @@ describe('the page-load correction', () => {
   })
 })
 
-// Last in the file on purpose: a fresh module instance keeps its capture-phase
-// click listener and init subscription for good.
-describe('when Elementor started before the bundle loaded', () => {
-  it('corrects a deep link without waiting for an init event', async () => {
+describe('teardown', () => {
+  it('scopes the click listener to the host signal', () => {
+    const lifetime = new AbortController()
+    const add = vi.spyOn(document, 'addEventListener')
+
+    installAnchorScroll(lifetime.signal)
+
+    expect(add).toHaveBeenCalledWith('click', expect.any(Function), {
+      capture: true,
+      signal: lifetime.signal
+    })
+  })
+
+  it('never corrects for a host that is already gone', () => {
     const scrollTo = vi.fn()
     vi.stubGlobal('scrollTo', scrollTo)
     measured()
     history.replaceState(null, '', '#two')
-    // An AJAX navigator that runs init() once loads this bundle on a later page.
-    vi.stubGlobal('elementorFrontend', { hooks: {}, isEditMode: () => false })
-    vi.resetModules()
-    const fresh = await import('@ts/anchor-scroll')
+    const lifetime = new AbortController()
+    lifetime.abort()
 
-    fresh.installAnchorScroll()
+    initLoadCorrection(lifetime.signal)
 
-    expect(scrollTo).toHaveBeenCalledWith({ top: 2100, behavior: 'instant' })
-    vi.unstubAllGlobals()
+    expect(scrollTo).not.toHaveBeenCalled()
+  })
+
+  it('drops a correction still waiting for its section once the host goes', () => {
+    const scrollTo = vi.fn()
+    vi.stubGlobal('scrollTo', scrollTo)
+    const { wrapper } = measured()
+    wrapper.style.setProperty('--arts-hs-distance', 'calc(2 * 80cqw)')
+    history.replaceState(null, '', '#two')
+    const lifetime = new AbortController()
+    initLoadCorrection(lifetime.signal)
+
+    lifetime.abort()
+    wrapper.style.setProperty('--arts-hs-distance', '2000px')
+    wrapper.dispatchEvent(new CustomEvent('arts-hs:ready', { bubbles: true }))
+
+    expect(scrollTo).not.toHaveBeenCalled()
   })
 })

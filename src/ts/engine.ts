@@ -5,20 +5,17 @@
 // polyfill's CSS-parsing layer mis-maps `contain` ranges on subjects taller
 // than the scrollport, so it is never relied on).
 
+import { LAYOUT_EVENT, POLYFILLED_CLASS, READY_EVENT, VAR_DISTANCE } from './contract'
+import { clamp01, computeInsetStart } from './geometry'
 import {
   distanceOf,
   isInverted,
   isScrubbing,
-  LAYOUT_EVENT,
-  POLYFILLED_CLASS,
   pinWindowOf,
-  READY_EVENT,
   resolveTrack,
-  resolveWrapper,
-  VAR_DISTANCE
-} from './contract'
-import { clamp01, computeInsetStart } from './geometry'
-import { updateTrackState } from './motion-fx-compat'
+  resolveWrapper
+} from './probes'
+import { clearTrackState, updateTrackState } from './track-state'
 import { isHTMLElement } from './utils/isHTMLElement'
 
 // Probe the NAMED timeline syntax the engine actually uses — probing view()
@@ -32,7 +29,31 @@ const SUPPORTS_NATIVE =
   CSS.supports('animation-timeline: --x') &&
   CSS.supports('animation-range: contain 0% contain 100%')
 
-const booted = new WeakSet<HTMLElement>()
+type TPolyfillState = 'native' | 'polyfilled' | 'unavailable'
+
+// Read through a local cast, never the producer's global.d.ts: this module is
+// part of the standalone package. Both are installed by the shared
+// arts/scroll-timeline-polyfill loader (ViewTimeline natively, in browsers
+// that have it). Read at call time, so importing the engine touches nothing.
+const host = () =>
+  window as {
+    ViewTimeline?: new (options: {
+      subject: Element
+      axis: string
+      inset?: string
+    }) => AnimationTimeline
+    __artsScrollTimelinePolyfillReady?: Promise<TPolyfillState>
+  }
+
+// Everything one mounted section owns, so teardown can release all of it.
+interface IInstance {
+  track: HTMLElement
+  observer: ResizeObserver | null
+  frame: number
+  animation: Animation | null
+}
+
+const instances = new WeakMap<HTMLElement, IInstance>()
 
 // The % window of the pin scrub during which each panel horizontally
 // intersects the scrollport: enters when its leading edge crosses the
@@ -66,20 +87,6 @@ export const stampPanelRanges = (
     panel.style.setProperty('--arts-hs-panel-start', `${(clamp01(start) * 100).toFixed(3)}%`)
     panel.style.setProperty('--arts-hs-panel-end', `${(clamp01(end) * 100).toFixed(3)}%`)
   }
-}
-
-let recalcTimer: number | undefined
-
-// Pro's Motion FX recomputes cached background-layer dimensions on init and
-// window resize; nothing there watches the panels, which also resize without a
-// window resize (image/font load) — so nudge its public re-measure event once
-// our geometry settles. Harmless with no listeners; trailing debounce absorbs
-// ResizeObserver bursts during load.
-const scheduleMotionFxRecalc = (): void => {
-  window.clearTimeout(recalcTimer)
-  recalcTimer = window.setTimeout(() => {
-    window.elementorFrontend?.elements?.$window?.trigger('elementor-pro/motion-fx/recalc')
-  }, 100)
 }
 
 interface ILayoutSnapshot {
@@ -137,11 +144,11 @@ export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
     insetStart,
     pinWindow
   })
-  scheduleMotionFxRecalc()
   announceLayout(wrapper, { distance, pinWindow, insetStart, horizontal })
 }
 
-const observe = (wrapper: HTMLElement, track: HTMLElement): void => {
+const observe = (wrapper: HTMLElement, instance: IInstance): void => {
+  const { track } = instance
   const ro = new ResizeObserver(() => {
     // Removing an observed element reports a 0x0 box, which is the only signal
     // frontend code gets that an editor re-render replaced this section — every
@@ -167,8 +174,10 @@ const observe = (wrapper: HTMLElement, track: HTMLElement): void => {
     // (subject + source children) and smooth-scroll libraries observe those
     // same boxes. Written before the next layout, every observer sees the new
     // height in its first pass. Cost: that one frame paints the old runway.
-    requestAnimationFrame(() => measure(wrapper, track))
+    cancelAnimationFrame(instance.frame)
+    instance.frame = requestAnimationFrame(() => measure(wrapper, track))
   })
+  instance.observer = ro
   ro.observe(wrapper)
   ro.observe(track)
   measure(wrapper, track)
@@ -181,7 +190,7 @@ const timelines = new WeakMap<HTMLElement, AnimationTimeline>()
 // placements don't pre-translate. Null when no ViewTimeline exists at all —
 // neither tier can bind a timeline then.
 const createViewTimeline = (wrapper: HTMLElement, track: HTMLElement): AnimationTimeline | null => {
-  const Ctor = window.ViewTimeline
+  const Ctor = host().ViewTimeline
   if (!Ctor) {
     return null
   }
@@ -196,19 +205,19 @@ const createViewTimeline = (wrapper: HTMLElement, track: HTMLElement): Animation
 // every tick — built once per instance, never rebuilt on resize. The vertical
 // states neutralize it through --arts-hs-move: 0 in the same calc.
 //
-// Reports whether the scrub is actually running — belt-and-braces: the
-// loader resolves 'polyfilled' only once ViewTimeline exists, and the shared
-// polyfill is patched so one hostile stylesheet no longer aborts its whole
-// init (stock upstream did — Elementor's own inline CSS is such a sheet).
-// Without the timeline the track would pin and never move, so on failure
-// the caller must keep the vertical layout instead.
-const buildPolyfillAnimation = (wrapper: HTMLElement, track: HTMLElement): boolean => {
+// Returns the running scrub, or null — belt-and-braces: the loader resolves
+// 'polyfilled' only once ViewTimeline exists, and the shared polyfill is
+// patched so one hostile stylesheet no longer aborts its whole init (stock
+// upstream did — Elementor's own inline CSS is such a sheet). Without the
+// timeline the track would pin and never move, so on failure the caller must
+// keep the vertical layout instead.
+const buildPolyfillAnimation = (wrapper: HTMLElement, track: HTMLElement): Animation | null => {
   try {
     const timeline = createViewTimeline(wrapper, track)
     if (!timeline) {
-      return false
+      return null
     }
-    track.animate(
+    const animation = track.animate(
       [
         { transform: 'translateX(0px)' },
         {
@@ -226,9 +235,9 @@ const buildPolyfillAnimation = (wrapper: HTMLElement, track: HTMLElement): boole
       } as any
     )
     timelines.set(wrapper, timeline)
-    return true
+    return animation
   } catch {
-    return false
+    return null
   }
 }
 
@@ -236,8 +245,8 @@ const buildPolyfillAnimation = (wrapper: HTMLElement, track: HTMLElement): boole
 // the polyfill (one copy per page, however many Arts plugins ask for it) and
 // publishes this promise. We depend on its script handle, so it has always run
 // by the time ours does.
-const polyfillState = (): Promise<string> =>
-  window.__artsScrollTimelinePolyfillReady ?? Promise.resolve('unavailable')
+const polyfillState = (): Promise<TPolyfillState> =>
+  host().__artsScrollTimelinePolyfillReady ?? Promise.resolve('unavailable')
 
 // The README contract's JS path — one implementation across tiers. Native constructs lazily on
 // demand; polyfilled reuses the instance buildPolyfillAnimation already made
@@ -245,7 +254,7 @@ const polyfillState = (): Promise<string> =>
 // its CSS-parsing layer is the broken path).
 export const getTimeline = (el: Element): AnimationTimeline | null => {
   const wrapper = resolveWrapper(el)
-  if (!wrapper || !booted.has(wrapper)) {
+  if (!wrapper || !instances.has(wrapper)) {
     return null
   }
   const cached = timelines.get(wrapper)
@@ -271,24 +280,27 @@ const announce = (wrapper: HTMLElement): void => {
 }
 
 export const boot = (wrapper: HTMLElement): void => {
-  if (booted.has(wrapper)) {
+  if (instances.has(wrapper)) {
     return
   }
-  booted.add(wrapper)
 
   const track = resolveTrack(wrapper)
   if (!track) {
     return
   }
+  const instance: IInstance = { track, observer: null, frame: 0, animation: null }
+  instances.set(wrapper, instance)
 
   if (SUPPORTS_NATIVE) {
-    observe(wrapper, track)
+    observe(wrapper, instance)
     announce(wrapper)
     return
   }
 
   polyfillState().then((state) => {
-    if (state !== 'polyfilled') {
+    // Torn down (or torn down and booted afresh) while the polyfill loaded:
+    // building now would drive a section nobody owns, or drive it twice.
+    if (instances.get(wrapper) !== instance || state !== 'polyfilled') {
       // No timelines to drive the track with: the designed vertical layout
       // stays in place and content is never trapped behind the clipped pin.
       return
@@ -298,11 +310,34 @@ export const boot = (wrapper: HTMLElement): void => {
     // nothing paints in between — and if the build still fails, the class comes
     // straight back off rather than leaving a pinned track that never scrubs.
     wrapper.classList.add(POLYFILLED_CLASS)
-    if (!buildPolyfillAnimation(wrapper, track)) {
+    instance.animation = buildPolyfillAnimation(wrapper, track)
+    if (!instance.animation) {
       wrapper.classList.remove(POLYFILLED_CLASS)
       return
     }
-    observe(wrapper, track)
+    observe(wrapper, instance)
     announce(wrapper)
   })
+}
+
+// Releases what boot() took: observer, pending frame, the polyfilled scrub
+// and its layout flip, and every per-section cache — so booting the same
+// wrapper again announces ready and layout afresh (consumers key their own
+// first-measure state off those events). Measured inline vars stay: they are
+// inert in the stacked layout and still exact where CSS keeps scrubbing.
+export const teardown = (wrapper: HTMLElement): void => {
+  const instance = instances.get(wrapper)
+  if (!instance) {
+    return
+  }
+  instances.delete(wrapper)
+  instance.observer?.disconnect()
+  cancelAnimationFrame(instance.frame)
+  if (instance.animation) {
+    instance.animation.cancel()
+    wrapper.classList.remove(POLYFILLED_CLASS)
+  }
+  timelines.delete(wrapper)
+  snapshots.delete(wrapper)
+  clearTrackState(wrapper)
 }

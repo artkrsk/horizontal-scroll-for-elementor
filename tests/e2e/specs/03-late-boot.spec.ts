@@ -19,7 +19,7 @@ test('boots when Elementor started before the bundle loaded', async ({ page }) =
   await page.waitForFunction(() => Boolean(window.elementorFrontend?.hooks))
 
   const before = await page.evaluate(() => ({
-    api: typeof window.ARTS_HS,
+    api: typeof window.artsHorizontalScroll,
     distance: (document.querySelector('.js-arts-hs') as HTMLElement).style.getPropertyValue(
       '--arts-hs-distance'
     )
@@ -48,11 +48,13 @@ test('boots when Elementor started before the bundle loaded', async ({ page }) =
     return Boolean(
       wrapper &&
         /^\d+(\.\d+)?px$/.test(wrapper.style.getPropertyValue('--arts-hs-distance')) &&
-        window.ARTS_HS?.getTimeline?.(wrapper)
+        window.artsHorizontalScroll?.getTimeline(wrapper)
     )
   })
   const position = await page.evaluate(
     () => getComputedStyle(document.querySelector('.js-arts-hs__track') as HTMLElement).position
   )
   expect(position).toBe('sticky')
+  // Integrations written against 1.4.x read the old name.
+  expect(await page.evaluate(() => window.ARTS_HS === window.artsHorizontalScroll)).toBe(true)
 })

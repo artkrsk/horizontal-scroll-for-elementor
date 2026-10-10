@@ -69,7 +69,7 @@ class AssetsTest extends TestCase {
 		$before = wp_scripts()->get_data( Assets::HANDLE, 'before' );
 		$this->assertIsArray( $before );
 		$inline = implode( "\n", array_filter( $before, 'is_string' ) );
-		$this->assertStringContainsString( 'window.ARTS_HS_DIAGNOSTICS =', $inline );
+		$this->assertStringContainsString( 'window.artsHorizontalScrollDiagnostics =', $inline );
 		// The two keys diagnostics.ts indexes by blocker kind, plus the one it
 		// always prints. A rename on either side leaves the bar with an empty sentence.
 		foreach ( array( 'blocked', 'overflow', 'fixed' ) as $key ) {

@@ -10,7 +10,7 @@ import {
   resolvePanel,
   resolveTrack,
   resolveWrapper
-} from '@ts/contract'
+} from '@ts/probes'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, section, setGeometry } from './support'
 

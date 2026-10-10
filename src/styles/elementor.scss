@@ -1,0 +1,109 @@
+// ============================================================
+// WordPress bundle entry: the generic engine (index.scss — also the
+// package's styles entry) plus what only exists on an Elementor page:
+// WP's admin bar and RTL body class, `.e-con` panels, the editor-only
+// diagnostic bar and Pro's Scroll Snap. Everything here wins on
+// specificity, never on order, so the split leaves the cascade as it was.
+// ============================================================
+
+@use 'index';
+
+.arts-hs {
+  // Our own admin-bar metric, keyed to the body class WP renders ONLY when
+  // the bar is actually on the page — the var alone is unreliable (the
+  // Elementor editor preview exposes it while never rendering the bar).
+  // Under the class it mirrors WP's var (32px/46px across core's 782px
+  // breakpoint), except below 600px where core switches the bar to
+  // position: absolute (it scrolls away) and pinned content must not
+  // reserve room for it.
+  body.admin-bar & {
+    --arts-hs-admin-bar: var(--wp-admin--admin-bar--height, 0px);
+
+    @media screen and (max-width: 600px) {
+      --arts-hs-admin-bar: 0px;
+    }
+  }
+
+  // Auto direction, keyed to the body class WP renders from the same
+  // is_rtl() that puts dir="rtl" on <html> (index.scss's `:dir(rtl)` covers
+  // the attribute itself). A forced Direction control value overrides both
+  // at {{WRAPPER}}'s higher specificity.
+  body.rtl & {
+    --arts-hs-dir: -1;
+    --arts-hs-page-dir: rtl;
+  }
+
+  &__track {
+    // Panels keep Elementor's default flex-shrink:1. The max-content track
+    // sizes itself from its children's CONTENT width, so shrink then
+    // collapses every panel off its authored Width (100vw etc). Pin it:
+    // authored widths win, the track grows to fit. No-op in vertical states —
+    // track-height is auto there, so the column main axis has no deficit to
+    // shrink against.
+    > .e-con {
+      flex-shrink: 0;
+
+      // Panel content keeps the page's real direction even when Direction
+      // is forced: the wrapper's `direction` is a geometry decision (track
+      // anchor edge + scrub sign), not an authored-content one.
+      direction: var(--arts-hs-page-dir, ltr);
+    }
+
+    // Boxed panels: Elementor's Width control (our 100vw default) only drives the
+    // OUTER width in `full` mode. In `boxed` mode the outer falls back to
+    // `--width: 100%` — degenerate against the max-content track — while the inner
+    // `.e-con-inner` handles the boxed max-width (--content-width). Give the boxed
+    // outer a definite one-screen width; the inner stays centered at its cap.
+    > .e-con-boxed {
+      width: 100cqw;
+    }
+  }
+
+  // Editor-only diagnostic bar, injected by the bundle when an ancestor has
+  // taken the sticky scrollport away. The positioner carries no height, so the
+  // track keeps the geometry it would have had and the message simply
+  // overflows it — `overflow-x: clip` on the runway leaves overflow-y visible,
+  // since `clip` on one axis doesn't force the other to `auto` the way `hidden`
+  // does. When the offending ancestor is itself a non-scrolling box this
+  // degrades to a plain bar at the section top, which still reads fine.
+  &__diagnostic {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    height: 0;
+  }
+
+  &__diagnostic-message {
+    box-sizing: border-box;
+    max-width: 600px;
+    padding: 12px 16px;
+    border-inline-start: 4px solid #f5a623;
+    background: #1f2124;
+    color: #fff;
+    direction: var(--arts-hs-page-dir, ltr);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: start;
+  }
+}
+
+// Elementor Pro's per-page Scroll Snap marks top-level sections/containers
+// as snap stops — a stop the height of the pin runway traps scrolling at
+// the section edge. Its selector (.e-con:not(.e-child)) can ALSO match the
+// panels: nested-elements children are created without `isInner`, and the
+// class is computed once when the view is built — the editor sets the
+// attribute on first render, but the panel keeps `e-parent` until something
+// constructs it afresh. Neutralized on the widget, on whatever root
+// section/container hosts it, and on every container inside the track;
+// Pro's rule ships in Elementor's own generated CSS, which ties these
+// selectors on specificity and carries no guaranteed order against ours —
+// hence the scoped !important.
+.arts-hs,
+.arts-hs .e-con,
+.e-con:has(.arts-hs),
+.elementor-section:has(.arts-hs) {
+  scroll-snap-align: none !important;
+  scroll-snap-stop: normal !important;
+}
+

@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { horizontalPercentage, pinProgress } from '@ts/motion-fx-compat'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, section, setRect } from './support'
 
 /**
@@ -132,7 +132,8 @@ describe('the wrapped core utility', () => {
     const scroll = { getElementViewportPercentage: original }
     vi.stubGlobal('elementorModules', { utils: { Scroll: scroll } })
 
-    const { installMotionFx, updateTrackState } = await import('@ts/motion-fx-compat')
+    const { installMotionFx } = await import('@ts/motion-fx-compat')
+    const { updateTrackState } = await import('@ts/track-state')
     installMotionFx()
     window.dispatchEvent(new Event('elementor/frontend/init'))
 
@@ -258,5 +259,62 @@ describe('the wrapped core utility', () => {
       installMotionFx()
       window.dispatchEvent(new Event('elementor/frontend/init'))
     }).not.toThrow()
+  })
+})
+
+describe('the Pro re-measure nudge', () => {
+  const STATE = { active: true, inverted: false, insetStart: 0, pinWindow: 2200 }
+
+  /** A fresh install: the engine's track-state writes then drive the nudge. */
+  const installed = async () => {
+    vi.resetModules()
+    vi.useFakeTimers()
+    const { installMotionFx } = await import('@ts/motion-fx-compat')
+    const { updateTrackState } = await import('@ts/track-state')
+    installMotionFx()
+    return updateTrackState
+  }
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('fires once per burst of measures', async () => {
+    const trigger = vi.fn()
+    vi.stubGlobal('elementorFrontend', { elements: { $window: { trigger } } })
+    const updateTrackState = await installed()
+    const { wrapper } = section()
+
+    // A ResizeObserver burst during image/font load is the case this debounce
+    // exists for.
+    updateTrackState(wrapper, STATE)
+    updateTrackState(wrapper, STATE)
+    updateTrackState(wrapper, STATE)
+    vi.advanceTimersByTime(100)
+
+    expect(trigger).toHaveBeenCalledTimes(1)
+    expect(trigger).toHaveBeenCalledWith('elementor-pro/motion-fx/recalc')
+  })
+
+  it('survives a page with no Motion FX listener at all', async () => {
+    vi.stubGlobal('elementorFrontend', undefined)
+    const updateTrackState = await installed()
+
+    updateTrackState(section().wrapper, STATE)
+
+    expect(() => vi.advanceTimersByTime(100)).not.toThrow()
+  })
+
+  it('stays silent until installed — a standalone host never nudges Elementor', async () => {
+    const trigger = vi.fn()
+    vi.stubGlobal('elementorFrontend', { elements: { $window: { trigger } } })
+    vi.resetModules()
+    vi.useFakeTimers()
+    const { updateTrackState } = await import('@ts/track-state')
+
+    updateTrackState(section().wrapper, STATE)
+    vi.advanceTimersByTime(100)
+
+    expect(trigger).not.toHaveBeenCalled()
   })
 })

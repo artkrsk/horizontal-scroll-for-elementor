@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 
 /**
  * README's "committed surface" table IS the public API — the file says so, and
- * `window.ARTS_HS.contract` exists to be bumped when it changes. But a table in
+ * `window.artsHorizontalScroll.contract` exists to be bumped when it changes. But a table in
  * a markdown file is the one place in this repo nothing executes, so a var
  * could be renamed in the stylesheet, or documented and never shipped, and
  * every other test here would stay green while integrators' CSS broke.
@@ -37,10 +37,11 @@ const withoutComments = (code: string): string =>
  * compiles to both `--arts-hs-move` and its `--arts-hs-h-` twin, and dropping
  * the interpolation is what makes the emitted name visible to a search.
  */
-const STYLESHEET = withoutComments(readFileSync('src/styles/index.scss', 'utf8')).replace(
-  /#\{\$ns\}/g,
-  ''
-)
+const STYLESHEET = withoutComments(
+  ['src/styles/index.scss', 'src/styles/elementor.scss']
+    .map((file) => readFileSync(file, 'utf8'))
+    .join('\n')
+).replace(/#\{\$ns\}/g, '')
 
 const TYPESCRIPT = walk('src/ts')
   .filter((file) => file.endsWith('.ts'))
@@ -119,24 +120,36 @@ describe('the names the README and the code both spell out', () => {
     expect(NAMES).toContain(LAYOUT_EVENT)
   })
 
+  // The global IS the app object: app.ts builds it and publishes it whole.
+  it('publishes the app under the documented global', () => {
+    expect(SOURCE).toMatch(/host\(\)\.artsHorizontalScroll = app/)
+  })
+
   it('exposes getTimeline on the documented global', () => {
-    expect(NAMES).toContain('window.ARTS_HS.getTimeline(el)')
-    expect(SOURCE).toMatch(/window\.ARTS_HS = \{[^}]*getTimeline/)
+    expect(NAMES).toContain('window.artsHorizontalScroll.getTimeline(el)')
+    expect(SOURCE).toMatch(/const app: IHorizontalScrollApp = \{[^}]*getTimeline/)
   })
 
   it('exposes getScrollRange on the documented global', () => {
-    expect(NAMES).toContain('window.ARTS_HS.getScrollRange(el)')
-    expect(SOURCE).toMatch(/window\.ARTS_HS = \{[^}]*getScrollRange/)
+    expect(NAMES).toContain('window.artsHorizontalScroll.getScrollRange(el)')
+    expect(SOURCE).toMatch(/const app: IHorizontalScrollApp = \{[^}]*getScrollRange/)
   })
 
   it('exposes getScrollTop on the documented global', () => {
-    expect(NAMES).toContain('window.ARTS_HS.getScrollTop(el)')
-    expect(SOURCE).toMatch(/window\.ARTS_HS = \{[^}]*getScrollTop/)
+    expect(NAMES).toContain('window.artsHorizontalScroll.getScrollTop(el)')
+    expect(SOURCE).toMatch(/const app: IHorizontalScrollApp = \{[^}]*getScrollTop/)
+  })
+
+  it('keeps the deprecated alias the README still promises', () => {
+    expect(README).toContain('`window.ARTS_HS`')
+    expect(SOURCE).toMatch(/window\.ARTS_HS = app/)
   })
 
   it('ships the API level the README says it is at', () => {
-    // "currently `1`" in the prose above the table, `contract: 1` in the entry.
-    const documentedLevel = README.match(/`window\.ARTS_HS\.contract` \(currently `(\d+)`\)/)
+    // "currently `1`" in the prose above the table, `contract: 1` in the app.
+    const documentedLevel = README.match(
+      /`window\.artsHorizontalScroll\.contract` \(currently `(\d+)`\)/
+    )
     const shipped = SOURCE.match(/contract: (\d+)/)
 
     expect(documentedLevel?.[1]).toBeDefined()

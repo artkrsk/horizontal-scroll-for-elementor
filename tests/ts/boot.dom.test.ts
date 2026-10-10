@@ -4,11 +4,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { section } from './support'
 
 /**
- * The bundle entry. The shared vitest config excludes this file from coverage
- * as wiring, but two things here are not wiring: the `$scope` unwrap decides
- * whether the engine ever finds its own markup (the runway moved inside
- * Elementor's widget container in 1.2.0, so the descendant branch is now the
- * live one), and `window.ARTS_HS` is a committed public surface.
+ * The WordPress bundle entry. Two things here are not mere wiring: the
+ * `$scope` unwrap decides whether the engine ever finds its own markup (the
+ * runway moved inside Elementor's widget container in 1.2.0, so the descendant
+ * branch is now the live one), and `window.artsHorizontalScroll` — with its
+ * deprecated `ARTS_HS` alias — is a committed public surface.
  */
 
 /** Spelled out, exactly as index.ts spells it — phpParity pins that literal to PHP. */
@@ -19,7 +19,9 @@ const mocks = vi.hoisted(() => {
   return {
     order,
     boot: vi.fn(),
+    teardown: vi.fn(),
     getTimeline: vi.fn(),
+    initLoadCorrection: vi.fn(),
     getScrollTop: vi.fn(),
     getScrollRange: vi.fn(),
     requestScrollspyRescan: vi.fn(),
@@ -27,9 +29,14 @@ const mocks = vi.hoisted(() => {
   }
 })
 
-vi.mock('@ts/engine', () => ({ boot: mocks.boot, getTimeline: mocks.getTimeline }))
+vi.mock('@ts/engine', () => ({
+  boot: mocks.boot,
+  teardown: mocks.teardown,
+  getTimeline: mocks.getTimeline
+}))
 vi.mock('@ts/anchor-scroll', () => ({
   installAnchorScroll: () => mocks.note('anchor-scroll'),
+  initLoadCorrection: mocks.initLoadCorrection,
   getScrollTop: mocks.getScrollTop,
   getScrollRange: mocks.getScrollRange
 }))
@@ -55,10 +62,10 @@ const createHooks = () => {
   return hooks
 }
 
-/** Re-evaluate the entry: its installs and the ARTS_HS write are module-scope. */
+/** Re-evaluate the entry: its installs and the global write are module-scope. */
 const load = async (): Promise<void> => {
   vi.resetModules()
-  await import('@ts/index')
+  await import('@ts/boot')
 }
 
 /** Elementor's init(): rebuild the hooks object, then announce. */
@@ -98,10 +105,12 @@ beforeEach(() => {
   document.body.innerHTML = ''
   mocks.order.length = 0
   mocks.boot.mockClear()
+  mocks.initLoadCorrection.mockClear()
   mocks.requestScrollspyRescan.mockClear()
   actions.clear()
   registrations.clear()
   delete (window as { ARTS_HS?: unknown }).ARTS_HS
+  delete (window as { artsHorizontalScroll?: unknown }).artsHorizontalScroll
   // Before init() Elementor's frontend object exists but has no hooks yet.
   vi.stubGlobal('elementorFrontend', {})
 })
@@ -155,23 +164,42 @@ describe('bundle entry', () => {
     expect(registrations.get(rebuilt)).toBe(1)
   })
 
-  it('exposes the documented ARTS_HS surface', async () => {
+  it('exposes the documented artsHorizontalScroll surface', async () => {
     await load()
 
-    expect(window.ARTS_HS?.contract).toBe(1)
-    expect(window.ARTS_HS?.getTimeline).toBe(mocks.getTimeline)
-    expect(window.ARTS_HS?.getScrollTop).toBe(mocks.getScrollTop)
-    expect(window.ARTS_HS?.getScrollRange).toBe(mocks.getScrollRange)
+    expect(window.artsHorizontalScroll?.contract).toBe(1)
+    expect(window.artsHorizontalScroll?.getTimeline).toBe(mocks.getTimeline)
+    expect(window.artsHorizontalScroll?.getScrollTop).toBe(mocks.getScrollTop)
+    expect(window.artsHorizontalScroll?.getScrollRange).toBe(mocks.getScrollRange)
   })
 
-  it('merges into an existing ARTS_HS rather than replacing it', async () => {
-    // A second Arts plugin (or a re-executed bundle) must not drop what is there.
-    ;(window as { ARTS_HS?: unknown }).ARTS_HS = { contract: 0, sibling: 'kept' }
+  it('keeps the 1.4.x name as an alias of the very same object', async () => {
+    await load()
+
+    expect(window.ARTS_HS).toBeDefined()
+    expect(window.ARTS_HS).toBe(window.artsHorizontalScroll)
+  })
+})
+
+describe('deep-link correction', () => {
+  it('runs on every Elementor frontend init, not at bundle evaluation', async () => {
+    await load()
+    expect(mocks.initLoadCorrection).not.toHaveBeenCalled()
+
+    elementorInit()
+    elementorInit()
+
+    // PJAX themes re-run init() per transition and land on the new page's hash.
+    expect(mocks.initLoadCorrection).toHaveBeenCalledTimes(2)
+    expect(mocks.initLoadCorrection).toHaveBeenCalledWith(window.artsHorizontalScroll?.signal)
+  })
+
+  it('runs straight away when Elementor started before the bundle loaded', async () => {
+    ;(window.elementorFrontend as { hooks?: object }).hooks = createHooks()
 
     await load()
 
-    expect((window.ARTS_HS as { sibling?: string }).sibling).toBe('kept')
-    expect(window.ARTS_HS?.contract).toBe(1)
+    expect(mocks.initLoadCorrection).toHaveBeenCalledTimes(1)
   })
 })
 

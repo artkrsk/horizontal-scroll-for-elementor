@@ -6,22 +6,20 @@
 // explicit — Elementor's frontend CSS ships `html { scroll-behavior: smooth }`
 // (under prefers-reduced-motion: no-preference), which repaces any
 // non-explicit programmatic scroll.
+import { READY_EVENT, VAR_DISTANCE } from './contract'
+import { clamp01, computeInsetStart, layoutDocTop, layoutOffsetLeftWithin } from './geometry'
 import {
   distanceOf,
   isEditMode,
   isInverted,
   isScrubbing,
   pinWindowOf,
-  READY_EVENT,
   resolveHashTarget,
   resolvePanel,
   resolveTrack,
-  resolveWrapper,
-  VAR_DISTANCE
-} from './contract'
-import { clamp01, computeInsetStart, layoutDocTop, layoutOffsetLeftWithin } from './geometry'
+  resolveWrapper
+} from './probes'
 import { isHTMLElement } from './utils/isHTMLElement'
-import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 
 // No deep-link scrolling inside the editor's preview iframe: canvas scroll
 // actors are the editor's own territory, and scroll-to-panel was deliberately
@@ -208,7 +206,7 @@ const correctFromLocationHash = (): void => {
 // goes position: absolute. One more pass at window load gets the final word,
 // unless the visitor has taken over scrolling — touchmove, not touchstart: a
 // mere tap during load (common on phones) must not cancel the correction.
-const armLoadRepass = (): void => {
+const armLoadRepass = (signal: AbortSignal): void => {
   if (document.readyState === 'complete') {
     return
   }
@@ -217,7 +215,7 @@ const armLoadRepass = (): void => {
     userScrolled = true
   }
   for (const type of ['wheel', 'touchmove', 'keydown']) {
-    window.addEventListener(type, mark, { once: true, passive: true })
+    window.addEventListener(type, mark, { once: true, passive: true, signal })
   }
   window.addEventListener(
     'load',
@@ -226,16 +224,17 @@ const armLoadRepass = (): void => {
         correctFromLocationHash()
       }
     },
-    { once: true }
+    { once: true, signal }
   )
 }
 
 // Page-load deep link: the browser has already scrolled to the section top by
 // the time the engine can say better. Correct instantly once the target's
 // section has measured — arts-hs:ready is the same signal the integration
-// contract points consumers at.
-const initLoadCorrection = (): void => {
-  if (isEditMode()) {
+// contract points consumers at. The host decides when a page has loaded: the
+// app runs this once at init, the Elementor boot on every frontend init.
+export const initLoadCorrection = (signal: AbortSignal): void => {
+  if (signal.aborted || isEditMode()) {
     return
   }
   const ctx = resolveContext(location.hash)
@@ -244,16 +243,15 @@ const initLoadCorrection = (): void => {
   }
   const run = (): void => {
     correctFromLocationHash()
-    armLoadRepass()
+    armLoadRepass(signal)
   }
   if (hasMeasuredDistance(ctx.wrapper)) {
     run()
   } else {
-    ctx.wrapper.addEventListener(READY_EVENT, run, { once: true })
+    ctx.wrapper.addEventListener(READY_EVENT, run, { once: true, signal })
   }
 }
 
-export const installAnchorScroll = (): void => {
-  document.addEventListener('click', handleClick, { capture: true })
-  onElementorFrontendInit(initLoadCorrection)
+export const installAnchorScroll = (signal: AbortSignal): void => {
+  document.addEventListener('click', handleClick, { capture: true, signal })
 }

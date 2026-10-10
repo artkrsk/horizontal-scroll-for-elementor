@@ -11,20 +11,22 @@
 
 import { TRACK_CLASS, WRAPPER_SELECTOR } from './contract'
 import { clamp01 } from './geometry'
+import { type ITrackState, readTrackState, setTrackStateListener } from './track-state'
 import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 
-interface ITrackState {
-  active: boolean
-  inverted: boolean
-  insetStart: number
-  pinWindow: number
-}
+let recalcTimer: number | undefined
 
-const states = new WeakMap<HTMLElement, ITrackState>()
-
-/** Written by the engine's measure() — the per-frame override reads state, never measures. */
-export const updateTrackState = (wrapper: HTMLElement, state: ITrackState): void => {
-  states.set(wrapper, state)
+// Pro's Motion FX recomputes cached background-layer dimensions on init and
+// window resize; nothing there watches the panels, which also resize without a
+// window resize (image/font load) — so nudge its public re-measure event once
+// our geometry settles. Harmless with no listeners; trailing debounce absorbs
+// ResizeObserver bursts during load. Driven by every engine measure() through
+// the track-state listener installMotionFx() registers.
+const scheduleMotionFxRecalc = (): void => {
+  window.clearTimeout(recalcTimer)
+  recalcTimer = window.setTimeout(() => {
+    window.elementorFrontend?.elements?.$window?.trigger('elementor-pro/motion-fx/recalc')
+  }, 100)
 }
 
 // Mirror of core's vertical formula (rounding included): 0 as the leading
@@ -81,7 +83,7 @@ const patchScrollUtility = (): void => {
       // false for every element here — always, not only after a re-render.
       const wrapper =
         el && typeof el.closest === 'function' ? el.closest<HTMLElement>(WRAPPER_SELECTOR) : null
-      const state = wrapper ? states.get(wrapper) : undefined
+      const state = wrapper ? readTrackState(wrapper) : undefined
       if (el && wrapper && state?.active) {
         // The wrapper and track ARE the pin, not content riding it — the
         // horizontal mirror degenerates on them (rect == stage → constant
@@ -105,5 +107,6 @@ const patchScrollUtility = (): void => {
 }
 
 export const installMotionFx = (): void => {
+  setTrackStateListener(scheduleMotionFxRecalc)
   onElementorFrontendInit(patchScrollUtility)
 }

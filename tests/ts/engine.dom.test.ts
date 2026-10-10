@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { measure, stampPanelRanges } from '@ts/engine'
-import { updateTrackState } from '@ts/motion-fx-compat'
+import { updateTrackState } from '@ts/track-state'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, section, setGeometry } from './support'
 
@@ -9,11 +9,11 @@ import { nth, section, setGeometry } from './support'
  * The measuring half of the engine. The boot/tier half needs control over
  * module-scope SUPPORTS_NATIVE and lives in engine.boot.dom.test.ts.
  *
- * motion-fx-compat is mocked here so the track state measure() publishes is
+ * track-state is mocked here so the track state measure() publishes is
  * assertable directly — the `active` gate in particular, which is what stops
  * the horizontal correction from firing in a vertical state.
  */
-vi.mock('@ts/motion-fx-compat', () => ({ updateTrackState: vi.fn() }))
+vi.mock('@ts/track-state', () => ({ updateTrackState: vi.fn(), clearTrackState: vi.fn() }))
 
 /** The track state measure() last published. */
 const lastState = () => vi.mocked(updateTrackState).mock.lastCall?.[1]
@@ -155,30 +155,6 @@ describe('measure', () => {
     measure(wrapper, track)
 
     expect(lastState()?.inverted).toBe(true)
-  })
-
-  it('nudges Pro to re-measure once per burst', () => {
-    const trigger = vi.fn()
-    vi.stubGlobal('elementorFrontend', { elements: { $window: { trigger } } })
-    const { wrapper, track } = threePanels()
-
-    // A ResizeObserver burst during image/font load is the case this debounce
-    // exists for.
-    measure(wrapper, track)
-    measure(wrapper, track)
-    measure(wrapper, track)
-    vi.advanceTimersByTime(100)
-
-    expect(trigger).toHaveBeenCalledTimes(1)
-    expect(trigger).toHaveBeenCalledWith('elementor-pro/motion-fx/recalc')
-  })
-
-  it('survives a page with no Motion FX listener at all', () => {
-    const { wrapper, track } = threePanels()
-
-    measure(wrapper, track)
-
-    expect(() => vi.advanceTimersByTime(100)).not.toThrow()
   })
 })
 

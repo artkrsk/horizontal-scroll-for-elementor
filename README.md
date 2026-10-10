@@ -41,7 +41,9 @@ Tests always run against the built `dist/` artifact, never repo source. The non-
 
 ## Integration contract
 
-Arts Horizontal Scroll drives its pinned sections with CSS scroll-driven animations. The same timeline that moves the track is available to your own widgets and animations — this section is the complete public contract. Everything listed here is stable; everything not listed is internal and may change without notice. `window.ARTS_HS.contract` (currently `1`) bumps only on breaking changes.
+Arts Horizontal Scroll drives its pinned sections with CSS scroll-driven animations. The same timeline that moves the track is available to your own widgets and animations — this section is the complete public contract. Everything listed here is stable; everything not listed is internal and may change without notice. `window.artsHorizontalScroll.contract` (currently `1`) bumps only on breaking changes.
+
+`window.ARTS_HS` — the name 1.4.x published — is a deprecated alias of the very same object, kept for one more release. Read `window.artsHorizontalScroll`; code that must also run against 1.4.x can fall back: `window.artsHorizontalScroll ?? window.ARTS_HS`.
 
 ### Detection
 
@@ -82,10 +84,10 @@ transform: translateX(calc(120px * var(--arts-hs-move, 1)));
 | `.arts-hs` / `.js-arts-hs` / `.js-arts-hs__track` | styling marker / DOM hooks |
 | `arts-hs:ready` | bubbling `CustomEvent` on the wrapper once the engine boots (after its first measure); `detail: { wrapper }` |
 | `arts-hs:layout` | bubbling `CustomEvent` on the wrapper whenever a measure changed the geometry or flipped between horizontal and stacked (including the first one); `detail: { wrapper, horizontal }`. A continuous window resize re-measures every frame — debounce heavy work such as trigger refreshes |
-| `window.ARTS_HS.getTimeline(el)` | the section timeline as a WAAPI object — see the JS path below |
-| `window.ARTS_HS.getScrollTop(el)` | document scrollY that puts `el`'s panel on stage — the position anchor links scroll to; `null` outside a panel, in vertical states, or before the first measure |
-| `window.ARTS_HS.getScrollRange(el)` | `{ start, end, onStageAtEngage }` — `start`/`end` is the document scrollY window during which `el` crosses the stage (its leading edge enters → its trailing edge leaves), clamped to the pinned traversal; `onStageAtEngage` is `true` when `el` is already on stage as the pin engages — it then scrolls into view vertically, before the traversal, and its clamped `start` is the engage point rather than an entrance; an optional second argument `{ inset }` (a fraction of the stage width, e.g. `0.15`) narrows the stage from both sides, like a negative IntersectionObserver `rootMargin` — the window then opens once `el` is that far in and closes that far before it leaves, `onStageAtEngage` included — the way to map a reveal trigger point onto the sideways travel; hand the numbers to your own scroll engine (e.g. ScrollTrigger `start`/`end`) and re-read them on `arts-hs:layout`; `null` in the same cases as `getScrollTop` |
-| `window.ARTS_HS.contract` | integer API level, currently `1` |
+| `window.artsHorizontalScroll.getTimeline(el)` | the section timeline as a WAAPI object — see the JS path below |
+| `window.artsHorizontalScroll.getScrollTop(el)` | document scrollY that puts `el`'s panel on stage — the position anchor links scroll to; `null` outside a panel, in vertical states, or before the first measure |
+| `window.artsHorizontalScroll.getScrollRange(el)` | `{ start, end, onStageAtEngage }` — `start`/`end` is the document scrollY window during which `el` crosses the stage (its leading edge enters → its trailing edge leaves), clamped to the pinned traversal; `onStageAtEngage` is `true` when `el` is already on stage as the pin engages — it then scrolls into view vertically, before the traversal, and its clamped `start` is the engage point rather than an entrance; an optional second argument `{ inset }` (a fraction of the stage width, e.g. `0.15`) narrows the stage from both sides, like a negative IntersectionObserver `rootMargin` — the window then opens once `el` is that far in and closes that far before it leaves, `onStageAtEngage` included — the way to map a reveal trigger point onto the sideways travel; hand the numbers to your own scroll engine (e.g. ScrollTrigger `start`/`end`) and re-read them on `arts-hs:layout`; `null` in the same cases as `getScrollTop` |
+| `window.artsHorizontalScroll.contract` | integer API level, currently `1` |
 
 ### Recipe: animate while your panel is on stage
 
@@ -122,7 +124,7 @@ In Firefox the plugin runs a shared polyfill, and descendant **CSS** bindings to
 
 ```js
 const bind = (el) => {
-  const timeline = window.ARTS_HS?.getTimeline?.(el)
+  const timeline = window.artsHorizontalScroll?.getTimeline(el)
   if (!timeline) {
     return
   }
@@ -156,6 +158,41 @@ Per-panel windows on this path: read the stamped vars — `getComputedStyle(pane
 - Don't select by `.arts-hs*` classes from JS, and don't style the `js-` classes.
 - Don't give any ancestor of the section a scrolling `overflow` (`hidden`, `auto`, `scroll`) — it becomes a scroll container and takes the pin and the timeline with it. `overflow: clip` is safe on either axis. On `html`/`body` the rule is subtler: either one alone is fine, because the root's overflow propagates to the viewport, but `html, body { overflow-x: hidden }` together does break it. `position: fixed` on an ancestor breaks it too. Logged into the Elementor editor, the section says so itself and names the element.
 - Don't read `--arts-hs-*` vars not listed above — they're internal.
+
+## Package entries (without WordPress)
+
+The same engine runs on plain HTML. The repo is also the `@arts/horizontal-scroll` package (private; consume it with `link:` or a path dependency). Importing it installs nothing — the host starts it.
+
+| Entry | What |
+|---|---|
+| `@arts/horizontal-scroll` | `createHorizontalScrollApp()` and the public types |
+| `@arts/horizontal-scroll/contract` | constants and types only — DOM hooks, event names, `IArtsHorizontalScrollGlobal` for typing your own `Window` key |
+| `@arts/horizontal-scroll/styles.scss` / `styles.css` | the engine stylesheet (`.arts-hs__panel` included, none of the Elementor rules) |
+
+Builds that compile source select the `arts-source` condition; everything else gets `dist/esm` and `dist/types`, built with `pnpm build:library`.
+
+```html
+<div class="arts-hs js-arts-hs">
+  <div class="arts-hs__track js-arts-hs__track">
+    <section class="arts-hs__panel">…</section>
+    <section class="arts-hs__panel">…</section>
+  </div>
+</div>
+```
+
+```js
+import { createHorizontalScrollApp } from '@arts/horizontal-scroll'
+
+const app = createHorizontalScrollApp() // { signal } ties it to your own lifetime
+app.init()        // publishes window.artsHorizontalScroll, handles anchor links and page-load deep links
+app.mount()       // boots every section in the document; app.mount(container) for one subtree
+app.unmount(old)  // before swapping content out (AJAX); app.unmount() releases everything
+app.destroy()     // terminal: e.g. in import.meta.hot.dispose
+```
+
+- **Panels** default to one stage width (`100cqw`) at zero specificity — any width you set wins. Add `arts-hs_touch-vertical` to the wrapper to stack on touch devices.
+- **RTL** follows `dir="rtl"` on any ancestor.
+- **Browsers without scroll-driven animations** need the shared polyfill's loader (`@arts/scroll-timeline-polyfill/loader.js`) in the page before `mount()`: set `window.__artsScrollTimelinePolyfillSrc` to the URL of its `scroll-timeline.js`, then load the loader once. Without it those browsers keep the stacked layout. Put `data-aphrodite` on the stylesheet `<link>` when you can — the polyfill's CSS layer then skips it, as it does under WordPress.
 
 ## License
 

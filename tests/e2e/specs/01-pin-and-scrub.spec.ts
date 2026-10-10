@@ -23,7 +23,7 @@ test.beforeEach(async ({ page }) => {
   // signal arts-hs:ready carries, and survives having been dispatched already.
   await page.waitForFunction(() => {
     const wrapper = document.querySelector('.js-arts-hs')
-    return Boolean(wrapper && window.ARTS_HS?.getTimeline?.(wrapper))
+    return Boolean(wrapper && window.artsHorizontalScroll?.getTimeline(wrapper))
   })
 })
 

@@ -28,10 +28,10 @@
 // read. Same for `content-visibility: hidden`, which hides the section and the
 // bar with it.
 //
-// The whole module is gated on window.ARTS_HS_DIAGNOSTICS, which PHP emits
+// The whole module is gated on window.artsHorizontalScrollDiagnostics, which PHP emits
 // only on the Elementor preview request. On a public page it is absent and
 // nothing here ever runs.
-import { isScrubbing, resolveTrack } from './contract'
+import { isScrubbing, resolveTrack } from './probes'
 import { isHTMLElement } from './utils/isHTMLElement'
 
 // Exported so phpParity.test.ts can hold the stylesheet to them: renamed on one
@@ -55,7 +55,7 @@ type TBlockerKind = 'overflow' | 'fixed'
 
 /** What PHP hands us. Carried by argument from the one place that checks for
     it, so nothing downstream re-tests a global that cannot change mid-page. */
-type TStrings = NonNullable<Window['ARTS_HS_DIAGNOSTICS']>
+type TStrings = NonNullable<Window['artsHorizontalScrollDiagnostics']>
 
 export interface IBlocker {
   kind: TBlockerKind
@@ -268,7 +268,7 @@ const requestSweep = (strings: TStrings): void => {
 
 /** Called per widget mount, alongside boot(). No-op outside the editor preview. */
 export const inspectSection = (wrapper: HTMLElement): void => {
-  const strings = window.ARTS_HS_DIAGNOSTICS
+  const strings = window.artsHorizontalScrollDiagnostics
   if (!strings) {
     return
   }

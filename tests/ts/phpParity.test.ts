@@ -29,8 +29,11 @@ import { describe, expect, it } from 'vitest'
  * cost the suite a PHP runtime.
  */
 const WIDGET_PHP = readFileSync('src/php/Widgets/HorizontalScroll.php', 'utf8')
-const ENTRY_TS = readFileSync('src/ts/index.ts', 'utf8')
-const STYLESHEET = readFileSync('src/styles/index.scss', 'utf8')
+const ENTRY_TS = readFileSync('src/ts/boot.ts', 'utf8')
+/** The WordPress bundle's stylesheet: the generic engine plus its Elementor adapter. */
+const STYLESHEET = ['src/styles/index.scss', 'src/styles/elementor.scss']
+  .map((file) => readFileSync(file, 'utf8'))
+  .join('\n')
 
 /** The literal returned by a `function <name>(): string { return '...' }`. */
 const phpStringReturn = (fn: string): string => {

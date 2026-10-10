@@ -39,7 +39,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto(DEMO)
   await page.waitForFunction(() => {
     const wrapper = document.querySelector('.js-arts-hs')
-    return Boolean(wrapper && window.ARTS_HS?.getTimeline?.(wrapper))
+    return Boolean(wrapper && window.artsHorizontalScroll?.getTimeline(wrapper))
   })
 })
 
@@ -74,7 +74,10 @@ test('lands an anchor link on the panel the plugin reports', async ({ page }) =>
       still = window.scrollY === last ? still + 1 : 0
       last = window.scrollY
     }
-    return { scrollY: window.scrollY, target: window.ARTS_HS?.getScrollTop?.(panel) ?? null }
+    return {
+      scrollY: window.scrollY,
+      target: window.artsHorizontalScroll?.getScrollTop(panel) ?? null
+    }
   })
 
   expect(landing.target).not.toBeNull()
@@ -85,7 +88,7 @@ test('getScrollRange brackets the moment a panel enters and leaves the stage', a
   const picked = await page.evaluate(() => {
     const track = document.querySelector('.js-arts-hs__track')
     const panels = Array.from(track?.children ?? []) as HTMLElement[]
-    const ranges = panels.map((panel) => window.ARTS_HS?.getScrollRange?.(panel) ?? null)
+    const ranges = panels.map((panel) => window.artsHorizontalScroll?.getScrollRange(panel) ?? null)
     if (ranges.some((range) => range === null)) {
       throw new Error('a panel of a horizontal section returned no range')
     }
@@ -105,7 +108,7 @@ test('getScrollRange brackets the moment a panel enters and leaves the stage', a
     return {
       id: panel.id,
       range: ranges[index] as { start: number; end: number },
-      top: window.ARTS_HS?.getScrollTop?.(panel) ?? null
+      top: window.artsHorizontalScroll?.getScrollTop(panel) ?? null
     }
   })
 
@@ -166,8 +169,8 @@ test('announces layout changes but never a scroll', async ({ page }) => {
   const stacked = await page.evaluate(() => {
     const panel = document.querySelector('.js-arts-hs__track')?.children[1] as HTMLElement
     return {
-      range: window.ARTS_HS?.getScrollRange?.(panel) ?? null,
-      top: window.ARTS_HS?.getScrollTop?.(panel) ?? null
+      range: window.artsHorizontalScroll?.getScrollRange(panel) ?? null,
+      top: window.artsHorizontalScroll?.getScrollTop(panel) ?? null
     }
   })
   expect(stacked).toEqual({ range: null, top: null })

@@ -6,7 +6,7 @@
     "project.config.js",
     "dev/sync-fixtures.js"
   ],
-  "project": ["src/ts/**/*.ts", "tests/**/*.ts", "dev/**/*.js"],
+  "project": ["src/ts/**/*.ts", "tests/**/*.ts", "dev/**/*.js", "scripts/**/*.mjs"],
   "ignoreExportsUsedInFile": true,
   "ignoreDependencies": ["fallow", "@wordpress/env"]
 }

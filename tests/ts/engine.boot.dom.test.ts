@@ -93,19 +93,19 @@ describe('boot on a browser with native scroll-driven animations', () => {
     expect(ready).toHaveLength(0)
   })
 
-  it('never retries a section that booted without a track', async () => {
+  it('boots a section whose track arrived after an earlier attempt', async () => {
     const { boot } = await loadEngine(true)
     const { wrapper, track } = travelling()
     track.remove()
 
     boot(wrapper)
-    // Markup arrives late — boot() stamps the WeakSet before it resolves the
-    // track, so recovery is a re-render (a fresh wrapper), never a second call.
+    // Nothing was taken for a trackless section, so a host mounting authored
+    // markup again once it is complete gets a working section.
     wrapper.appendChild(track)
     const ready = readySignal(wrapper)
     boot(wrapper)
 
-    expect(ready).toHaveLength(0)
+    expect(ready).toHaveLength(1)
   })
 })
 
@@ -236,8 +236,8 @@ describe('boot on a polyfilled browser', () => {
     fakeViewTimeline()
     vi.stubGlobal('__artsScrollTimelinePolyfillReady', Promise.resolve('polyfilled'))
     const { wrapper, track } = travelling()
-    const animate = vi.fn()
-    track.animate = animate
+    const animate = vi.fn((_keyframes: unknown, _options: unknown) => ({ cancel: vi.fn() }))
+    track.animate = animate as unknown as typeof track.animate
     const ready = readySignal(wrapper)
 
     boot(wrapper)
@@ -339,5 +339,123 @@ describe('boot on a polyfilled browser', () => {
 
     expect(wrapper.classList.contains('arts-hs_polyfilled')).toBe(false)
     expect(ready).toHaveLength(0)
+  })
+})
+
+describe('teardown', () => {
+  /** A polyfilled tier whose scrub builds report back, cancellable. */
+  const polyfilled = async (ready: Promise<string> = Promise.resolve('polyfilled')) => {
+    const engine = await loadEngine(false)
+    fakeViewTimeline()
+    vi.stubGlobal('__artsScrollTimelinePolyfillReady', ready)
+    const fixture = travelling()
+    const built: { cancel: ReturnType<typeof vi.fn> }[] = []
+    fixture.track.animate = vi.fn(() => {
+      const animation = { cancel: vi.fn() }
+      built.push(animation)
+      return animation
+    }) as unknown as typeof fixture.track.animate
+    return { ...engine, ...fixture, built }
+  }
+
+  it('releases the observer and the pending frame on the native tier', async () => {
+    const { spy, Fake } = observerSpy()
+    vi.stubGlobal('ResizeObserver', Fake)
+    vi.stubGlobal('requestAnimationFrame', () => 7)
+    const cancel = vi.fn()
+    vi.stubGlobal('cancelAnimationFrame', cancel)
+    const { boot, teardown, getTimeline } = await loadEngine(true)
+    fakeViewTimeline()
+    const { wrapper } = travelling()
+    boot(wrapper)
+    spy.deliver([])
+
+    teardown(wrapper)
+
+    expect(spy.disconnected).toBe(1)
+    expect(cancel).toHaveBeenLastCalledWith(7)
+    expect(getTimeline(wrapper)).toBeNull()
+  })
+
+  it('cancels the polyfilled scrub and takes the layout flip back off', async () => {
+    const { boot, teardown, wrapper, built } = await polyfilled()
+    boot(wrapper)
+    await flush()
+
+    teardown(wrapper)
+
+    expect(nth(built, 0).cancel).toHaveBeenCalledTimes(1)
+    expect(wrapper.classList.contains('arts-hs_polyfilled')).toBe(false)
+  })
+
+  it('announces ready and layout afresh when the same wrapper boots again', async () => {
+    const { boot, teardown } = await loadEngine(true)
+    const { wrapper } = travelling()
+    const ready = readySignal(wrapper)
+    const layout: Event[] = []
+    wrapper.addEventListener('arts-hs:layout', (event) => layout.push(event))
+    boot(wrapper)
+
+    teardown(wrapper)
+    boot(wrapper)
+
+    expect(ready).toHaveLength(2)
+    expect(layout).toHaveLength(2)
+  })
+
+  it('builds exactly one scrub per boot across a remount', async () => {
+    const { boot, teardown, wrapper, built } = await polyfilled()
+    boot(wrapper)
+    await flush()
+
+    teardown(wrapper)
+    boot(wrapper)
+    await flush()
+
+    expect(built).toHaveLength(2)
+    expect(nth(built, 0).cancel).toHaveBeenCalledTimes(1)
+    expect(nth(built, 1).cancel).not.toHaveBeenCalled()
+    expect(wrapper.classList.contains('arts-hs_polyfilled')).toBe(true)
+  })
+
+  it('never builds for a section torn down while the polyfill loaded', async () => {
+    let settle: (state: string) => void = () => {}
+    const { boot, teardown, wrapper, built } = await polyfilled(
+      new Promise((resolve) => {
+        settle = resolve
+      })
+    )
+    boot(wrapper)
+
+    teardown(wrapper)
+    settle('polyfilled')
+    await flush()
+
+    expect(built).toHaveLength(0)
+    expect(wrapper.classList.contains('arts-hs_polyfilled')).toBe(false)
+  })
+
+  it('builds once when the section is remounted while the polyfill loaded', async () => {
+    let settle: (state: string) => void = () => {}
+    const { boot, teardown, wrapper, built } = await polyfilled(
+      new Promise((resolve) => {
+        settle = resolve
+      })
+    )
+    boot(wrapper)
+    teardown(wrapper)
+    boot(wrapper)
+
+    settle('polyfilled')
+    await flush()
+
+    expect(built).toHaveLength(1)
+  })
+
+  it('ignores a wrapper it never booted', async () => {
+    const { teardown } = await loadEngine(true)
+    const { wrapper } = travelling()
+
+    expect(() => teardown(wrapper)).not.toThrow()
   })
 })

@@ -5,7 +5,7 @@ export default {
   versionConstant: 'ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION',
   defineKey: '__ARTS_HORIZONTAL_SCROLL_VERSION__',
   esbuildTarget: 'es2018',
-  entry: { ts: './src/ts/index.ts', sass: './src/styles/index.scss' },
+  entry: { ts: './src/ts/boot.ts', sass: './src/styles/elementor.scss' },
   bundles: [
     {
       name: 'editor',

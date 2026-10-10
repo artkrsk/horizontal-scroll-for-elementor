@@ -2,10 +2,15 @@
   // Codebase-health instrument (advisory in CI; knip is the hard gate).
   "entry": [
     "src/ts/index.ts",
+    "src/ts/contract.ts",
+    "src/ts/boot.ts",
     "src/ts/editor/index.ts",
-    // Real runtime root, declared as the sass entry in project.config.js —
-    // a manifest fallow does not read.
+    "scripts/build-library.mjs",
+    // Real runtime roots: the package's styles entry, and the WordPress
+    // bundle's, declared as the sass entry in project.config.js — a manifest
+    // fallow does not read.
     "src/styles/index.scss",
+    "src/styles/elementor.scss",
     "project.config.js",
     "dev/sync-fixtures.js"
   ],
