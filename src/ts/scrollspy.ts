@@ -166,9 +166,10 @@ export const installScrollspy = (): void => {
 // A page can mount several horizontal-scroll widgets in one synchronous
 // ready-trigger batch — boot.ts calls this once per instance from its own
 // element_ready hook, and queueMicrotask collapses that batch into a single
-// rescan instead of one per widget. This is also the one signal every AJAX
-// re-init model still fires per new instance, including one that suppresses
-// repeat elementor/frontend/init dispatches after the first page load.
+// rescan instead of one per widget. This is also the signal both Arts AJAX
+// frameworks still fire per new instance, including ArtsAJAXNavigator, which
+// suppresses repeat elementor/frontend/init dispatches after the first page
+// load.
 let rescanQueued = false
 
 export const requestScrollspyRescan = (): void => {
