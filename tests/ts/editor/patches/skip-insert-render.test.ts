@@ -5,7 +5,7 @@ import { fakeDollarE, OTHER_WIDGET, OUR_WIDGET } from '../../support'
 /**
  * Core's canvas step for a repeater insert, switched off for our widget. With
  * `support_improved_repeaters` on, that step renders a `-content-single`
- * template into a `target_container` this widget does not have and throws
+ * template into a `target_container` this widget leaves empty and throws
  * mid-command; the child container is rendered by the nested-elements hook
  * either way.
  */
