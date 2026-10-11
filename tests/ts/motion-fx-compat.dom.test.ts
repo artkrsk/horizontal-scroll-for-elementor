@@ -223,8 +223,8 @@ describe('the wrapped core utility', () => {
   })
 
   it('falls back to the original rather than throwing into Pro rAF loop', async () => {
-    // Nothing may escape: a throw here would kill every scrolling effect on
-    // the page, not just ours.
+    // Nothing may escape: a throw here would end that element's Motion FX
+    // loop, not just our correction.
     const { original, call } = await patched()
     const hostile = {
       closest: () => {

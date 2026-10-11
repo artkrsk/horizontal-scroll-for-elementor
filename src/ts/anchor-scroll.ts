@@ -4,7 +4,7 @@
 // math knows the real destination: map the panel's traversal fraction to a
 // document scrollY and take the navigation over. Scroll behaviors are always
 // explicit — Elementor's frontend CSS ships `html { scroll-behavior: smooth }`
-// (under prefers-reduced-motion: no-preference), which repaces any
+// (under prefers-reduced-motion: no-preference), which re-paces any
 // non-explicit programmatic scroll.
 import { READY_EVENT, VAR_DISTANCE } from './contract'
 import { clamp01, computeInsetStart, layoutDocTop, layoutOffsetLeftWithin } from './geometry'
@@ -98,7 +98,8 @@ export const computeTargetScrollY = (
 // is that far in and closes that far before it leaves, which is how a reveal
 // "trigger point" maps onto sideways travel — mapped here because the scroll
 // per pixel of travel (runway factor) and the direction are this engine's.
-// Null in the same cases as getScrollTop.
+// Null in the same cases as getScrollTop, plus a target with no layout-tree
+// path to the track (position: fixed, detached).
 export const getScrollRange = (
   target: Element,
   options?: { inset?: number }
@@ -183,9 +184,10 @@ const handleClick = (event: MouseEvent): void => {
     return
   }
   // preventDefault only, no stopPropagation: menu-close / analytics listeners
-  // keep working, and current core binds no anchor click handler of its own
-  // (it only stamps scroll-margin-top and lets the browser scroll natively),
-  // so there is nothing of Elementor's to race. pushState instead of assigning
+  // keep working, and neither core nor Pro binds an anchor click handler that
+  // scrolls (core at most stamps scroll-margin-top for Pro's sticky Anchor
+  // Offset and lets the browser scroll natively), so there is nothing of
+  // Elementor's to race. pushState instead of assigning
   // location.hash — hash assignment triggers a native fragment scroll that
   // would race ours under `scroll-behavior: smooth`.
   event.preventDefault()

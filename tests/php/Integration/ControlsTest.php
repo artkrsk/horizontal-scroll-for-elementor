@@ -147,11 +147,11 @@ class ControlsTest extends TestCase {
 
 		$actions = $this->array_value( $controls['panels']['item_actions'] ?? null );
 
-		// Row drag-sort and duplicate corrupt nested children in current
-		// Elementor (core bugs). All four keys are asserted, not just the two
-		// vetoes: the editor deep-merges the control type's own four-key
-		// default over the widget's, so an omitted key quietly reverts to
-		// `true` there with nothing on the PHP side to show it.
+		// Row drag-sort and duplicate are locked as a precaution (see
+		// lock-panel-moves.ts). All four keys are asserted, not just the two
+		// vetoes: the editor deep-merges the widget's onto the control type's
+		// own four-key default, so an omitted key quietly stays `true` there
+		// with nothing on the PHP side to show it.
 		$this->assertFalse( $actions['sort'] );
 		$this->assertFalse( $actions['duplicate'] );
 		$this->assertTrue( $actions['add'] );

@@ -47,13 +47,14 @@ class NoticesTest extends TestCase {
 
 		// Container carries the dependency chain — while it is off, Elementor
 		// re-derives nested-elements as inactive on every load. nested-elements
-		// is an ordinary mutable feature though, so it needs its own write too.
+		// is an ordinary mutable feature though (through Elementor 4.2), so it
+		// needs its own write too.
 		$this->assertSame( 'active', get_option( $container_key ) );
 		$this->assertSame( 'active', get_option( $nested_key ) );
 
 		// Order is load-bearing, and both-are-active cannot see it: written the
 		// other way round, Elementor's own dependency validation throws and
-		// wp_die()s the request.
+		// wp_die()s the request (for a mutable nested-elements, i.e. through 4.2).
 		$ours = array();
 		foreach ( $written as $option ) {
 			if ( in_array( $option, array( $container_key, $nested_key ), true ) && ! in_array( $option, $ours, true ) ) {

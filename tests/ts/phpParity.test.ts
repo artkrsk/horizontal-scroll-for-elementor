@@ -25,8 +25,8 @@ import { describe, expect, it } from 'vitest'
  * as impossible, when it left the element_ready hook name spelled out with a
  * comment saying no TS constant could keep it in sync with PHP. This can.
  *
- * Parsed by regex rather than executed: booting WordPress for six strings would
- * cost the suite a PHP runtime.
+ * Parsed by regex rather than executed: booting WordPress for a handful of
+ * strings would cost the suite a PHP runtime.
  */
 const WIDGET_PHP = readFileSync('src/php/Widgets/HorizontalScroll.php', 'utf8')
 const ENTRY_TS = readFileSync('src/ts/boot.ts', 'utf8')
@@ -67,7 +67,7 @@ describe('the widget type is one name in three places', () => {
   })
 
   it('matches the element_ready hook the frontend bundle registers', () => {
-    // Deliberately a literal in index.ts so AssetsTest can grep the built
+    // Deliberately a literal in boot.ts so AssetsTest can grep the built
     // bundle for it — which is precisely why it needs pinning from here.
     const hook = ENTRY_TS.match(/'frontend\/element_ready\/([^']+)\.default'/)
 

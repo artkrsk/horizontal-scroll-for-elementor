@@ -225,7 +225,7 @@ const buildPolyfillAnimation = (wrapper: HTMLElement, track: HTMLElement): Anima
             'translateX(calc((-100% + 100cqw) * var(--arts-hs-dir, 1) * var(--arts-hs-move, 1)))'
         }
       ],
-      // Vestigial: the installed lib.dom now types timeline/rangeStart/rangeEnd
+      // The `as any` is vestigial: the installed lib.dom now types timeline/rangeStart/rangeEnd
       {
         timeline,
         rangeStart: 'contain 0%',

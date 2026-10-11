@@ -12,8 +12,8 @@ use Elementor\Core\Experiments\Manager as Experiments_Manager;
  * Nested Elements ships default-on, so every other test here runs the healthy
  * path — and the degrade is three separate decisions in three files: the
  * manager declines to register, the widget hides itself, and the notice offers
- * the one-click fix. None of them had ever executed under test, which is a poor
- * place for a plugin whose whole value proposition is one widget.
+ * the one-click fix. Each is covered here, since none of them runs in a healthy
+ * environment.
  */
 class NestedElementsOffTest extends TestCase {
 

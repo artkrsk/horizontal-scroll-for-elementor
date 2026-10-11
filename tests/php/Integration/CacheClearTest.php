@@ -9,9 +9,9 @@ use Arts\HorizontalScroll\Managers\Elementor as ElementorManager;
  * update. Elementor caches generated post CSS and rendered element markup
  * against saved pages; a release that moves the runway or retargets a control
  * selector — 1.2.0 did both — otherwise keeps serving the old pairing until
- * something clears them. Nothing exercised either branch: the callback runs
- * once during bootstrap, when the option already matches, so the clear path had
- * never executed at all.
+ * something clears them. The callback runs once during bootstrap, when the
+ * option already matches, so only a test that sets the stored version first
+ * ever reaches the clear path.
  */
 class CacheClearTest extends TestCase {
 

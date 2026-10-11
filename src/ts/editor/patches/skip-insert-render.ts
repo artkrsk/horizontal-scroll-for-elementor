@@ -2,9 +2,11 @@
 // insert/remove patches the canvas instead of re-rendering the whole widget
 // (see get_initial_config() in the PHP widget). On insert, that path renders a
 // `-content-single` template into the widget's `target_container` — this widget
-// has neither, since its only per-row DOM is the child container the
-// nested-elements create hook renders itself. Left on, the insert throws
-// mid-command and the Add button then trips over the missing return value.
+// fills neither (the template body is empty, the container list is empty),
+// since its only per-row DOM is the child container the nested-elements create
+// hook renders itself. Left on, the insert throws
+// mid-command (`querySelector('')` on the empty target_container, logged as a
+// console error while the panel still gets added).
 //
 // renderAfterInsert: false skips core's canvas step for our inserts, including
 // the re-insert behind undoing a removal; the child container still renders

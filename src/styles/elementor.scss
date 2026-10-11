@@ -9,8 +9,8 @@
 @use 'index';
 
 .arts-hs {
-  // Our own admin-bar metric, keyed to the body class WP renders ONLY when
-  // the bar is actually on the page — the var alone is unreliable (the
+  // Our own admin-bar metric, keyed to the body class WP adds only while the
+  // bar is showing (is_admin_bar_showing()) — the var alone is unreliable (the
   // Elementor editor preview exposes it while never rendering the bar).
   // Under the class it mirrors WP's var (32px/46px across core's 782px
   // breakpoint), except below 600px where core switches the bar to
@@ -92,13 +92,13 @@
 // as snap stops — a stop the height of the pin runway traps scrolling at
 // the section edge. Its selector (.e-con:not(.e-child)) can ALSO match the
 // panels: nested-elements children are created without `isInner`, and the
-// class is computed once when the view is built — the editor sets the
-// attribute on first render, but the panel keeps `e-parent` until something
-// constructs it afresh. Neutralized on the widget, on whatever root
-// section/container hosts it, and on every container inside the track;
-// Pro's rule ships in Elementor's own generated CSS, which ties these
-// selectors on specificity and carries no guaranteed order against ours —
-// hence the scoped !important.
+// class is computed once when the view is built (through Elementor 4.2; the
+// 4.3 betas re-evaluate it after render) — the editor sets the attribute on
+// first render, but the panel keeps `e-parent` until something constructs it
+// afresh. Neutralized on the widget, on every section/container that contains
+// it, and on every container inside the track; Pro's rule ships in
+// Elementor's own generated CSS, which ties these selectors on specificity
+// and carries no guaranteed order against ours — hence the scoped !important.
 .arts-hs,
 .arts-hs .e-con,
 .e-con:has(.arts-hs),

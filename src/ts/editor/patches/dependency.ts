@@ -2,8 +2,9 @@
 // a Dependency subclass declaring a command, an id, a condition and an apply,
 // behind the same availability guard and the same registration try/catch.
 //
-// Mutating command args in a Dependency hook (then returning true) is the
-// sanctioned single-transaction path; returning false blocks the command.
+// Mutating command args in a Dependency hook and returning true rewrites the
+// command before it runs (core's own kit-defaults hook does the same); any
+// falsy return blocks it.
 import { WIDGET_TYPE } from '../../contract'
 
 /** Runtime probe: a base class to extend AND a registrar to hand instances to. */

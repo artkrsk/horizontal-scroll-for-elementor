@@ -16,12 +16,13 @@ import { onElementorFrontendInit } from './utils/onElementorFrontendInit'
 
 let recalcTimer: number | undefined
 
-// Pro's Motion FX recomputes cached background-layer dimensions on init and
-// window resize; nothing there watches the panels, which also resize without a
-// window resize (image/font load) — so nudge its public re-measure event once
-// our geometry settles. Harmless with no listeners; trailing debounce absorbs
-// ResizeObserver bursts during load. Driven by every engine measure() through
-// the track-state listener installMotionFx() registers.
+// Pro's Motion FX recomputes its cached element and background-layer
+// dimensions on init and window resize; nothing there watches the panels, which
+// also resize without a window resize (image/font load) — so nudge its public
+// re-measure event once our geometry settles. Harmless with no listeners;
+// trailing debounce absorbs ResizeObserver bursts during load. Driven by every
+// engine measure() through the track-state listener installMotionFx()
+// registers.
 const scheduleMotionFxRecalc = (): void => {
   window.clearTimeout(recalcTimer)
   recalcTimer = window.setTimeout(() => {
@@ -73,9 +74,9 @@ const patchScrollUtility = (): void => {
     $element: JQuery,
     offsetObj?: { start?: number; end?: number }
   ): number {
-    // Nothing may escape: a throw here would kill Pro's rAF loop. The
-    // incoming vh-based offsets are deliberately dropped on the corrected
-    // path — Motion FX's scroll interaction never passes any.
+    // Nothing may escape: a throw here would end the calling element's Pro rAF
+    // loop. The incoming vh-based offsets are deliberately dropped on the
+    // corrected path — Motion FX's scroll interaction never passes any.
     try {
       const el = $element?.[0]
       // Duck-typed, not instanceof: inside the editor preview the editor's own

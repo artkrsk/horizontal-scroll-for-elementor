@@ -1,6 +1,7 @@
 // One-page menu arbitration. Pro's Nav Menu scrollspy is one
-// IntersectionObserver per anchor link — threshold 0, no exclusivity, a
-// viewport-midpoint band. Inside a scrubbing section that yields double
+// IntersectionObserver per anchor link — threshold 0, no exclusivity, a root
+// of only the top half of the viewport (a line at the midpoint for targets
+// taller than half of it). Inside a scrubbing section that yields double
 // highlights at every flush landing (a neighbor panel's edge touches the
 // viewport and still "intersects") and never lights short targets sitting
 // below the midpoint. There is no seam to intercept (the handler even leaks
@@ -98,8 +99,8 @@ export const collectGroups = (): {
 }
 
 // Rebuilt every run, not reused — module scope only so a later run can
-// disconnect what an earlier one built. AJAX/PJAX themes re-invoke
-// elementorFrontend.init() after each transition, re-dispatching
+// disconnect what an earlier one built. AJAX/PJAX frameworks that re-invoke
+// elementorFrontend.init() after each transition re-dispatch
 // elementor/frontend/init without this repo ever calling init() itself, and
 // menuRoots is typically a persistent header/nav that survives the
 // transition: an undisconnected pair would keep reacting to that live

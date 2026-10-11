@@ -1,7 +1,7 @@
 // Navigator/canvas drags of nested children run plain document/elements/move,
 // which reorders elements[] only — core has NO reverse sync into the repeater
-// rows (verified in modules/nested-elements at HEAD; Nested Tabs shares the
-// gap: its children desync the same way). The panel repeater is the only
+// rows (verified in modules/nested-elements; Nested Tabs shares the gap: its
+// children desync the same way). The panel repeater is the only
 // reorder surface core designed for, so foreign moves of our panels are
 // blocked instead of silently desyncing.
 //
@@ -29,14 +29,17 @@ export const registerPanelMoveLock = (): void => {
       blocked
     ),
 
-    // Row drag-sort and row duplicate both corrupt nested children in
-    // current Elementor (verified live — core's own Nested Tabs drops a
-    // child on the same move command; duplicate clones the row but not the
-    // child container, and the index-only correlation then deletes wrong
-    // children). The repeater declares item_actions sort/duplicate = false,
-    // but that flag's wiring to the UI is unreliable across versions —
-    // these vetoes are the enforcement. Add/remove are healthy and stay
-    // open.
+    // Row drag-sort and row duplicate are locked as a precaution, not because
+    // a failure was reproduced: on Elementor 4.1.5 both `$e` commands (what
+    // the repeater UI runs) kept rows, child models, canvas DOM and serialized
+    // elements in step, for core's Nested Tabs and for this widget with these
+    // vetoes bypassed. The recorded concern — a duplicate cloning only the
+    // row, Nested Tabs dropping a child on move, and the index-only row-to-child
+    // correlation then deleting wrong children — did not reproduce; re-test
+    // before relaxing. The repeater declares item_actions sort/duplicate =
+    // false, but those flags only gate the UI affordances —
+    // $e.run('document/repeater/*') never reads them — so these vetoes are the
+    // enforcement. Add/remove are healthy and stay open.
     defineDependency(
       'document/repeater/move',
       'arts-hs-lock-repeater-sort',

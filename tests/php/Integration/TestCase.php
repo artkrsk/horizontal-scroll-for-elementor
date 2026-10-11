@@ -22,10 +22,9 @@ abstract class TestCase extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Controls as the CSS generator and the editor read them: Optimized Control
-	 * Loading files every control carrying `selectors` into a separate
-	 * style_controls stack, and get_controls() merges it back only under this
-	 * flag.
+	 * Controls as the CSS generator reads them: outside the editor, Elementor
+	 * files every control carrying `selectors` into a separate style_controls
+	 * stack, and get_controls() merges it back only under this flag.
 	 *
 	 * @return array<string, array<string, mixed>>
 	 */

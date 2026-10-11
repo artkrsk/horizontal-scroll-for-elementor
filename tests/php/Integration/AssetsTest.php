@@ -118,7 +118,7 @@ class AssetsTest extends TestCase {
 		// explicit width the widget collapses inside flex-row parents.
 		$this->assertMatchesRegularExpression( '/\.arts-hs\{[^}]*width:\s*100%/', $css );
 		// Pro's page Scroll Snap would make the runway (or its host section)
-		// a viewport-height snap stop and trap scrolling at the edge.
+		// a snap stop as tall as the runway and trap scrolling at the edge.
 		$this->assertMatchesRegularExpression( '/:has\(\.arts-hs\)[^}]*\{[^}]*scroll-snap-align:\s*none\s*!important/s', $css );
 		// Explicit inset — default `auto` inherits scroll-padding (WP sets it
 		// to the admin-bar height), shifting the range off the sticky engage
@@ -236,9 +236,9 @@ class AssetsTest extends TestCase {
 
 	public function test_editor_bundle_ships_behind_the_nested_elements_handle(): void {
 		// Every editor guard the plugin has — the move lock, both panel-width
-		// guards and the scroll suppression — is delivered by this one handle.
-		// Lose it and the editor silently loses all four while the rest of this
-		// suite stays green.
+		// guards, the insert-render skip and the scroll suppression — is
+		// delivered by this one handle. Lose it and the editor silently loses
+		// all of them while the rest of this suite stays green.
 		$this->assertNotFalse(
 			has_action( 'elementor/editor/before_enqueue_scripts', array( $this->assets_manager(), 'enqueue_editor_js' ) )
 		);

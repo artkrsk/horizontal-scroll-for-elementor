@@ -11,7 +11,7 @@ import { section } from './support'
  * deprecated `ARTS_HS` alias — is a committed public surface.
  */
 
-/** Spelled out, exactly as index.ts spells it — phpParity pins that literal to PHP. */
+/** Spelled out, exactly as boot.ts spells it — phpParity pins that literal to PHP. */
 const HOOK = 'frontend/element_ready/arts-horizontal-scroll.default'
 
 const mocks = vi.hoisted(() => {

@@ -14,11 +14,11 @@ class Notices extends BaseManager {
 
 	/**
 	 * The widget needs Elementor's Nested Elements experiment. It ships
-	 * default-on and is an ordinary togglable feature, but it declares a
-	 * dependency on "Flexbox Container": while Container is off, Elementor
-	 * re-derives Nested Elements as inactive on every load, whatever that
-	 * feature's own saved option holds. So the notice offers to switch on
-	 * both, in that order.
+	 * default-on and (through Elementor 4.2) is an ordinary togglable feature,
+	 * but it declares a dependency on "Flexbox Container": while Container is
+	 * off, Elementor re-derives Nested Elements as inactive on every load,
+	 * whatever that feature's own saved option holds. So the notice offers to
+	 * switch on both, in that order.
 	 */
 	public function maybe_render_activation_notice(): void {
 		if ( ! current_user_can( 'manage_options' ) || ! did_action( 'elementor/loaded' ) ) {
@@ -81,10 +81,11 @@ class Notices extends BaseManager {
 		// what that feature's own option holds.
 		update_option( $experiments->get_feature_option_key( 'container' ), 'active' );
 
-		// nested-elements is an ordinary mutable feature an admin can switch off
-		// on its own, so Container alone is not enough. Order is load-bearing:
-		// written before Container, Elementor's own dependency validation throws
-		// and wp_die()s the request.
+		// Through Elementor 4.2, nested-elements is an ordinary mutable feature
+		// an admin can switch off on its own, so Container alone is not enough.
+		// Order is load-bearing there: written before Container, Elementor's own
+		// dependency validation throws and wp_die()s the request. The 4.3 betas
+		// make the feature non-mutable, so this write is a no-op there.
 		update_option( $experiments->get_feature_option_key( 'nested-elements' ), 'active' );
 	}
 }

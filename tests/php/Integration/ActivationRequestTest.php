@@ -7,8 +7,8 @@ use Arts\HorizontalScroll\Managers\Notices;
 /**
  * The plugin's only state-changing request. handle_activation() flips two
  * Elementor experiments from an admin-post URL, which makes its capability
- * check and its nonce the whole of its security — and neither had ever run:
- * the suite asserted the hook was registered and stopped there.
+ * check and its nonce the whole of its security — so this drives the request
+ * itself; asserting only that the hook is registered would leave both unrun.
  *
  * wp_die() and the redirect both end the request in production; wp-phpunit
  * turns the first into a WPDieException, and the second is short-circuited by

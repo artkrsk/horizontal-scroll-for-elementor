@@ -28,6 +28,12 @@
 // read. Same for `content-visibility: hidden`, which hides the section and the
 // bar with it.
 //
+// Known false positive, measured: Pro's page Scroll Snap makes `body` the one
+// page scroller (`html { overflow: hidden }`, `body { height: 100vh; overflow:
+// auto }`). The pin still scrubs there in Chromium and Firefox, yet the walk
+// reports body — it reads overflow only, not whether the container is the
+// scroller itself or a content-height wrapper around it.
+//
 // The whole module is gated on window.artsHorizontalScrollDiagnostics, which PHP emits
 // only on the Elementor preview request. On a public page it is absent and
 // nothing here ever runs.
@@ -103,8 +109,9 @@ const scrollingOverflow = (style: CSSStyleDeclaration): string | null => {
 // looked like an engine divergence worth warning about. It does not reproduce —
 // the reading was a flaky first measurement after load, and repeat runs agree
 // with Chromium and Firefox. Safari 26 was then checked by hand on the same
-// page and pins correctly too. The old WebKit body-overflow bugs
-// (webkit.org/b/240860, /b/153852) no longer apply here.
+// page and pins correctly too. The old WebKit body-overflow bugs (webkit.org/b/153852,
+// body scrollable on iOS; /b/240860, body scrollable under a smaller visual
+// viewport) no longer apply here.
 const rootOwnsPropagation = (doc: Document): boolean => {
   const root = getComputedStyle(doc.documentElement)
   return NON_VISIBLE_OVERFLOW.has(root.overflowX) || NON_VISIBLE_OVERFLOW.has(root.overflowY)
@@ -126,8 +133,8 @@ const inspect = (el: HTMLElement): IBlocker | null => {
     return { kind: 'overflow', label: describe(el), declaration: overflow }
   }
 
-  // Nothing below a fixed ancestor participates in page scroll, so the timeline
-  // has no traversal to resolve against — the page stops scrolling entirely.
+  // Nothing below a fixed ancestor moves with page scroll, so the section never
+  // travels through the viewport and the timeline has no traversal to resolve against.
   if (style.position === 'fixed') {
     return { kind: 'fixed', label: describe(el), declaration: 'position: fixed' }
   }
@@ -255,7 +262,8 @@ const sweep = (strings: TStrings): void => {
 }
 
 // A real timer, not just a microtask: Elementor rewrites the style element on
-// every keystroke inside a control, and each sweep forces a style recalc.
+// every keystroke inside a code control (the kit's Custom CSS), and each sweep
+// forces a style recalc.
 const requestSweep = (strings: TStrings): void => {
   if (sweepTimer !== null) {
     clearTimeout(sweepTimer)

@@ -51,10 +51,11 @@ beforeEach(() => {
   document.body.innerHTML = ''
 })
 
-// Every boot() measures, and measure() arms the 100 ms Motion FX recalc on a
-// real timer. Let the last one fire while happy-dom's window still exists: on
-// a slow runner the file can finish first, and the timer then throws
-// "window is not defined" into the run after teardown.
+// Waits out 150 ms of real time after the last test. It was added while
+// measure() itself armed the 100 ms Motion FX recalc on a real timer, which on a
+// slow runner could outlive happy-dom's window and throw "window is not defined"
+// after teardown. The engine now reaches Motion FX only through track-state's
+// listener, which this file never installs, so nothing here arms such a timer.
 afterAll(() => new Promise((resolve) => setTimeout(resolve, 150)))
 
 describe('boot on a browser with native scroll-driven animations', () => {

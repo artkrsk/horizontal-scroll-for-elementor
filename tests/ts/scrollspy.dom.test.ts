@@ -11,9 +11,9 @@ import { beforeAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, observerSpy, section } from './support'
 
 /**
- * One-page menu arbitration. Pro's own scrollspy has no exclusivity and a
- * viewport-midpoint band, which inside a scrubbing section double-highlights
- * at every flush landing. We own the active state for links whose targets live
+ * One-page menu arbitration. Pro's own scrollspy has no exclusivity and only
+ * observes the top half of the viewport, which inside a scrubbing section
+ * double-highlights at every flush landing. We own the active state for links whose targets live
  * in a section — and the two rules that make that safe are exclusivity (one
  * panel per group) and compare-before-write (our own writes must never
  * retrigger the MutationObserver that watches Pro's).

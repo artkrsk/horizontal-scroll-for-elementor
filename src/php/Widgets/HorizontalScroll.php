@@ -122,8 +122,9 @@ class HorizontalScroll extends Widget_Nested_Base {
 	 * `target_container`: empty here, because the only per-row DOM is the
 	 * child container, which the nested-elements hooks create and delete
 	 * themselves. The insert half of that path would still render a
-	 * `-content-single` template this widget doesn't have, so the editor bundle
-	 * switches it off (patches/skip-insert-render.ts).
+	 * `-content-single` template this widget leaves empty into that empty
+	 * `target_container` and throw, so the editor bundle switches it off
+	 * (patches/skip-insert-render.ts).
 	 *
 	 * @return array<string, mixed>
 	 */
@@ -164,18 +165,19 @@ class HorizontalScroll extends Widget_Nested_Base {
 				'fields'       => $repeater->get_controls(),
 				'title_field'  => '{{{ panel_title }}}',
 				'button_text'  => esc_html__( 'Add Panel', 'horizontal-scroll-for-elementor' ),
-				// Row drag-sort AND row duplicate corrupt nested children in
-				// current Elementor (core bugs — its own Nested Tabs drops a
-				// child on the same move command; duplicate clones the row but
-				// not the child container; correlation is index-only, so the
-				// desync then deletes wrong children). Add/remove are verified
-				// healthy and stay enabled. All four keys spelled out rather
-				// than just the two vetoes: the editor deep-merges the control
-				// type's own four-key default over these, so an omitted key
-				// quietly reverts to `true` there — stating all four keeps this
-				// array the whole policy instead of a diff against a default
-				// that lives elsewhere. The editor bundle additionally vetoes
-				// the two commands for this widget.
+				// Row drag-sort AND row duplicate are locked as a precaution:
+				// core correlates repeater rows with child containers by index
+				// only, and a foreign move does desync them. The repeater's own
+				// sort/duplicate kept both in step when exercised on Elementor
+				// 4.1.5 (see lock-panel-moves.ts), so re-test before relaxing.
+				// Add/remove are verified healthy and stay enabled. All four
+				// keys spelled out rather than just the two vetoes: the editor
+				// deep-merges these onto the control type's own four-key default
+				// (all `true`), so an omitted key quietly stays `true` there —
+				// stating all four keeps this array the whole policy instead of
+				// a diff against a default that lives elsewhere. The flags only
+				// gate the UI, so the editor bundle additionally vetoes the two
+				// commands for this widget.
 				'item_actions' => array(
 					'add'       => true,
 					'duplicate' => false,
