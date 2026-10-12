@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "types": "./dist/types/index.d.ts",
-  "packageManager": "pnpm@12.9.1",
+  "packageManager": "pnpm@12.11.2",
   "engines": {
     "node": ">=24"
   },
@@ -24,7 +24,7 @@
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^5.0.0",
-    "@wordpress/env": "11.16.0",
+    "@wordpress/env": "11.17.0",
     "esbuild": "^0.28.2",
     "fallow": "^3.15.0",
     "happy-dom": "^20.11.2",
