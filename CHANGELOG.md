@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.2
+
+* improved: for theme developers – the scripting interface now lives at window.artsHorizontalScroll; the old window.ARTS_HS name keeps working as an alias for one more release.
+
 ## 1.4.1
 
 * improved: for theme developers – getScrollRange() now identifies elements already visible when pinning starts and supports an inset for timing reveal effects farther inside the section’s edges.
