@@ -130,6 +130,9 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
+= 1.4.2 =
+* improved: for theme developers – the scripting interface now lives at window.artsHorizontalScroll; the old window.ARTS_HS name keeps working as an alias for one more release.
+
 = 1.4.1 =
 * improved: for theme developers – getScrollRange() now identifies elements already visible when pinning starts and supports an inset for timing reveal effects farther inside the section’s edges.
 * fixed: content overflowing the last panel no longer extends the pinned scroll distance or throws off panel-link destinations and custom scroll-effect timing.
