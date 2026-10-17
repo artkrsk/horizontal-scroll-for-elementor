@@ -20,7 +20,7 @@ export default defineConfig({
   reporter: [['html', { outputFolder: 'playwright-report' }], ['list']],
   outputDir: 'test-results',
   use: {
-    baseURL: process.env.WP_BASE_URL || 'http://localhost:8892',
+    baseURL: process.env.WP_BASE_URL || 'http://localhost:8900',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     // The self-hosted runner is slow enough that the default 30s can flake a
