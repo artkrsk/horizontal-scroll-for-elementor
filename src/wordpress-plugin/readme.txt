@@ -130,54 +130,54 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
-= 1.4.2 =
+= 1.4.2 – October 13, 2026 =
 * improved: for theme developers – the scripting interface now lives at window.artsHorizontalScroll; the old window.ARTS_HS name keeps working as an alias for one more release.
 
-= 1.4.1 =
+= 1.4.1 – October 7, 2026 =
 * improved: for theme developers – getScrollRange() now identifies elements already visible when pinning starts and supports an inset for timing reveal effects farther inside the section’s edges.
 * fixed: content overflowing the last panel no longer extends the pinned scroll distance or throws off panel-link destinations and custom scroll-effect timing.
 * fixed: panel links no longer start a competing scroll when a theme or another plugin has already taken over the click.
 
-= 1.4.0 =
+= 1.4.0 – September 26, 2026 =
 * added: links to a panel now land exactly on it in themes that run their own smooth scrolling, such as [Rhye](https://artemsemkin.com/themes/rhye/) – menu links, buttons and links shared with a #panel address.
 * added: for theme developers – getScrollRange() and an arts-hs:layout event let a theme's own scroll effects follow the sideways movement inside panels (see the Integration contract in the plugin's README).
 * fixed: on sites with AJAX page transitions that start Elementor only once, a horizontal section on a page you reach through a transition now sets itself up fully – before, it could end too early or too late, and in Firefox it stayed a vertical stack.
 * fixed: in Firefox, pages with a horizontal section no longer flash unstyled for a moment – e.g. a header jumping out of place – while loading or after an AJAX page transition.
 
-= 1.3.2 =
+= 1.3.2 – September 23, 2026 =
 * fixed: adding or removing a panel in the Elementor editor no longer triggers error messages in the browser console – panels were always added and removed correctly.
 
-= 1.3.1 =
+= 1.3.1 – September 23, 2026 =
 * fixed: resizing the browser window no longer triggers a harmless "ResizeObserver loop" error message – the page itself always displayed correctly.
 
-= 1.3.0 =
+= 1.3.0 – September 9, 2026 =
 * added: the Elementor editor now tells you when a pinned section can't pin, and names the element responsible – usually overflow-x: hidden set on both html and body. The notice shows only in the editor and clears itself once the rule is gone.
 * fixed: one-page menu highlighting keeps working after an AJAX page transition – the menu now follows panels in sections loaded after the first page.
 * fixed: sites with AJAX page transitions no longer accumulate leftover scroll watchers from previous pages.
 
-= 1.2.1 =
+= 1.2.1 – August 28, 2026 =
 * fixed: panels carry their own on-stage range in the Elementor editor again – effects built on that range now preview exactly as they behave on the published page.
 * fixed: the Pin Top Offset is respected in the editor preview – the section engages where it does on the live page instead of a little early.
 
-= 1.2.0 =
+= 1.2.0 – August 20, 2026 =
 * improved: the pinned section now lives inside Elementor's standard widget wrapper instead of replacing it – themes and add-ons that expect regular widget markup see it.
 * fixed: the Advanced tab works again – margin, padding, background, border, shadow, and transform apply to the section on sites where Elementor's Optimized Markup experiment is off.
 * fixed: pages saved with earlier versions refresh on their own – the plugin clears Elementor's CSS and element cache once after updating, no "Regenerate CSS & Data" needed.
 
-= 1.1.0 =
+= 1.1.0 – August 20, 2026 =
 * added: an Auto option for the Direction control, now the default – the section follows the page's language direction, so right-to-left sites mirror automatically.
 * improved: the plugin page now covers right-to-left and multilingual support – WPML, Polylang, TranslatePress, and Weglot work without setup.
 * fixed: right-to-left pages no longer pin a blank section – panels lay out and travel the correct way.
 
-= 1.0.3 =
+= 1.0.3 – August 20, 2026 =
 * improved: documentation only – the plugin page now covers what works without Elementor Pro, how the widget differs from Pro's Horizontal Scroll motion effect, and which control sets the scroll pacing.
 
-= 1.0.2 =
+= 1.0.2 – August 20, 2026 =
 * improved: the widget now sits in Elementor's Layout category, next to Container and Grid.
 * improved: a clearer widget icon in the Elementor panel.
 
-= 1.0.1 =
+= 1.0.1 – August 13, 2026 =
 * improved: confirmed compatibility with WordPress 7.1.
 
-= 1.0.0 =
+= 1.0.0 – July 20, 2026 =
 Initial release.
