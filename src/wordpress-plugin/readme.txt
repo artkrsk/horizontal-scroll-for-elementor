@@ -5,7 +5,7 @@ Tags: elementor, horizontal scroll, scroll effects, sticky section, scroll anima
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.4.2
+Stable tag: 1.4.3
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/
@@ -130,7 +130,7 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
-= 1.4.3 =
+= 1.4.3 – October 21, 2026 =
 * improved: for theme developers – getScrollRange() can now follow a single point on screen, such as a sticky header’s center, to tell which panel sits under it, and reports whether an element is still on stage when pinning ends and where the pinned section sits.
 
 = 1.4.2 – October 13, 2026 =

@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.4.3 – October 21, 2026
+
+* improved: for theme developers – getScrollRange() can now follow a single point on screen, such as a sticky header’s center, to tell which panel sits under it, and reports whether an element is still on stage when pinning ends and where the pinned section sits.
+
 ## 1.4.2 – October 13, 2026
 
 * improved: for theme developers – the scripting interface now lives at window.artsHorizontalScroll; the old window.ARTS_HS name keeps working as an alias for one more release.
