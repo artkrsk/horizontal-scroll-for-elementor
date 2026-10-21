@@ -107,9 +107,12 @@ const app: IHorizontalScrollApp = createHorizontalScrollApp({ signal: new AbortC
 app.init()
 app.mount(document)
 const range: IHorizontalScrollRange | null = app.getScrollRange(document.body, { inset: 0.15 })
+const pointed: IHorizontalScrollRange | null = app.getScrollRange(document.body, { point: 0.5 })
+const stageTop: number | undefined = pointed?.stageTop
 app.unmount()
 app.destroy()
 void range
+void stageTop
 `)
     expect(files).not.toMatch(PRODUCER_ONLY)
   })

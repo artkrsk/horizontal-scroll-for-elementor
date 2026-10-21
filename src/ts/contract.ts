@@ -27,6 +27,11 @@ export interface IHorizontalScrollRange {
   end: number
   /** The target is already on stage as the pin engages; `start` is then the engage point. */
   onStageAtEngage: boolean
+  /** The target is still on stage as the pin releases; `end` is then the release point. */
+  onStageAtRelease: boolean
+  /** Viewport offset of the pinned stage's top edge (the track's raw sticky top). */
+  stageTop: number
+  stageHeight: number
 }
 
 /** `window.artsHorizontalScroll` — README: Integration contract. */
@@ -35,7 +40,15 @@ export interface IArtsHorizontalScrollGlobal {
   readonly contract: number
   getTimeline(el: Element): AnimationTimeline | null
   getScrollTop(target: Element): number | null
-  getScrollRange(target: Element, options?: { inset?: number }): IHorizontalScrollRange | null
+  /**
+   * `inset` narrows the stage from both sides by a fraction of its width; `point`
+   * (clamped to 0..1, from the stage's physical left edge) replaces it with one
+   * line the target must contain.
+   */
+  getScrollRange(
+    target: Element,
+    options?: { inset?: number; point?: number }
+  ): IHorizontalScrollRange | null
 }
 
 /** `arts-hs:ready` detail, dispatched on the wrapper. */

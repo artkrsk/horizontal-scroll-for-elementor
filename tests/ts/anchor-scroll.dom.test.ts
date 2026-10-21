@@ -164,7 +164,10 @@ describe('getScrollRange', () => {
     expect(getScrollRange(nth(panels, 0))).toEqual({
       start: 1000,
       end: 2100,
-      onStageAtEngage: true
+      onStageAtEngage: true,
+      onStageAtRelease: false,
+      stageTop: 0,
+      stageHeight: 800
     })
   })
 
@@ -174,7 +177,10 @@ describe('getScrollRange', () => {
     expect(getScrollRange(nth(panels, 1))).toEqual({
       start: 1000,
       end: 3200,
-      onStageAtEngage: false
+      onStageAtEngage: false,
+      onStageAtRelease: false,
+      stageTop: 0,
+      stageHeight: 800
     })
   })
 
@@ -184,7 +190,10 @@ describe('getScrollRange', () => {
     expect(getScrollRange(nth(panels, 2))).toEqual({
       start: 2100,
       end: 3200,
-      onStageAtEngage: false
+      onStageAtEngage: false,
+      onStageAtRelease: true,
+      stageTop: 0,
+      stageHeight: 800
     })
   })
 
@@ -194,7 +203,14 @@ describe('getScrollRange', () => {
     setGeometry(child, { offsetLeft: 200, offsetWidth: 300 })
     Object.defineProperty(child, 'offsetParent', { value: nth(panels, 2), configurable: true })
 
-    expect(getScrollRange(child)).toEqual({ start: 2320, end: 3200, onStageAtEngage: false })
+    expect(getScrollRange(child)).toEqual({
+      start: 2320,
+      end: 3200,
+      onStageAtEngage: false,
+      onStageAtRelease: true,
+      stageTop: 0,
+      stageHeight: 800
+    })
   })
 
   it('mirrors the window when the traversal is inverted', () => {
@@ -203,7 +219,10 @@ describe('getScrollRange', () => {
     expect(getScrollRange(nth(panels, 2))).toEqual({
       start: 1000,
       end: 2100,
-      onStageAtEngage: true
+      onStageAtEngage: true,
+      onStageAtRelease: false,
+      stageTop: 0,
+      stageHeight: 800
     })
   })
 
@@ -229,12 +248,18 @@ describe('getScrollRange', () => {
     expect(getScrollRange(nth(panels, 2), { inset: 0.2 })).toEqual({
       start: 2320,
       end: 3200,
-      onStageAtEngage: false
+      onStageAtEngage: false,
+      onStageAtRelease: true,
+      stageTop: 0,
+      stageHeight: 800
     })
     expect(getScrollRange(nth(panels, 1), { inset: 0.2 })).toEqual({
       start: 1220,
       end: 2980,
-      onStageAtEngage: false
+      onStageAtEngage: false,
+      onStageAtRelease: false,
+      stageTop: 0,
+      stageHeight: 800
     })
   })
 
@@ -260,8 +285,91 @@ describe('getScrollRange', () => {
     expect(getScrollRange(nth(panels, 0), { inset: 0.2 })).toEqual({
       start: 2320,
       end: 3200,
-      onStageAtEngage: false
+      onStageAtEngage: false,
+      onStageAtRelease: true,
+      stageTop: 0,
+      stageHeight: 800
     })
+  })
+
+  it('reports the stage band and release state beside the existing window', () => {
+    const { panels } = linked()
+
+    expect(getScrollRange(nth(panels, 1))).toEqual({
+      start: 1000,
+      end: 3200,
+      onStageAtEngage: false,
+      onStageAtRelease: false,
+      stageTop: 0,
+      stageHeight: 800
+    })
+    expect(getScrollRange(nth(panels, 2))?.onStageAtRelease).toBe(true)
+  })
+
+  it('reads the stage band from the pinned track top, not the clamped engage inset', () => {
+    // The sticky top (80) exceeds the wrapper's document top (30), so the
+    // engage inset clamps to 30 while the band keeps the raw 80.
+    const { panels } = linked({ stickyTop: 80, docTop: 30 })
+
+    expect(getScrollRange(nth(panels, 1))?.stageTop).toBe(80)
+  })
+
+  // point 0.25 on purpose: 0.5 is symmetric and indistinguishable from inset 0.5
+  it('maps a stage point onto each panel so exactly one panel owns it at a time', () => {
+    const { panels } = linked()
+
+    expect(getScrollRange(nth(panels, 0), { point: 0.25 })).toMatchObject({
+      start: 1000,
+      end: 1825,
+      onStageAtEngage: true,
+      onStageAtRelease: false
+    })
+    expect(getScrollRange(nth(panels, 1), { point: 0.25 })).toMatchObject({
+      start: 1825,
+      end: 2925,
+      onStageAtEngage: false,
+      onStageAtRelease: false
+    })
+    expect(getScrollRange(nth(panels, 2), { point: 0.25 })).toMatchObject({
+      start: 2925,
+      end: 3200,
+      onStageAtEngage: false,
+      onStageAtRelease: true
+    })
+  })
+
+  it('mirrors the stage point when the traversal is inverted', () => {
+    const { panels } = linked({ dir: -1 })
+
+    expect(getScrollRange(nth(panels, 2), { point: 0.25 })).toMatchObject({
+      start: 1000,
+      end: 1275,
+      onStageAtEngage: true,
+      onStageAtRelease: false
+    })
+    expect(getScrollRange(nth(panels, 1), { point: 0.25 })).toMatchObject({
+      start: 1275,
+      end: 2375,
+      onStageAtEngage: false,
+      onStageAtRelease: false
+    })
+    expect(getScrollRange(nth(panels, 0), { point: 0.25 })).toMatchObject({
+      start: 2375,
+      end: 3200,
+      onStageAtEngage: false,
+      onStageAtRelease: true
+    })
+  })
+
+  it('clamps the point to the stage and lets it win over inset', () => {
+    const { panels } = linked()
+    const first = nth(panels, 0)
+
+    expect(getScrollRange(first, { point: -2 })).toEqual(getScrollRange(first, { point: 0 }))
+    expect(getScrollRange(first, { point: 7 })).toEqual(getScrollRange(first, { point: 1 }))
+    expect(getScrollRange(first, { point: 0.25, inset: 0.15 })).toEqual(
+      getScrollRange(first, { point: 0.25 })
+    )
   })
 
   it('returns null outside any section', () => {

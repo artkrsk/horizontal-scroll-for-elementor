@@ -6,7 +6,7 @@
 // explicit — Elementor's frontend CSS ships `html { scroll-behavior: smooth }`
 // (under prefers-reduced-motion: no-preference), which re-paces any
 // non-explicit programmatic scroll.
-import { READY_EVENT, VAR_DISTANCE } from './contract'
+import { type IHorizontalScrollRange, READY_EVENT, VAR_DISTANCE } from './contract'
 import { clamp01, computeInsetStart, layoutDocTop, layoutOffsetLeftWithin } from './geometry'
 import {
   distanceOf,
@@ -39,6 +39,9 @@ interface IPinFrame {
   pinWindow: number
   engage: number
   inverted: boolean
+  /** The track's raw sticky top: where the pinned stage starts, unclamped. */
+  stageTop: number
+  stageHeight: number
 }
 
 // The traversal every position below maps onto; null means "leave it to the
@@ -62,7 +65,16 @@ const pinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null =>
   // Layout-tree offset, not a rect: an entrance animation on the widget is
   // mid-transform exactly when the deep-link load correction runs.
   const engage = layoutDocTop(wrapper) - computeInsetStart(wrapper, track)
-  return { distance, pinWindow, engage, inverted: isInverted(wrapper) }
+  return {
+    distance,
+    pinWindow,
+    engage,
+    inverted: isInverted(wrapper),
+    // Not computeInsetStart: that clamps to the wrapper's document top to
+    // place the engage point, but the pinned stage really sits at the raw top.
+    stageTop: Number.parseFloat(getComputedStyle(track).top) || 0,
+    stageHeight: track.offsetHeight
+  }
 }
 
 // Document scrollY at which the panel is on stage; null when pinFrame is.
@@ -92,18 +104,23 @@ export const computeTargetScrollY = (
 // frame. Clamping gives a target already on stage at pin engage the same
 // `start` as one whose edge only reaches the stage then (100vw panels put every
 // other panel exactly there), yet only the former is seen while the section
-// still scrolls vertically — onStageAtEngage tells them apart. `inset` narrows
+// still scrolls vertically — onStageAtEngage tells them apart; onStageAtRelease
+// is its twin for a target still on stage as the pin lets go. `inset` narrows
 // the stage from both sides by that fraction of its width, as a negative
 // IntersectionObserver rootMargin would: the window then opens once the target
 // is that far in and closes that far before it leaves, which is how a reveal
 // "trigger point" maps onto sideways travel — mapped here because the scroll
 // per pixel of travel (runway factor) and the direction are this engine's.
+// `point` replaces `inset` with one line at that fraction of the stage width
+// from its physical left edge: the window is then when the target contains
+// that line, so exactly one of a row of abutting panels owns it at a time.
+// stageTop/stageHeight place the pinned stage in the viewport while it holds.
 // Null in the same cases as getScrollTop, plus a target with no layout-tree
 // path to the track (position: fixed, detached).
 export const getScrollRange = (
   target: Element,
-  options?: { inset?: number }
-): { start: number; end: number; onStageAtEngage: boolean } | null => {
+  options?: { inset?: number; point?: number }
+): IHorizontalScrollRange | null => {
   const wrapper = resolveWrapper(target)
   const track = wrapper ? resolveTrack(wrapper) : null
   if (!wrapper || !track || !isHTMLElement(target) || target === track || !track.contains(target)) {
@@ -114,16 +131,23 @@ export const getScrollRange = (
   if (!frame || left === null) {
     return null
   }
-  const inset = (options?.inset ?? 0) * wrapper.clientWidth
-  const enter = (left - wrapper.clientWidth + inset) / frame.distance
-  const exit = (left + target.offsetWidth - inset) / frame.distance
+  const stageWidth = wrapper.clientWidth
+  const inset = (options?.inset ?? 0) * stageWidth
+  const point = options?.point === undefined ? null : clamp01(options.point)
+  const insetEnter = point === null ? inset : (1 - point) * stageWidth
+  const insetExit = point === null ? inset : point * stageWidth
+  const enter = (left - stageWidth + insetEnter) / frame.distance
+  const exit = (left + target.offsetWidth - insetExit) / frame.distance
   const [from, to] = frame.inverted ? [1 - exit, 1 - enter] : [enter, exit]
   return {
     start: frame.engage + clamp01(from) * frame.pinWindow,
     end: frame.engage + clamp01(to) * frame.pinWindow,
     // More than a pixel on stage: panel and stage widths both round to whole
     // pixels, so an edge sitting on the stage edge can land a pixel inside it.
-    onStageAtEngage: from * frame.distance < -1 && to > 0
+    onStageAtEngage: from * frame.distance < -1 && to > 0,
+    onStageAtRelease: from < 1 && (to - 1) * frame.distance > 1,
+    stageTop: frame.stageTop,
+    stageHeight: frame.stageHeight
   }
 }
 
