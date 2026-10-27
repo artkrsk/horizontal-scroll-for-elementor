@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "types": "./dist/types/index.d.ts",
-  "packageManager": "pnpm@12.14.0",
+  "packageManager": "pnpm@12.15.0",
   "engines": {
     "node": ">=24"
   },
@@ -20,7 +20,7 @@
   "devDependencies": {
     "@artemsemkin/elementor-types": "^2.0.0",
     "@arts/wp-plugin-tooling": "github:artkrsk/wp-plugin-tooling",
-    "@biomejs/biome": "2.5.15",
+    "@biomejs/biome": "2.6.3",
     "@playwright/test": "^1.62.1",
     "@types/node": "^26.1.1",
     "@vitest/coverage-v8": "^5.0.0",
