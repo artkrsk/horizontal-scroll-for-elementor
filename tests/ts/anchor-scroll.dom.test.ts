@@ -167,7 +167,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: true,
       onStageAtRelease: false,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: 1
     })
   })
 
@@ -180,7 +184,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: false,
       onStageAtRelease: false,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: 1
     })
   })
 
@@ -193,7 +201,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: false,
       onStageAtRelease: true,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: 1
     })
   })
 
@@ -209,7 +221,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: false,
       onStageAtRelease: true,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: 1
     })
   })
 
@@ -222,7 +238,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: true,
       onStageAtRelease: false,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: -1
     })
   })
 
@@ -251,7 +271,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: false,
       onStageAtRelease: true,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: 1
     })
     expect(getScrollRange(nth(panels, 1), { inset: 0.2 })).toEqual({
       start: 1220,
@@ -259,7 +283,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: false,
       onStageAtRelease: false,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: 1
     })
   })
 
@@ -288,7 +316,11 @@ describe('getScrollRange', () => {
       onStageAtEngage: false,
       onStageAtRelease: true,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: -1
     })
   })
 
@@ -301,9 +333,25 @@ describe('getScrollRange', () => {
       onStageAtEngage: false,
       onStageAtRelease: false,
       stageTop: 0,
-      stageHeight: 800
+      stageHeight: 800,
+      engage: 1000,
+      release: 3200,
+      distance: 2000,
+      direction: 1
     })
     expect(getScrollRange(nth(panels, 2))?.onStageAtRelease).toBe(true)
+  })
+
+  it('reports the pin frame beside the window: engage, release, travel and direction', () => {
+    const { panels } = linked({ stickyTop: 80, docTop: 30 })
+
+    expect(getScrollRange(nth(panels, 1))).toMatchObject({
+      engage: 0,
+      release: 2200,
+      distance: 2000,
+      direction: 1
+    })
+    expect(getScrollRange(nth(linked({ dir: -1 }).panels, 1))?.direction).toBe(-1)
   })
 
   it('reads the stage band from the pinned track top, not the clamped engage inset', () => {

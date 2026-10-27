@@ -86,8 +86,8 @@ test('lands an anchor link on the panel the plugin reports', async ({ page }) =>
 
 test('getScrollRange brackets the moment a panel enters and leaves the stage', async ({ page }) => {
   const picked = await page.evaluate(() => {
-    const track = document.querySelector('.js-arts-hs__track')
-    const panels = Array.from(track?.children ?? []) as HTMLElement[]
+    const track = document.querySelector('.js-arts-hs__track') as HTMLElement
+    const panels = Array.from(track.children) as HTMLElement[]
     const ranges = panels.map((panel) => window.artsHorizontalScroll?.getScrollRange(panel) ?? null)
     if (ranges.some((range) => range === null)) {
       throw new Error('a panel of a horizontal section returned no range')
@@ -107,14 +107,33 @@ test('getScrollRange brackets the moment a panel enters and leaves the stage', a
     panel.id ||= 'e2e-range-panel'
     return {
       id: panel.id,
-      range: ranges[index] as { start: number; end: number },
-      top: window.artsHorizontalScroll?.getScrollTop(panel) ?? null
+      range: ranges[index] as {
+        start: number
+        end: number
+        engage: number
+        release: number
+        distance: number
+        direction: number
+      },
+      top: window.artsHorizontalScroll?.getScrollTop(panel) ?? null,
+      travel: track.offsetWidth - (track.parentElement as HTMLElement).clientWidth
     }
   })
 
   expect(picked.top).not.toBeNull()
   expect(picked.range.start).toBeLessThan(picked.top as number)
   expect(picked.top as number).toBeLessThan(picked.range.end)
+
+  // The pin frame brackets every window, and maps the flush point onto the
+  // section timeline as a fraction strictly inside the panel's own window.
+  expect(picked.range.engage).toBeLessThanOrEqual(picked.range.start)
+  expect(picked.range.end).toBeLessThanOrEqual(picked.range.release)
+  expect(picked.range.direction).toBe(1)
+  expect(Math.abs(picked.range.distance - picked.travel)).toBeLessThanOrEqual(1)
+  const span = picked.range.release - picked.range.engage
+  const flush = ((picked.top as number) - picked.range.engage) / span
+  expect(flush).toBeGreaterThan((picked.range.start - picked.range.engage) / span)
+  expect(flush).toBeLessThan((picked.range.end - picked.range.engage) / span)
 
   const edgesAt = async (scrollTop: number) => {
     await page.evaluate((top) => window.scrollTo({ top, behavior: 'instant' }), scrollTop)

@@ -32,6 +32,14 @@ export interface IHorizontalScrollRange {
   /** Viewport offset of the pinned stage's top edge (the track's raw sticky top). */
   stageTop: number
   stageHeight: number
+  /** Document scrollY where the pin engages — the section timeline's `contain 0%`. */
+  engage: number
+  /** Document scrollY where the pin releases — `contain 100%`; `(y - engage) / (release - engage)` maps any scrollY onto the timeline. */
+  release: number
+  /** px the track travels between engage and release. */
+  distance: number
+  /** `1`, or `-1` when the traversal is mirrored (RTL page, forced Right to Left) — the sign of `--arts-hs-dir`. */
+  direction: 1 | -1
 }
 
 /** `window.artsHorizontalScroll` — README: Integration contract. */

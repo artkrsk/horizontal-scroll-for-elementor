@@ -115,6 +115,8 @@ export const computeTargetScrollY = (
 // from its physical left edge: the window is then when the target contains
 // that line, so exactly one of a row of abutting panels owns it at a time.
 // stageTop/stageHeight place the pinned stage in the viewport while it holds.
+// engage/release/distance/direction expose the frame the numbers map onto, so
+// `(y - engage) / (release - engage)` is a `contain` fraction of the timeline.
 // Null in the same cases as getScrollTop, plus a target with no layout-tree
 // path to the track (position: fixed, detached).
 export const getScrollRange = (
@@ -147,7 +149,13 @@ export const getScrollRange = (
     onStageAtEngage: from * frame.distance < -1 && to > 0,
     onStageAtRelease: from < 1 && (to - 1) * frame.distance > 1,
     stageTop: frame.stageTop,
-    stageHeight: frame.stageHeight
+    stageHeight: frame.stageHeight,
+    // The frame itself, so a consumer can place scroll numbers on the section
+    // timeline (WAAPI rangeStart/rangeEnd take no scrollY) without pin math.
+    engage: frame.engage,
+    release: frame.engage + frame.pinWindow,
+    distance: frame.distance,
+    direction: frame.inverted ? -1 : 1
   }
 }
 
