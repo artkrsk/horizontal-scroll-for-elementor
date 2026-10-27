@@ -5,7 +5,7 @@ Tags: elementor, horizontal scroll, scroll effects, sticky section, scroll anima
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.4.3
+Stable tag: 1.4.4
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/
@@ -130,7 +130,7 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
-= 1.4.4 =
+= 1.4.4 – October 27, 2026 =
 * improved: for theme developers – getScrollRange() now also reports where pinning starts and ends, how far the panels travel and in which direction, so a theme can place its own scroll effects on the section’s timeline.
 * fixed: in Firefox, scroll-driven animations on elements inside a pinned section keep playing while it’s pinned, as they do in Chrome and Safari – before, they froze until the section released.
 * fixed: in Firefox, scroll-driven effects no longer run slightly early for logged-in users who see the WordPress admin bar.
