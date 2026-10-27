@@ -130,6 +130,11 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
+= 1.4.4 =
+* improved: for theme developers – getScrollRange() now also reports where pinning starts and ends, how far the panels travel and in which direction, so a theme can place its own scroll effects on the section’s timeline.
+* fixed: in Firefox, scroll-driven animations on elements inside a pinned section keep playing while it’s pinned, as they do in Chrome and Safari – before, they froze until the section released.
+* fixed: in Firefox, scroll-driven effects no longer run slightly early for logged-in users who see the WordPress admin bar.
+
 = 1.4.3 – October 21, 2026 =
 * improved: for theme developers – getScrollRange() can now follow a single point on screen, such as a sticky header’s center, to tell which panel sits under it, and reports whether an element is still on stage when pinning ends and where the pinned section sits.
 
