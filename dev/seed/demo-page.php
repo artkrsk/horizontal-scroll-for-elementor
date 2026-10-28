@@ -422,9 +422,10 @@ $header = array(
 		'position'              => 'fixed',
 		'_offset_orientation_v' => 'start',
 		// Clears the WP admin bar when present; 0 otherwise. The plugin's own
-		// --arts-hs-admin-bar is scoped to the widget wrapper and can't reach
-		// this sibling, so the header reads WP's raw var (cosmetic side
-		// effects: 32px editor-preview offset; 600-767px logged-in overlap).
+		// --arts-hs-admin-bar is declared on the widget's inner .arts-hs runway
+		// and can't reach this sibling, so the header reads WP's raw var
+		// (cosmetic side effects: 32px editor-preview offset; 600-767px
+		// logged-in overlap).
 		'_offset_y'             => array(
 			'unit' => 'custom',
 			'size' => 'var(--wp-admin--admin-bar--height, 0px)',
@@ -1140,7 +1141,9 @@ $page_settings = array(
 	'background_color'      => '#0A0A0B',
 );
 
-// Mirrors Document::save()'s sequence (elementor/core/base/document.php).
+// Writes the meta of an Elementor-built page directly. Not Document::save()'s
+// sequence: save() puts _wp_page_template first and does not write
+// _elementor_edit_mode.
 update_post_meta( $post_id, '_elementor_page_settings', wp_slash( $page_settings ) );
 update_post_meta( $post_id, '_elementor_data', wp_slash( wp_json_encode( $elements, JSON_UNESCAPED_UNICODE ) ) );
 update_post_meta( $post_id, '_elementor_edit_mode', 'builder' );

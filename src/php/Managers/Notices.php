@@ -84,8 +84,8 @@ class Notices extends BaseManager {
 		// Through Elementor 4.2, nested-elements is an ordinary mutable feature
 		// an admin can switch off on its own, so Container alone is not enough.
 		// Order is load-bearing there: written before Container, Elementor's own
-		// dependency validation throws and wp_die()s the request. The 4.3 betas
-		// make the feature non-mutable, so this write is a no-op there.
+		// dependency validation throws and wp_die()s the request. 4.3 makes the
+		// feature non-mutable, so this write is a no-op there.
 		update_option( $experiments->get_feature_option_key( 'nested-elements' ), 'active' );
 	}
 }
