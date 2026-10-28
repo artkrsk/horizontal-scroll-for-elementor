@@ -9,11 +9,43 @@ import { isHTMLElement } from './utils/isHTMLElement'
 export const layoutDocTop = (el: HTMLElement): number => {
   let top = 0
   let node: Element | null = el
+  let last = el
   while (isHTMLElement(node)) {
     top += node.offsetTop
+    last = node
     node = node.offsetParent
   }
-  return top
+  return last === last.ownerDocument.body ? top + rootOffsetTop(last) : top
+}
+
+// What a chain ending at <body> leaves out: every engine measures a top-level
+// element from the root's border box, so the root's own margin is in no term —
+// WordPress's admin bar sets `html { margin-top: 32px }` (46px under 782px,
+// kept under 600px where the bar stops being fixed). The computed margin, never
+// the admin-bar var or class: the editor preview exposes the var with no bar,
+// and a theme can move or drop the bump. Not html.offsetTop, which Firefox
+// reports as 0.
+const rootOffsetTop = (body: HTMLElement): number => {
+  const root = body.ownerDocument.documentElement
+  const bodyStyle = getComputedStyle(body)
+  // Pro's page Scroll Snap makes body the scroller (html overflow hidden, body
+  // auto): its scrollport already starts below the root margin, and the chain
+  // is already scroller-relative.
+  if (
+    getComputedStyle(root).overflowY !== 'visible' &&
+    !['visible', 'clip'].includes(bodyStyle.overflowY)
+  ) {
+    return 0
+  }
+  // A positioned body is the offsetParent proper: top-level elements measure
+  // from its own box, so its margin (or one collapsing through it) and the
+  // root's border and padding are missing too. Its rect is the one place a rect
+  // is safe — nothing animates the body itself. A border on <body> is the one
+  // case engines disagree on (Gecko is off by it), left as is.
+  if (bodyStyle.position !== 'static') {
+    return body.getBoundingClientRect().top + window.scrollY
+  }
+  return Number.parseFloat(getComputedStyle(root).marginTop) || 0
 }
 
 // The element's left offset inside the track, from the layout tree — the

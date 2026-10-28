@@ -1,7 +1,7 @@
 // @vitest-environment happy-dom
 
 import { computeInsetStart, layoutDocTop, layoutOffsetLeftWithin } from '@ts/geometry'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, section } from './support'
 
 /**
@@ -42,6 +42,64 @@ describe('layoutDocTop', () => {
     layoutDocTop(el)
 
     expect(spy).not.toHaveBeenCalled()
+  })
+})
+
+describe('layoutDocTop at the root', () => {
+  /** A chain whose last link is <body>, as every in-flow element's is. */
+  const underBody = (top: number): HTMLElement => {
+    const el = document.body.appendChild(document.createElement('div'))
+    Object.defineProperty(el, 'offsetTop', { value: top, configurable: true })
+    Object.defineProperty(el, 'offsetParent', { value: document.body, configurable: true })
+    // The spec's null for <body>; happy-dom computes none.
+    Object.defineProperty(document.body, 'offsetParent', { value: null, configurable: true })
+    return el
+  }
+
+  beforeEach(() => {
+    // happy-dom computes no initial values: state the browser defaults.
+    document.documentElement.setAttribute('style', 'overflow-y: visible')
+    document.body.setAttribute('style', 'overflow-y: visible; position: static')
+  })
+
+  afterEach(() => {
+    document.documentElement.removeAttribute('style')
+    document.body.removeAttribute('style')
+    vi.restoreAllMocks()
+  })
+
+  it("adds the root's margin the chain never sees (WP admin bar)", () => {
+    document.documentElement.style.marginTop = '32px'
+
+    expect(layoutDocTop(underBody(100))).toBe(132)
+  })
+
+  it('adds nothing without a root margin', () => {
+    expect(layoutDocTop(underBody(100))).toBe(100)
+  })
+
+  it('adds the margin when the root clips but body does not scroll', () => {
+    document.documentElement.style.marginTop = '32px'
+    document.documentElement.style.overflowY = 'hidden'
+
+    expect(layoutDocTop(underBody(100))).toBe(132)
+  })
+
+  it('stays scroller-relative when body is the scroller', () => {
+    // Pro's page Scroll Snap: html overflow hidden, body auto.
+    document.documentElement.style.marginTop = '32px'
+    document.documentElement.style.overflowY = 'hidden'
+    document.body.style.overflowY = 'auto'
+
+    expect(layoutDocTop(underBody(100))).toBe(100)
+  })
+
+  it("measures from a positioned body's padding edge", () => {
+    document.documentElement.style.marginTop = '32px'
+    document.body.style.position = 'relative'
+    vi.spyOn(document.body, 'getBoundingClientRect').mockReturnValue({ top: 40 } as DOMRect)
+
+    expect(layoutDocTop(underBody(100))).toBe(140)
   })
 })
 
