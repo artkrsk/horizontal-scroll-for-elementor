@@ -116,7 +116,7 @@ test('getScrollRange brackets the moment a panel enters and leaves the stage', a
         direction: number
       },
       top: window.artsHorizontalScroll?.getScrollTop(panel) ?? null,
-      travel: track.offsetWidth - (track.parentElement as HTMLElement).clientWidth
+      travel: track.offsetWidth - (track.closest('.js-arts-hs') as HTMLElement).clientWidth
     }
   })
 

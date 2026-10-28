@@ -78,7 +78,7 @@ transform: translateX(calc(120px * var(--arts-hs-move, 1)));
 | `contain 0%` → `contain 100%` | pin engage → pin release (the pinned traversal) |
 | `--arts-hs-animation` | gate: `none` when vertical; invalid (your fallback wins) when horizontal |
 | `--arts-hs-move` | `0` vertical / `1` horizontal multiplier |
-| `--arts-hs-distance` | measured px the track travels |
+| `--arts-hs-distance` | measured px the track travels; a server estimate until the script's first measure (the section's own layout never reads it: the runway gets its height from the track in CSS) |
 | `--arts-hs-dir` | `1` default / `-1` on an RTL page (Direction: Auto) or when Direction is forced to Right to Left |
 | `--arts-hs-panel-start` / `--arts-hs-panel-end` | per panel: the % window during which that panel intersects the viewport; set on each panel element, inherits into its subtree |
 | `.arts-hs` / `.js-arts-hs` / `.js-arts-hs__track` | styling marker / DOM hooks |
@@ -87,6 +87,7 @@ transform: translateX(calc(120px * var(--arts-hs-move, 1)));
 | `window.artsHorizontalScroll.getTimeline(el)` | the section timeline as a WAAPI object — see the JS path below |
 | `window.artsHorizontalScroll.getScrollTop(el)` | document scrollY that puts `el`'s panel on stage — the position anchor links scroll to; `null` outside a panel, in vertical states, or before the first measure |
 | `window.artsHorizontalScroll.getScrollRange(el)` | `{ start, end, onStageAtEngage, onStageAtRelease, stageTop, stageHeight, engage, release, distance, direction }` — `start`/`end` is the document scrollY window during which `el` crosses the stage (its leading edge enters → its trailing edge leaves), clamped to the pinned traversal; `onStageAtEngage` is `true` when `el` is already on stage as the pin engages — it then scrolls into view vertically, before the traversal, and its clamped `start` is the engage point rather than an entrance; an optional second argument `{ inset }` (a fraction of the stage width, e.g. `0.15`) narrows the stage from both sides, like a negative IntersectionObserver `rootMargin` — the window then opens once `el` is that far in and closes that far before it leaves, `onStageAtEngage` included — the way to map a reveal trigger point onto the sideways travel; `{ point }` (a fraction of the stage width from its left edge, clamped to `0`–`1`) replaces `inset` with a single line, so the window is when `el` contains that line and exactly one of a row of abutting panels owns it at a time; `onStageAtRelease` is `true` when `el` is still on stage as the pin releases — its clamped `end` is then the release point; `stageTop` and `stageHeight` are the pinned stage's viewport offset (the track's sticky `top`) and height; hand the numbers to your own scroll engine (e.g. ScrollTrigger `start`/`end`) and re-read them on `arts-hs:layout`; `engage` and `release` are the document scrollY of pin engage and release (the section timeline's `contain 0%` and `contain 100%`), so `(y - engage) / (release - engage)` turns any of these numbers into a timeline fraction — the way to set WAAPI `rangeStart`/`rangeEnd` (or `animation-range`) from `start`/`end`, and `getScrollTop(panel)` through the same formula is the panel's flush-on-stage point; `distance` is the px the track travels over that span and `direction` is `1`, or `-1` when the traversal is mirrored (the sign of `--arts-hs-dir`); `null` in the same cases as `getScrollTop` |
+| `window.artsHorizontalScroll.mount(root)` | boots every section under `root` that is not booted yet (idempotent per section) — for a runtime that mounts content before Elementor's own `element_ready` reaches it (an AJAX visit's commit); the section is measured synchronously, so its ranges exist the moment the call returns |
 | `window.artsHorizontalScroll.contract` | integer API level, currently `1` |
 
 ### Recipe: animate while your panel is on stage
@@ -173,12 +174,16 @@ Builds that compile source select the `arts-source` condition; everything else g
 
 ```html
 <div class="arts-hs js-arts-hs">
-  <div class="arts-hs__track js-arts-hs__track">
-    <section class="arts-hs__panel">…</section>
-    <section class="arts-hs__panel">…</section>
+  <div class="arts-hs__sizer">
+    <div class="arts-hs__track js-arts-hs__track">
+      <section class="arts-hs__panel">…</section>
+      <section class="arts-hs__panel">…</section>
+    </div>
   </div>
 </div>
 ```
+
+`.arts-hs__sizer` is required: the stylesheet gives the section its height from it, so it pins before any script runs.
 
 ```js
 import { createHorizontalScrollApp } from '@arts/horizontal-scroll'

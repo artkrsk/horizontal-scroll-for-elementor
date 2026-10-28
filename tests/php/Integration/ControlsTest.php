@@ -49,7 +49,7 @@ class ControlsTest extends TestCase {
 				'--arts-hs-track-direction: column',
 				'--arts-hs-track-width: auto',
 				'--arts-hs-track-height: auto',
-				'--arts-hs-pin-height: auto',
+				'--arts-hs-sizer-display: contents',
 			) as $needle
 		) {
 			$this->assertStringContainsString( $needle, $vertical );
@@ -75,7 +75,7 @@ class ControlsTest extends TestCase {
 				'--arts-hs-track-direction: var(--arts-hs-h-track-direction)',
 				'--arts-hs-track-width: var(--arts-hs-h-track-width)',
 				'--arts-hs-track-height: var(--arts-hs-h-track-height)',
-				'--arts-hs-pin-height: var(--arts-hs-h-pin-height)',
+				'--arts-hs-sizer-display: var(--arts-hs-h-sizer-display)',
 			) as $needle
 		) {
 			$this->assertStringContainsString( $needle, $horizontal );

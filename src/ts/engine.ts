@@ -134,8 +134,8 @@ export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
 
   // Zero travel means the section behaves like a normal block, where Pro's
   // own vertical math is the correct answer again — hence the distance gate.
-  // pinWindowOf reads offsetHeight after the fresh --arts-hs-distance write,
-  // so the runway height is already current.
+  // pinWindowOf reads the runway's layout height, which the stylesheet's
+  // sizer derives from the track — current whatever was written above.
   const horizontal = distance > 0 && isScrubbing(track)
   const pinWindow = pinWindowOf(wrapper, track)
   updateTrackState(wrapper, {
@@ -166,14 +166,14 @@ const observe = (wrapper: HTMLElement, instance: IInstance): void => {
       ro.disconnect()
       return
     }
-    // Next frame, never here: the runway height is built from the
-    // --arts-hs-distance measure() writes, so a travel change would resize the
-    // wrapper (and <body>) mid-delivery, and the browser reports that as a
-    // ResizeObserver loop error on window for every such resize. Stepping this
-    // observer aside can't help — the guard is document-wide, and the polyfill
-    // (subject + source children) and smooth-scroll libraries observe those
-    // same boxes. Written before the next layout, every observer sees the new
-    // height in its first pass. Cost: that one frame paints the old runway.
+    // Next frame, never here: measure() announces `arts-hs:layout`, and its
+    // listeners (trigger refreshes, effects switching mode) and integrators'
+    // CSS reading the vars can resize observed boxes (and <body>) mid-delivery,
+    // which the browser reports as a ResizeObserver loop error on window for
+    // every such resize. Stepping this observer aside can't help — the guard
+    // is document-wide, and the polyfill (subject + source children) and
+    // smooth-scroll libraries observe those same boxes. The runway itself is
+    // already current (the stylesheet's sizer); only the vars lag a frame.
     cancelAnimationFrame(instance.frame)
     instance.frame = requestAnimationFrame(() => measure(wrapper, track))
   })

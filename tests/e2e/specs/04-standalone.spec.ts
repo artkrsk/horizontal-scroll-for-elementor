@@ -49,10 +49,12 @@ const html = ({
 <body>
 <div class="spacer"></div>
 <div class="arts-hs js-arts-hs${touchVertical ? ' arts-hs_touch-vertical' : ''}">
-  <div class="arts-hs__track js-arts-hs__track">
-    <div class="arts-hs__panel" id="p1">1</div>
-    <div class="arts-hs__panel" id="p2">2</div>
-    <div class="arts-hs__panel" id="p3">3</div>
+  <div class="arts-hs__sizer">
+    <div class="arts-hs__track js-arts-hs__track">
+      <div class="arts-hs__panel" id="p1">1</div>
+      <div class="arts-hs__panel" id="p2">2</div>
+      <div class="arts-hs__panel" id="p3">3</div>
+    </div>
   </div>
 </div>
 <div class="spacer"></div>

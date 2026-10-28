@@ -36,7 +36,7 @@
   --arts-hs-#{$ns}track-direction: column;
   --arts-hs-#{$ns}track-width: auto;
   --arts-hs-#{$ns}track-height: auto;
-  --arts-hs-#{$ns}pin-height: auto;
+  --arts-hs-#{$ns}sizer-display: contents;
 }
 
 @mixin arts-hs-horizontal-layout-vars($ns: '') {
@@ -45,7 +45,7 @@
   --arts-hs-#{$ns}track-direction: initial;
   --arts-hs-#{$ns}track-width: initial;
   --arts-hs-#{$ns}track-height: initial;
-  --arts-hs-#{$ns}pin-height: initial;
+  --arts-hs-#{$ns}sizer-display: initial;
 }
 
 .arts-hs {
@@ -80,10 +80,7 @@
   // an unresolved var() inside calc() invalidates the whole declaration at
   // computed-value time, and CSS optimizers have been known to strip
   // custom-property blocks. Cheap insurance, never wrong.
-  height: var(
-    --arts-hs-pin-height,
-    calc(var(--arts-hs-height, 100vh) + var(--arts-hs-distance, 160cqw) * var(--arts-hs-factor, 1))
-  );
+  // No height: the sizer below gives the runway its exact one.
   view-timeline: --arts-hs block;
 
   // Explicit inset — the default (`auto`) inherits the scroller's
@@ -115,6 +112,23 @@
   // controls override at higher specificity.
   width: 100%;
 
+  // The runway's height from layout alone, exact at first paint: one screen
+  // plus the track's travel times the Scroll Length factor. A height the
+  // script measured re-ranged every view timeline inside the section when it
+  // landed. `aspect-ratio` is the only CSS that turns a width into a height:
+  // this box is max-content wide (the track, shortened by the track's
+  // negative end margin to `travel + height / factor`) and `factor` px tall
+  // per px of that, i.e. `height + travel * factor`. The track stays sticky
+  // inside it, so the pin is unchanged. The floor keeps one screen when the
+  // track is narrower than the stage (no travel). Vertical states drop the
+  // box (`contents`), so the stack lays out exactly as without it.
+  &__sizer {
+    display: var(--arts-hs-sizer-display, block);
+    width: max-content;
+    min-height: var(--arts-hs-height, 100vh);
+    aspect-ratio: 1 / var(--arts-hs-factor, 1);
+  }
+
   &__track {
     position: var(--arts-hs-track-position, sticky);
 
@@ -138,6 +152,10 @@
     flex-direction: var(--arts-hs-track-direction, row);
     gap: var(--arts-hs-gap, 0px);
     width: var(--arts-hs-track-width, max-content);
+    // Sizes the sizer (above); zero in vertical states.
+    margin-inline-end: calc(
+      (var(--arts-hs-height, 100vh) / var(--arts-hs-factor, 1) - 100cqw) * var(--arts-hs-move, 1)
+    );
 
     // `linear` is load-bearing: it keeps the track glued 1:1 to scroll
     // position. The shorthand is declared BEFORE the timeline/range

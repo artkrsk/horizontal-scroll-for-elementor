@@ -222,8 +222,8 @@ class HorizontalScroll extends Widget_Nested_Base {
 				// return to horizontal under a wider vertical, while Stack on
 				// Touch still beats an explicit horizontal.
 				'selectors_dictionary' => array(
-					'horizontal' => '--arts-hs-animation: var(--arts-hs-h-animation); --arts-hs-move: var(--arts-hs-h-move); --arts-hs-track-position: var(--arts-hs-h-track-position); --arts-hs-track-direction: var(--arts-hs-h-track-direction); --arts-hs-track-width: var(--arts-hs-h-track-width); --arts-hs-track-height: var(--arts-hs-h-track-height); --arts-hs-pin-height: var(--arts-hs-h-pin-height);',
-					'vertical'   => '--arts-hs-animation: none; --arts-hs-move: 0; --arts-hs-track-position: static; --arts-hs-track-direction: column; --arts-hs-track-width: auto; --arts-hs-track-height: auto; --arts-hs-pin-height: auto;',
+					'horizontal' => '--arts-hs-animation: var(--arts-hs-h-animation); --arts-hs-move: var(--arts-hs-h-move); --arts-hs-track-position: var(--arts-hs-h-track-position); --arts-hs-track-direction: var(--arts-hs-h-track-direction); --arts-hs-track-width: var(--arts-hs-h-track-width); --arts-hs-track-height: var(--arts-hs-h-track-height); --arts-hs-sizer-display: var(--arts-hs-h-sizer-display);',
+					'vertical'   => '--arts-hs-animation: none; --arts-hs-move: 0; --arts-hs-track-position: static; --arts-hs-track-direction: column; --arts-hs-track-width: auto; --arts-hs-track-height: auto; --arts-hs-sizer-display: contents;',
 				),
 				'selectors'            => array( self::RUNWAY => '{{VALUE}}' ),
 			)
@@ -429,8 +429,8 @@ class HorizontalScroll extends Widget_Nested_Base {
 		if ( 'yes' === ( $settings['touch_vertical'] ?? 'yes' ) ) {
 			$this->add_render_attribute( 'runway', 'class', 'arts-hs_touch-vertical' );
 		}
-		// Server-side scroll-budget estimate so the pin works before (or without)
-		// JS measurement; the frontend script refines it to exact pixels.
+		// Pre-script value of the contract's measured --arts-hs-distance, for
+		// integrators' CSS only: the runway's height comes from the sizer.
 		$this->add_render_attribute(
 			'runway',
 			'style',
@@ -438,12 +438,14 @@ class HorizontalScroll extends Widget_Nested_Base {
 		);
 		?>
 		<div <?php $this->print_render_attribute_string( 'runway' ); ?>>
-			<div class="arts-hs__track js-arts-hs__track">
-				<?php
-				foreach ( array_keys( $panels ) as $index ) {
-					$this->print_child( $index );
-				}
-				?>
+			<div class="arts-hs__sizer">
+				<div class="arts-hs__track js-arts-hs__track">
+					<?php
+					foreach ( array_keys( $panels ) as $index ) {
+						$this->print_child( $index );
+					}
+					?>
+				</div>
 			</div>
 		</div>
 		<?php
@@ -457,7 +459,9 @@ class HorizontalScroll extends Widget_Nested_Base {
 	protected function content_template(): void {
 		?>
 		<div class="arts-hs js-arts-hs<# if ( 'yes' === settings.touch_vertical ) { #> arts-hs_touch-vertical<# } #>">
-			<div class="arts-hs__track js-arts-hs__track"></div>
+			<div class="arts-hs__sizer">
+				<div class="arts-hs__track js-arts-hs__track"></div>
+			</div>
 		</div>
 		<?php
 	}

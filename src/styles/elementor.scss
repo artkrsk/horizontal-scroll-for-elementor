@@ -88,6 +88,25 @@
   }
 }
 
+// Elementor turns every flex container into `column + wrap` at 767px and below
+// (`--flex-wrap-mobile`). In a multi-line column container an item's height is
+// measured at its fit-content width and never re-measured once it stretches to
+// the line (flexbox spec behaviour). The runway's inline-size containment leaves
+// this widget almost no fit-content width, so a stacked section measured far
+// taller than its panels: an empty band below it on phones, re-measured (moving
+// everything after it) whenever panel content changed at mount. A definite
+// inline size makes the measuring width the stretched one — the pair Elementor
+// ships for its own Video, Divider and Spacer widgets (`--container-widget-width`
+// is 100% in a column and `auto` in a row; the grow is the row's companion). The
+// Width control's post CSS still wins on specificity.
+.e-con,
+.e-con-inner {
+  > .elementor-widget-arts-horizontal-scroll {
+    width: var(--container-widget-width);
+    --flex-grow: var(--container-widget-flex-grow);
+  }
+}
+
 // Elementor Pro's per-page Scroll Snap marks top-level sections/containers
 // as snap stops — a stop the height of the pin runway traps scrolling at
 // the section edge. Its selector (.e-con:not(.e-child)) can ALSO match the

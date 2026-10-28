@@ -4,7 +4,6 @@ import {
   TRACK_CLASS,
   TRACK_SELECTOR,
   VAR_DIR,
-  VAR_DISTANCE,
   WIDGET_TYPE,
   WRAPPER_CLASS
 } from '@ts/contract'
@@ -118,8 +117,7 @@ describe('the stylesheet and TS agree on the names they share', () => {
     expect(STYLESHEET).toContain(`&.${POLYFILLED_CLASS}`)
   })
 
-  it('consumes the custom properties the engine writes', () => {
-    expect(STYLESHEET).toContain(VAR_DISTANCE)
+  it('consumes the custom properties the engine reads back', () => {
     expect(STYLESHEET).toContain(VAR_DIR)
   })
 
