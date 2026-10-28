@@ -39,10 +39,16 @@ interface ISpyGroup {
 }
 
 export const apply = (group: ISpyGroup): void => {
-  // Vertical states are Pro's home turf — its own spy handles stacked panels.
-  const scrubbing = isScrubbing(group.track)
+  // A vertical state is Pro's: write nothing, or setup()'s observer — which
+  // re-runs this on every class write in the menu — would strip each highlight
+  // Pro's spy sets, and Pro only re-lights a link when its target crosses again.
+  // No clear on the way in either: a layout flip comes with a resize, and Pro's
+  // resize rebuild rewrites every link, ours included.
+  if (!isScrubbing(group.track)) {
+    return
+  }
   for (const [link, panel] of group.links) {
-    const shouldBeActive = scrubbing && panel === group.current
+    const shouldBeActive = panel === group.current
     if (link.classList.contains(ACTIVE) !== shouldBeActive) {
       link.classList.toggle(ACTIVE, shouldBeActive)
       link.setAttribute('aria-current', shouldBeActive ? 'location' : '')

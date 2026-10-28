@@ -217,14 +217,16 @@ describe('apply', () => {
   })
 
   it('hands the menu back to Pro in a vertical state', () => {
-    // A vertical state clears the group and leaves the menu to Pro.
+    // Pro's highlight must survive: its spy only re-lights a link when the
+    // target crosses again, so a strip here leaves the link dark for good.
     const { links, spy, track } = group()
-    apply(spy)
     track.style.position = 'static'
+    nth(links, 1).classList.add(ACTIVE)
 
     apply(spy)
 
-    expect(links.some((link) => link.classList.contains(ACTIVE))).toBe(false)
+    expect(nth(links, 0).classList.contains(ACTIVE)).toBe(false)
+    expect(nth(links, 1).classList.contains(ACTIVE)).toBe(true)
   })
 
   it('writes nothing when the state is already correct', () => {
@@ -329,6 +331,21 @@ describe('the installed spy', () => {
     menuWrites.deliver([])
 
     expect(first.classList.contains(ACTIVE)).toBe(true)
+  })
+
+  it('lets Pro write over a stacked section', () => {
+    // The re-assert runs on every class write in the menu, whatever the
+    // layout state — in a vertical one it must leave Pro's writes standing.
+    const { track, panels } = panelSection()
+    const second = nth(menu(['#one', '#two']), 1)
+    track.style.position = 'static'
+    start()
+    crossing(nth(panels, 0), true)
+
+    second.classList.add(ACTIVE)
+    menuWrites.deliver([])
+
+    expect(second.classList.contains(ACTIVE)).toBe(true)
   })
 
   it('watches the menus for those writes', () => {
