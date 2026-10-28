@@ -152,6 +152,7 @@
     flex-direction: var(--arts-hs-track-direction, row);
     gap: var(--arts-hs-gap, 0px);
     width: var(--arts-hs-track-width, max-content);
+
     // Sizes the sizer (above); zero in vertical states.
     margin-inline-end: calc(
       (var(--arts-hs-height, 100vh) / var(--arts-hs-factor, 1) - 100cqw) * var(--arts-hs-move, 1)
