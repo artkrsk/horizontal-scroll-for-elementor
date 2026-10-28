@@ -71,7 +71,7 @@ export interface IBlocker {
   declaration: string
 }
 
-const describe = (el: HTMLElement): string => {
+const describeElement = (el: HTMLElement): string => {
   const id = el.id ? `#${el.id}` : ''
   const classes = Array.from(el.classList)
     .slice(0, 2)
@@ -130,13 +130,13 @@ const inspect = (el: HTMLElement): IBlocker | null => {
   const propagates = el === doc.body && !rootOwnsPropagation(doc)
   const overflow = propagates ? null : scrollingOverflow(style)
   if (overflow) {
-    return { kind: 'overflow', label: describe(el), declaration: overflow }
+    return { kind: 'overflow', label: describeElement(el), declaration: overflow }
   }
 
   // Nothing below a fixed ancestor moves with page scroll, so the section never
   // travels through the viewport and the timeline has no traversal to resolve against.
   if (style.position === 'fixed') {
-    return { kind: 'fixed', label: describe(el), declaration: 'position: fixed' }
+    return { kind: 'fixed', label: describeElement(el), declaration: 'position: fixed' }
   }
 
   return null
