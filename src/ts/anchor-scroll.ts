@@ -29,8 +29,8 @@ import { isHTMLElement } from './utils/isHTMLElement'
 // measure() writes a plain px value; render() prints a cqw-based calc
 // ESTIMATE on the same inline property as the no-JS fallback — so "non-empty"
 // is not "measured". A cold load can reach the correction before measure()
-// (readyState even hits complete first, skipping the load repass), and the
-// estimate-era runway height lands the page hundreds of px short.
+// (readyState even hits complete first, skipping the load repass); the README
+// contract answers null until the section's first measure.
 const hasMeasuredDistance = (wrapper: HTMLElement): boolean =>
   /^[\d.]+px$/.test(wrapper.style.getPropertyValue(VAR_DISTANCE).trim())
 
@@ -46,8 +46,7 @@ interface IPinFrame {
 
 // The traversal every position below maps onto; null means "leave it to the
 // browser" — vertical states, zero travel, or before the engine's first
-// measure() (the wrapper height still rides the server-side distance estimate
-// then, so the runway math would be wrong).
+// measure() (see hasMeasuredDistance).
 const pinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null => {
   if (!hasMeasuredDistance(wrapper)) {
     return null
@@ -55,8 +54,6 @@ const pinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null =>
   if (!isScrubbing(track)) {
     return null
   }
-  // distanceOf clamps at 0 where this used to allow a negative; the guard
-  // below takes the same early return either way.
   const distance = distanceOf(wrapper, track)
   const pinWindow = pinWindowOf(wrapper, track)
   if (distance <= 0 || pinWindow <= 0) {
@@ -102,8 +99,8 @@ export const computeTargetScrollY = (
 // as the per-panel range vars, clamped to the pinned traversal — so a theme can
 // hand exact numbers to its own scroll engine instead of reading rects every
 // frame. Clamping gives a target already on stage at pin engage the same
-// `start` as one whose edge only reaches the stage then (100vw panels put every
-// other panel exactly there), yet only the former is seen while the section
+// `start` as one whose edge only reaches the stage then (100vw panels put the
+// second one exactly there), yet only the former is seen while the section
 // still scrolls vertically — onStageAtEngage tells them apart; onStageAtRelease
 // is its twin for a target still on stage as the pin lets go. `inset` narrows
 // the stage from both sides by that fraction of its width, as a negative

@@ -10,8 +10,7 @@ import { fakeDollarE } from '../../support'
 
 /**
  * The two predicates the editor guards are built on. Both take plain command
- * args, so they are testable without an $e in sight — which is the whole
- * reason they live here rather than inline in each guard. The registration
+ * args, so they are testable without an $e in sight. The registration
  * machinery around them (hasDependencyApi, defineDependency,
  * registerDependencies) runs against the minimal $e from support.ts: what is
  * asserted is our wiring and failure containment, never Elementor's hooks.

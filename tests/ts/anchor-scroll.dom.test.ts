@@ -572,8 +572,8 @@ describe('the page-load correction', () => {
     history.replaceState(null, '', '#')
     // A cold load is the condition this code runs in — the bundle evaluates
     // well before `load` fires. Vitest hands us a document that is already
-    // complete, which would make armLoadRepass return early and every repass
-    // assertion below pass without exercising anything.
+    // complete, which would make armLoadRepass return early and the abandon
+    // case below pass without exercising anything.
     Object.defineProperty(document, 'readyState', { value: 'interactive', configurable: true })
     scrollTo = vi.fn()
     vi.stubGlobal('scrollTo', scrollTo)
@@ -600,8 +600,7 @@ describe('the page-load correction', () => {
 
   it('waits for the section to measure before trusting the geometry', () => {
     const { wrapper } = measured()
-    // The server-side estimate is in place but measure() has not run; the
-    // runway height still rides that estimate, so the maths would be wrong.
+    // The server-side estimate is in place but measure() has not run.
     wrapper.style.setProperty('--arts-hs-distance', 'calc(2 * 80cqw)')
     history.replaceState(null, '', '#two')
 

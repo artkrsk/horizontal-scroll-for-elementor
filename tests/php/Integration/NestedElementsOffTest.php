@@ -67,7 +67,7 @@ class NestedElementsOffTest extends TestCase {
 				$output = (string) ob_get_clean();
 
 				$this->assertStringContainsString( 'notice-warning', $output );
-				// The button posts to admin-post, where handle_activation()
+				// The button links to admin-post, where handle_activation()
 				// re-checks both the capability and this nonce.
 				$this->assertStringContainsString( 'action=' . Notices::ACTIVATE_ACTION, $output );
 				$this->assertStringContainsString( '_wpnonce=', $output );

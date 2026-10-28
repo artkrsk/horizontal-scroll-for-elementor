@@ -69,7 +69,6 @@ describe('suppressNativeScrollForPanels', () => {
   })
 
   it('leaves every other element to Elementor', () => {
-    // Everything outside our widget keeps the editor's native behaviour.
     panelSection()
     const elsewhere = document.createElement('div')
     document.body.appendChild(elsewhere)

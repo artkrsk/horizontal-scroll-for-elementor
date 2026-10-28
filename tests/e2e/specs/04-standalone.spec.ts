@@ -113,7 +113,7 @@ const landOn = async (page: Page, id: string) => {
   }, id)
   expect(top).not.toBeNull()
   await page.evaluate((y) => window.scrollTo({ top: y as number, behavior: 'instant' }), top)
-  // The scrub follows on the next frames (the polyfill drives WAAPI from rAF).
+  // The scrub follows on the next frames.
   await page.evaluate(
     () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
   )

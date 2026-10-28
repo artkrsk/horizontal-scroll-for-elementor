@@ -21,7 +21,7 @@ class RenderContractTest extends TestCase {
 			strpos( $html, 'elementor-widget-arts-horizontal-scroll' ),
 			strpos( $html, 'js-arts-hs' )
 		);
-		// Server-side no-JS scroll-budget estimate: (count - 1) * 80cqw.
+		// Pre-script value of the measured --arts-hs-distance: (count - 1) * 80cqw.
 		$this->assertStringContainsString( '--arts-hs-distance: calc(2 * 80cqw)', $html );
 	}
 
@@ -35,8 +35,8 @@ class RenderContractTest extends TestCase {
 
 	public function test_an_empty_repeater_renders_a_section_with_no_travel(): void {
 		// The floor under count(): an author who deletes every panel, or an
-		// import that lands the widget with none, must get a normal block —
-		// not a runway sized by calc(-1 * 80cqw).
+		// import that lands the widget with none, must publish zero travel —
+		// not a negative calc(-1 * 80cqw).
 		$html = $this->render_widget( 'ahsEmpty', array() );
 
 		$this->assertStringContainsString( '--arts-hs-distance: calc(0 * 80cqw)', $html );

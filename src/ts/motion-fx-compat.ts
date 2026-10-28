@@ -87,11 +87,11 @@ const patchScrollUtility = (): void => {
       const state = wrapper ? readTrackState(wrapper) : undefined
       if (el && wrapper && state?.active) {
         // The wrapper and track ARE the pin, not content riding it — the
-        // horizontal mirror degenerates on them (rect == stage → constant
-        // 50). Progress Tracker's Selector mode queries them with its
-        // signature offsets ({start: 0, end: -100}) and wants pin progress.
-        // Motion FX passes no offsets, and for it the wrapper is a normal
-        // tall block whose vertical math is already right — original.
+        // horizontal mirror is meaningless on them (on the wrapper rect ==
+        // stage, so a constant 50). Progress Tracker's Selector mode queries
+        // them with its signature offsets ({start: 0, end: -100}) and wants pin
+        // progress. Motion FX passes no offsets, and for it the wrapper is a
+        // normal tall block whose vertical math is already right — original.
         if (el === wrapper || el.classList.contains(TRACK_CLASS)) {
           if (offsetObj?.end === -100 && state.pinWindow > 0) {
             return pinProgress(wrapper, state)

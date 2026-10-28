@@ -4,11 +4,9 @@ import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 import { nth, observerSpy, section, setGeometry } from './support'
 
 /**
- * The tier half of the engine. SUPPORTS_NATIVE is evaluated at module scope on
- * purpose — the polyfill monkeypatches CSS.supports once it installs, so a
- * probe taken later would report native in Firefox and drive the track twice.
- * That design is what forces this file to load the engine dynamically: the
- * capability has to be decided before the import, never after it.
+ * The tier half of the engine. SUPPORTS_NATIVE is evaluated at module scope, so
+ * this file loads the engine dynamically: the capability has to be decided
+ * before the import, never after it.
  */
 const loadEngine = async (native: boolean) => {
   vi.resetModules()
@@ -147,8 +145,8 @@ describe('the measurement observer', () => {
     setGeometry(track, { offsetWidth: 5000 })
     spy.deliver([])
 
-    // Never inside the callback: the runway height is built from this var, so
-    // writing it there resizes an observed box mid-delivery and the browser
+    // Never inside the callback: measure() announces arts-hs:layout, whose
+    // listeners can resize observed boxes mid-delivery, and the browser
     // reports a ResizeObserver loop error on window.
     expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe('2000px')
 

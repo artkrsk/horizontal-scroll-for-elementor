@@ -23,8 +23,6 @@ export default defineConfig({
     baseURL: process.env.WP_BASE_URL || 'http://localhost:8900',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
-    // The self-hosted runner is slow enough that the default 30s can flake a
-    // cold Elementor page load.
     navigationTimeout: 60000
   },
   projects: [

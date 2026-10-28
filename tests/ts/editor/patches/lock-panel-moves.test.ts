@@ -10,9 +10,9 @@ import { fakeDollarE, OTHER_WIDGET, OUR_WIDGET, panelOf } from '../../support'
  *
  * The subtle half is that core's OWN repeater-move hook syncs the child by
  * running the very same command — under a document/repeater/move first trace.
- * Getting that discriminator wrong breaks legitimate reordering in one
- * direction and lets corruption through in the other, which is what makes it
- * worth pinning.
+ * Getting that discriminator wrong lets corruption through in one direction
+ * and, once the repeater sort veto is relaxed, breaks legitimate reordering in
+ * the other, which is what makes it worth pinning.
  *
  * The registration machinery is faked, not Elementor's behaviour: the guards
  * override every method they inherit and never call `super`.
@@ -93,9 +93,8 @@ describe('the repeater vetoes', () => {
     ['row sort', SORT_VETO],
     ['row duplicate', DUPLICATE_VETO]
   ])('blocks %s on our widget', (_label, id) => {
-    // Both corrupt nested children in current Elementor: its own Nested Tabs
-    // drops a child on move, and duplicate clones the row but not the child
-    // container, after which the index-only correlation deletes wrong children.
+    // Locked as a precaution, not for a reproduced failure — the rationale
+    // is in lock-panel-moves.ts.
     const { byId } = lock()
     const veto = byId(id)
 
@@ -113,8 +112,7 @@ describe('the repeater vetoes', () => {
   })
 
   it('never touches add or remove', () => {
-    // Those two are verified healthy and stay open — the repeater is the one
-    // reorder surface core designed for.
+    // Those two are verified healthy and stay open.
     const { registered } = lock()
     const commands = registered.map((d) => d.getCommand())
 

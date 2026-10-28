@@ -1,9 +1,8 @@
 // Frontend engine. The scroll mechanics are pure CSS — this module only
-// measures (one ResizeObserver per instance writing --arts-hs-distance)
-// and, on browsers without native support, waits for the shared polyfill
-// loader and constructs the one track animation via its WAAPI surface (the
-// polyfill's CSS-parsing layer mis-maps `contain` ranges on subjects taller
-// than the scrollport, so it is never relied on).
+// measures (one ResizeObserver per instance writing the distance, inset and
+// per-panel range vars, then announcing arts-hs:layout) and, on browsers
+// without native support, waits for the shared polyfill loader and
+// constructs the one track animation via its WAAPI surface.
 
 import { LAYOUT_EVENT, POLYFILLED_CLASS, READY_EVENT, VAR_DISTANCE } from './contract'
 import { clamp01, computeInsetStart } from './geometry'
@@ -32,9 +31,10 @@ const SUPPORTS_NATIVE =
 type TPolyfillState = 'native' | 'polyfilled' | 'unavailable'
 
 // Read through a local cast, never the producer's global.d.ts: this module is
-// part of the standalone package. Both are installed by the shared
-// arts/scroll-timeline-polyfill loader (ViewTimeline natively, in browsers
-// that have it). Read at call time, so importing the engine touches nothing.
+// part of the standalone package. The shared arts/scroll-timeline-polyfill
+// loader publishes the ready promise in every browser and installs
+// ViewTimeline only where it is missing. Read at call time, so importing the
+// engine touches nothing.
 const host = () =>
   window as {
     ViewTimeline?: new (options: {
@@ -151,8 +151,8 @@ const observe = (wrapper: HTMLElement, instance: IInstance): void => {
   const { track } = instance
   const ro = new ResizeObserver(() => {
     // Removing an observed element reports a 0x0 box, which is the only signal
-    // frontend code gets that an editor re-render replaced this section — every
-    // settings change builds a new wrapper, and without this each old one stays
+    // frontend code gets that an editor re-render replaced this section — a
+    // re-render builds a new wrapper, and without this each old one stays
     // reachable through its observer with the whole panel tree behind it.
     //
     // CONNECTEDNESS, not that 0x0: a section inside a hidden tab reports the

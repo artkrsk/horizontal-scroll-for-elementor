@@ -16,13 +16,13 @@ import { describe, expect, it } from 'vitest'
  * the same handful of names with no build step between them: PHP renders the
  * markup and seeds the initial panels, SCSS styles what PHP rendered, and TS
  * selects and mutates both. PHPStan is type analysis and cannot see a value
- * drift; the rest of this suite never opens a .php or .scss file at all.
+ * drift; the rest of this suite never opens a .php file, and its one other
+ * .scss reader, contractParity.test.ts, checks README's table, not these names.
  *
  * A rename on one side only would ship as "the engine silently stops finding
  * its own markup" — which is exactly the class of bug this file exists to make
- * impossible. It is also the enforcement the previous refactor had to write off
- * as impossible, when it left the element_ready hook name spelled out with a
- * comment saying no TS constant could keep it in sync with PHP. This can.
+ * impossible. It is also what ties boot.ts's deliberately spelled-out
+ * element_ready literal to PHP's get_name().
  *
  * Parsed by regex rather than executed: booting WordPress for a handful of
  * strings would cost the suite a PHP runtime.

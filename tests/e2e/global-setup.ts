@@ -33,8 +33,7 @@ export default function globalSetup(): void {
   const seeded = wp(`wp eval-file ${SEED} --user=1`)
   console.log(`[e2e] ${seeded.trim()}`)
 
-  // Elementor's one-time activation redirect would otherwise hijack the first
-  // navigation of the run.
+  // Repeats the seed's delete of Elementor's activation-redirect transient.
   try {
     wp('wp transient delete elementor_activation_redirect')
   } catch {

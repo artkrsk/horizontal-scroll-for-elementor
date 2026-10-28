@@ -5,7 +5,7 @@
  * `wp-env start` generates the tests config this file requires via
  * WP_PHPUNIT__TESTS_CONFIG (set in phpunit.xml). The suite loads the BUILT
  * plugin from wp-content/plugins (the dist/ mount), never the repo source
- * tree — the SmokeTest pins that autoloader precedence.
+ * tree — SmokeTest and BootTest pin that autoloader precedence.
  */
 
 require dirname( __DIR__, 2 ) . '/vendor/autoload.php';

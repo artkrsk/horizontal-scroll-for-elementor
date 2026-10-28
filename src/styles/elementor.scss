@@ -95,9 +95,8 @@
 // this widget almost no fit-content width, so a stacked section measured far
 // taller than its panels: an empty band below it on phones, re-measured (moving
 // everything after it) whenever panel content changed at mount. A definite
-// inline size makes the measuring width the stretched one — the pair Elementor
-// ships for its own Video, Divider and Spacer widgets (`--container-widget-width`
-// is 100% in a column and `auto` in a row; the grow is the row's companion). The
+// inline size makes the measuring width the stretched one, via Elementor's
+// `--container-widget-width` / `--container-widget-flex-grow` pair. The
 // Width control's post CSS still wins on specificity.
 .e-con,
 .e-con-inner {

@@ -217,7 +217,7 @@ describe('apply', () => {
   })
 
   it('hands the menu back to Pro in a vertical state', () => {
-    // Stacked panels are Pro's home turf; its own spy handles them correctly.
+    // A vertical state clears the group and leaves the menu to Pro.
     const { links, spy, track } = group()
     apply(spy)
     track.style.position = 'static'
@@ -228,9 +228,9 @@ describe('apply', () => {
   })
 
   it('writes nothing when the state is already correct', () => {
-    // Load-bearing: Pro keeps toggling these same classes, and the
-    // MutationObserver re-asserting on its writes would loop forever if our
-    // own writes were not silent.
+    // Pins compare-before-write: Pro keeps toggling these same classes, and the
+    // MutationObserver re-asserting on its writes should not be fed by
+    // redundant writes of our own.
     const { links, spy } = group()
     apply(spy)
     const toggle = vi.spyOn(nth(links, 0).classList, 'toggle')

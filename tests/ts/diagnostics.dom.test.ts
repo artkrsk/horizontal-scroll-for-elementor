@@ -10,7 +10,7 @@ import { observerSpy, section } from './support'
  * bar clears itself, since Elementor applies the fix as injected CSS without
  * ever re-rendering the widget.
  *
- * happy-dom resolves computed overflow/position/contain from inline styles for
+ * happy-dom resolves computed overflow and position from inline styles for
  * real, which is all the walk reads — but it does not expand the `overflow`
  * shorthand into computed longhands the way a browser does, so the fixtures
  * state `overflow-x`/`overflow-y` directly. That is the pair the walk reads and

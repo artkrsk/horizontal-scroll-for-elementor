@@ -109,7 +109,7 @@ export const section = (spec: ISectionSpec = {}) => {
   return { wrapper, track, panels }
 }
 
-/** A DOMRect with only the fields the engine reads. */
+/** A DOMRect with every geometry field zeroed unless overridden. */
 export const rect = (over: Partial<DOMRect> = {}): DOMRect =>
   ({ left: 0, right: 0, top: 0, bottom: 0, width: 0, height: 0, x: 0, y: 0, ...over }) as DOMRect
 
@@ -174,8 +174,8 @@ export const nth = <T>(items: readonly T[], index: number): T => {
 
 // ── Editor-side fixtures ──────────────────────────────────────────────────
 // Everything below is plain data or a one-method stand-in. The guards under
-// test override every method they inherit and never call `super`, so an empty
-// Dependency base is a faithful stand-in rather than an invention.
+// test override getCommand/getId/getConditions/apply and never call `super`,
+// so an empty Dependency base is enough for what they exercise.
 
 /** A container whose model reports our widget type, as isOurWidget reads it. */
 export const OUR_WIDGET = {

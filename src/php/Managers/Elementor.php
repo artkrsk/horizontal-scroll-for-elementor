@@ -36,10 +36,10 @@ class Elementor extends BaseManager {
 		// The widget needs the Nested Elements module ACTIVE, not merely
 		// autoloadable. Core gates its own promoted nested widgets in
 		// register_promoted_active_widgets the same way (on this very feature
-		// through Elementor 4.2, on Container in the 4.3 betas), dependency check
+		// through Elementor 4.2, on Container in 4.3), dependency check
 		// off for the same reason: Container being off already forces this
 		// feature inactive on every load. Through 4.2 the experiment is stable,
-		// default-on and switchable by sites (the 4.3 betas make it non-mutable
+		// default-on and switchable by sites (4.3 makes it non-mutable
 		// and hidden, so only Container can take it away) — and versions
 		// predating it would fatal on the widget's parent class. Degrade to
 		// no-widget.

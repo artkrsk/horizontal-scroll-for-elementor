@@ -13,7 +13,7 @@ const base = createVitestConfig({
  * whose two methods hand back a constant and a class — both already pinned from
  * the Module that registers it.
  *
- * `module.ts` and `views/view.ts` were here too and no longer are: calling into
+ * `module.ts` and `views/view.ts` are deliberately not listed: calling into
  * a fake is not the same as a fake writing the behaviour, and what those two
  * decide (which type is registered, that every admitted child comes back
  * locked) is ours, not the base class's.

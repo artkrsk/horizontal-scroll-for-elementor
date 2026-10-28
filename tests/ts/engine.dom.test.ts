@@ -95,8 +95,9 @@ describe('stampPanelRanges', () => {
   })
 
   it('skips children that are not HTML elements', () => {
-    // An SVG element is a child element but not an HTMLElement, which is the
-    // shape this guard exists for — text nodes never reach `.children`.
+    // An SVG element passes isHTMLElement's nodeType test but has no offsetLeft,
+    // which is what the guard's second half exists for — text nodes never reach
+    // `.children`.
     const { wrapper, track, panels } = threePanels()
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
     track.appendChild(svg)

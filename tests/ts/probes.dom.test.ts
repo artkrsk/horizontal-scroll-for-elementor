@@ -69,8 +69,7 @@ describe('resolveHashTarget', () => {
   })
 
   it('resolves a numeric id that is not a valid selector', () => {
-    // The reason this uses getElementById: "#123" throws in querySelector, and
-    // Elementor hands out numeric element ids routinely.
+    // The reason this uses getElementById: "#123" throws in querySelector.
     const { panels } = section({ panels: [{ left: 0, width: 1000, id: '123' }] })
 
     expect(resolveHashTarget('#123')).toBe(nth(panels, 0))

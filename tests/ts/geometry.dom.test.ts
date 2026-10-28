@@ -8,7 +8,8 @@ import { nth, section } from './support'
  * happy-dom has no layout, so the offsetParent chain is stated explicitly here.
  * That is the honest shape for these tests anyway: what layoutDocTop actually
  * promises is "sum offsetTop up the offsetParent chain, and never touch a
- * rect", and both halves of that are assertable without a layout engine.
+ * rect" (a positioned <body> aside), and both halves of that are assertable
+ * without a layout engine.
  */
 const chain = (tops: number[]): HTMLElement => {
   const els = tops.map(() => document.createElement('div'))

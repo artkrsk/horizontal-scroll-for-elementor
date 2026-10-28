@@ -285,7 +285,7 @@ export const inspectSection = (wrapper: HTMLElement): void => {
     const view = wrapper.ownerDocument.defaultView
     styleObserver = new MutationObserver(() => requestSweep(strings))
     styleObserver.observe(wrapper.ownerDocument.head, { childList: true, subtree: true })
-    // Now that the verdict depends on the layout state, width changes matter:
+    // The verdict depends on the layout state (isPinning), so width changes matter:
     // Elementor's device switcher resizes the preview without touching the head.
     const onResize = () => requestSweep(strings)
     view?.addEventListener('resize', onResize)
