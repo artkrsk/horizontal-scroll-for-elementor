@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.4.5 – October 29, 2026
+
+* added: for theme developers – a mount(root) call lets scripts that load content before Elementor is ready start horizontal scroll sections on it.
+* improved: the section now gets its full scroll height right from the first paint, so large parallax images inside it no longer jump when the page finishes loading.
+* fixed: on phones, sections inside stacked containers no longer reserve far too much empty space below them.
+* fixed: for logged-in users who see the WordPress admin bar, the section now starts pinning at the right moment instead of slightly late at the top of the page.
+* fixed: one-page menu links that point to a panel now light up correctly on phones and other stacked layouts.
+
 ## 1.4.4 – October 27, 2026
 
 * improved: for theme developers – getScrollRange() now also reports where pinning starts and ends, how far the panels travel and in which direction, so a theme can place its own scroll effects on the section’s timeline.
