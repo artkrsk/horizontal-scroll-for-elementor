@@ -4,6 +4,7 @@
 // without native support, waits for the shared polyfill loader and
 // constructs the one track animation via its WAAPI surface.
 
+import { dropPinFrames } from './anchor-scroll'
 import { LAYOUT_EVENT, POLYFILLED_CLASS, READY_EVENT, VAR_DISTANCE } from './contract'
 import { clamp01, computeInsetStart } from './geometry'
 import {
@@ -169,6 +170,7 @@ export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
   // var is the contract's, the inset var feeds the view timeline, the panel
   // vars are animation ranges), so the reads are current before them, and a
   // read after a write would pay a forced style + layout flush.
+  dropPinFrames()
   const distance = distanceOf(wrapper, track)
   const insetStart = computeInsetStart(wrapper, track)
   const inverted = isInverted(wrapper)
@@ -187,6 +189,12 @@ export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
     insetStart,
     pinWindow
   })
+  // Before the announcement: its listeners re-bind through getTimeline(), and a
+  // ViewTimeline's inset is fixed at construction. Native tier only — the
+  // polyfilled track's scrub is bound to its entry, which must stay put.
+  if (SUPPORTS_NATIVE && timelines.get(wrapper)?.inset !== insetStart) {
+    timelines.delete(wrapper)
+  }
   announceLayout(wrapper, { distance, pinWindow, insetStart, horizontal })
 }
 
@@ -226,22 +234,23 @@ const observe = (wrapper: HTMLElement, instance: IInstance): void => {
   measure(wrapper, track)
 }
 
-const timelines = new WeakMap<HTMLElement, AnimationTimeline>()
+// The inset each timeline was built with travels along, so measure() can tell
+// when the sticky offset or the admin-bar margin has outgrown it.
+const timelines = new WeakMap<HTMLElement, { timeline: AnimationTimeline; inset: number }>()
 
 // Mirror the stylesheet's explicit view-timeline-inset, so ambient
 // scroll-padding (WP admin bar) can't shift the range and top-of-page
 // placements don't pre-translate. Null when no ViewTimeline exists at all —
 // neither tier can bind a timeline then.
-const createViewTimeline = (wrapper: HTMLElement, track: HTMLElement): AnimationTimeline | null => {
+const createViewTimeline = (
+  wrapper: HTMLElement,
+  inset: number
+): { timeline: AnimationTimeline; inset: number } | null => {
   const Ctor = host().ViewTimeline
   if (!Ctor) {
     return null
   }
-  return new Ctor({
-    subject: wrapper,
-    axis: 'block',
-    inset: `${computeInsetStart(wrapper, track)}px 0px`
-  })
+  return { timeline: new Ctor({ subject: wrapper, axis: 'block', inset: `${inset}px 0px` }), inset }
 }
 
 // Endpoints are %/cqw/var-based, so they re-resolve against current boxes on
@@ -256,8 +265,9 @@ const createViewTimeline = (wrapper: HTMLElement, track: HTMLElement): Animation
 // keep the vertical layout instead.
 const buildPolyfillAnimation = (wrapper: HTMLElement, track: HTMLElement): Animation | null => {
   try {
-    const timeline = createViewTimeline(wrapper, track)
-    if (!timeline) {
+    // A fresh read: the polyfilled scrub is built before the section's first measure().
+    const built = createViewTimeline(wrapper, computeInsetStart(wrapper, track))
+    if (!built) {
       return null
     }
     const animation = track.animate(
@@ -270,14 +280,14 @@ const buildPolyfillAnimation = (wrapper: HTMLElement, track: HTMLElement): Anima
       ],
       // The `as any` is vestigial: the installed lib.dom now types timeline/rangeStart/rangeEnd
       {
-        timeline,
+        timeline: built.timeline,
         rangeStart: 'contain 0%',
         rangeEnd: 'contain 100%',
         easing: 'linear',
         fill: 'both'
       } as any
     )
-    timelines.set(wrapper, timeline)
+    timelines.set(wrapper, built)
     return animation
   } catch {
     return null
@@ -302,20 +312,27 @@ export const getTimeline = (el: Element): AnimationTimeline | null => {
   }
   const cached = timelines.get(wrapper)
   if (cached) {
-    return cached
+    return cached.timeline
   }
   if (!SUPPORTS_NATIVE) {
     return null
   }
-  const track = resolveTrack(wrapper)
-  if (!track) {
+  // The inset measure() wrote to --arts-hs-inset-start, never a fresh read: the
+  // JS timeline then mirrors the CSS one exactly and is replaced only when
+  // measure() announces (a transient layout read here could build an inset no
+  // snapshot matches, which the next measure() would drop without an event),
+  // and nothing forces a style + layout flush right after measure()'s writes
+  // when a layout listener re-binds. A native boot measures synchronously, so
+  // the snapshot exists for every section getTimeline() can reach.
+  const snapshot = snapshots.get(wrapper)
+  if (!snapshot || !resolveTrack(wrapper)) {
     return null
   }
-  const timeline = createViewTimeline(wrapper, track)
-  if (timeline) {
-    timelines.set(wrapper, timeline)
+  const built = createViewTimeline(wrapper, snapshot.insetStart)
+  if (built) {
+    timelines.set(wrapper, built)
   }
-  return timeline
+  return built?.timeline ?? null
 }
 
 const announce = (wrapper: HTMLElement): void => {
@@ -382,5 +399,6 @@ export const teardown = (wrapper: HTMLElement): void => {
   }
   timelines.delete(wrapper)
   snapshots.delete(wrapper)
+  dropPinFrames()
   clearTrackState(wrapper)
 }

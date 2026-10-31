@@ -362,6 +362,37 @@ describe('getScrollRange', () => {
     expect(getScrollRange(nth(panels, 1))?.stageTop).toBe(80)
   })
 
+  it('reads the pin frame once for every call a task makes on one section', () => {
+    const { panels } = linked()
+    const styles = vi.spyOn(globalThis, 'getComputedStyle')
+
+    try {
+      getScrollRange(nth(panels, 0))
+      const afterFirst = styles.mock.calls.length
+      getScrollRange(nth(panels, 1))
+      getScrollRange(nth(panels, 2), { inset: 0.2 })
+      getScrollTop(nth(panels, 2))
+
+      expect(afterFirst).toBeGreaterThan(0)
+      expect(styles.mock.calls.length).toBe(afterFirst)
+    } finally {
+      styles.mockRestore()
+    }
+  })
+
+  it('answers from a fresh read once the task that made the first call is over', async () => {
+    const { wrapper, panels } = linked()
+
+    expect(getScrollRange(nth(panels, 0))?.engage).toBe(1000)
+    // Same task: the memo is still serving the earlier read.
+    setGeometry(wrapper, { offsetTop: 1500 })
+    expect(getScrollRange(nth(panels, 0))?.engage).toBe(1000)
+
+    await Promise.resolve()
+
+    expect(getScrollRange(nth(panels, 0))?.engage).toBe(1500)
+  })
+
   // point 0.25 on purpose: 0.5 is symmetric and indistinguishable from inset 0.5
   it('maps a stage point onto each panel so exactly one panel owns it at a time', () => {
     const { panels } = linked()

@@ -47,7 +47,7 @@ interface IPinFrame {
 // The traversal every position below maps onto; null means "leave it to the
 // browser" — vertical states, zero travel, or before the engine's first
 // measure() (see hasMeasuredDistance).
-const pinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null => {
+const readPinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null => {
   if (!hasMeasuredDistance(wrapper)) {
     return null
   }
@@ -72,6 +72,31 @@ const pinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null =>
     stageTop: Number.parseFloat(getComputedStyle(track).top) || 0,
     stageHeight: track.offsetHeight
   }
+}
+
+// The frame depends on the section alone, yet a runtime reading every panel
+// (several times per layout event) used to repeat its whole style and offset
+// chain per call. Held for the rest of the synchronous run only — never a
+// frame: layout above the section moves without any ResizeObserver firing
+// (images loading), so anything outliving the task can serve stale numbers. A
+// caller that changes layout and re-reads within one run gets the earlier read.
+const frames = new Map<HTMLElement, IPinFrame | null>()
+
+/** Forget every memoized frame — measure() and teardown, the engine's own layout points */
+export const dropPinFrames = (): void => {
+  frames.clear()
+}
+
+const pinFrame = (wrapper: HTMLElement, track: HTMLElement): IPinFrame | null => {
+  if (frames.has(wrapper)) {
+    return frames.get(wrapper) ?? null
+  }
+  const frame = readPinFrame(wrapper, track)
+  if (frames.size === 0) {
+    queueMicrotask(dropPinFrames)
+  }
+  frames.set(wrapper, frame)
+  return frame
 }
 
 // Document scrollY at which the panel is on stage; null when pinFrame is.

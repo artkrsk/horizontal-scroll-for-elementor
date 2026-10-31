@@ -219,6 +219,77 @@ describe('getTimeline', () => {
     expect(nth(calls, 0)).toMatchObject({ subject: wrapper, axis: 'block', inset: '0px 0px' })
   })
 
+  it('builds a new one when the pin offset moves, before the layout is announced', async () => {
+    const { boot, measure, getTimeline } = await loadEngine(true)
+    const calls = fakeViewTimeline()
+    const { wrapper, track, panels } = travelling()
+    boot(wrapper)
+    const first = getTimeline(nth(panels, 0))
+    const seen: (AnimationTimeline | null)[] = []
+    wrapper.addEventListener('arts-hs:layout', () => seen.push(getTimeline(wrapper)))
+
+    // The admin bar's margin (or a responsive sticky offset) moved the inset.
+    track.style.top = '40px'
+    setGeometry(wrapper, { offsetTop: 100 })
+    measure(wrapper, track)
+
+    const second = getTimeline(nth(panels, 0))
+    expect(second).not.toBe(first)
+    expect(nth(calls, 1)).toMatchObject({ subject: wrapper, inset: '40px 0px' })
+    expect(seen).toEqual([second])
+
+    // Nothing moved: the same object keeps being served.
+    measure(wrapper, track)
+    expect(getTimeline(nth(panels, 0))).toBe(second)
+    expect(calls).toHaveLength(2)
+  })
+
+  it('builds from the inset measure() wrote, not from a fresh layout read', async () => {
+    const { boot, measure, getTimeline } = await loadEngine(true)
+    const calls = fakeViewTimeline()
+    const { wrapper, track, panels } = travelling()
+    track.style.top = '40px'
+    setGeometry(wrapper, { offsetTop: 100 })
+    boot(wrapper)
+
+    // Layout drifted since the last measure (an image above loaded): the
+    // stylesheet's timeline still uses the written 40px, so must this one.
+    setGeometry(wrapper, { offsetTop: 20 })
+    const styles = vi.spyOn(globalThis, 'getComputedStyle')
+    try {
+      expect(getTimeline(nth(panels, 0))).not.toBeNull()
+      expect(styles).not.toHaveBeenCalled()
+    } finally {
+      styles.mockRestore()
+    }
+    expect(nth(calls, 0)).toMatchObject({ inset: '40px 0px' })
+
+    // The next measure sees the drift, writes 20px and announces; the timeline follows.
+    measure(wrapper, track)
+    getTimeline(nth(panels, 0))
+    expect(nth(calls, 1)).toMatchObject({ inset: '20px 0px' })
+  })
+
+  it('keeps the polyfilled track timeline when the pin offset moves', async () => {
+    const { boot, measure, getTimeline } = await loadEngine(false)
+    const calls = fakeViewTimeline()
+    vi.stubGlobal('__artsScrollTimelinePolyfillReady', Promise.resolve('polyfilled'))
+    const { wrapper, track, panels } = travelling()
+    track.animate = vi.fn(() => ({ cancel: vi.fn() })) as unknown as typeof track.animate
+    boot(wrapper)
+    await flush()
+    const built = getTimeline(nth(panels, 0))
+
+    track.style.top = '40px'
+    setGeometry(wrapper, { offsetTop: 100 })
+    measure(wrapper, track)
+
+    // The scrub is bound to this object; dropping it would orphan the track.
+    expect(built).not.toBeNull()
+    expect(getTimeline(nth(panels, 0))).toBe(built)
+    expect(calls).toHaveLength(1)
+  })
+
   it('is null when the browser has no ViewTimeline at all', async () => {
     const { boot, getTimeline } = await loadEngine(true)
     vi.stubGlobal('ViewTimeline', undefined)

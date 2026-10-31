@@ -1,5 +1,6 @@
 // @vitest-environment happy-dom
 
+import { getScrollRange } from '@ts/anchor-scroll'
 import { measure, stampPanelRanges } from '@ts/engine'
 import { updateTrackState } from '@ts/track-state'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -119,6 +120,20 @@ describe('measure', () => {
     // cqw-based calc() estimate into the same property.
     expect(wrapper.style.getPropertyValue('--arts-hs-distance')).toBe('2000px')
     expect(wrapper.style.getPropertyValue('--arts-hs-inset-start')).toBe('80px')
+  })
+
+  it('drops the pin frame a caller read before the first measure', () => {
+    const { wrapper, track, panels } = threePanels()
+    for (const panel of panels) {
+      Object.defineProperty(panel, 'offsetParent', { value: track, configurable: true })
+    }
+
+    // Unmeasured: the contract answers null, and that answer is memoized for
+    // the rest of the task — measure() must not leave it standing.
+    expect(getScrollRange(nth(panels, 0))).toBeNull()
+    measure(wrapper, track)
+
+    expect(getScrollRange(nth(panels, 0))).toMatchObject({ distance: 2000 })
   })
 
   it('reports the track as active while it is pinned and has travel', () => {
