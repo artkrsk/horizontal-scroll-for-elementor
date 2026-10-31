@@ -60,13 +60,25 @@ const instances = new WeakMap<HTMLElement, IInstance>()
 // viewport edge, exits when its trailing edge leaves. Inverted direction
 // mirrors the window. Stamped inline so the values inherit into the
 // panel's subtree (a committed surface — README: Integration contract).
-export const stampPanelRanges = (
+interface IPanelRange {
+  panel: HTMLElement
+  start: string
+  end: string
+}
+
+// The read half: every panel's offsets against the runway, no writes. Reads
+// and writes are split because a style write followed by a layout read forces
+// a synchronous recalc, and this loop used to alternate them per panel (N+2
+// forced flushes per measure: ~200 ms at 4x in the boot task of a two-section
+// page, ~3 s over a 20-step resize storm there).
+export const readPanelRanges = (
   wrapper: HTMLElement,
   track: HTMLElement,
   distance: number,
   inverted: boolean
-): void => {
+): IPanelRange[] => {
   const viewport = wrapper.clientWidth
+  const ranges: IPanelRange[] = []
   for (const panel of Array.from(track.children)) {
     // Never instanceof: the editor assembles the canvas in its own window, so
     // inside the preview iframe EVERY panel failed a same-realm check and the
@@ -84,9 +96,38 @@ export const stampPanelRanges = (
       start = inverted ? 1 - exit : enter
       end = inverted ? 1 - enter : exit
     }
-    panel.style.setProperty('--arts-hs-panel-start', `${(clamp01(start) * 100).toFixed(3)}%`)
-    panel.style.setProperty('--arts-hs-panel-end', `${(clamp01(end) * 100).toFixed(3)}%`)
+    ranges.push({
+      panel,
+      start: `${(clamp01(start) * 100).toFixed(3)}%`,
+      end: `${(clamp01(end) * 100).toFixed(3)}%`
+    })
   }
+  return ranges
+}
+
+// An inline custom property write only when the value changes: an unchanged
+// write still dirties the element's style (and here the whole panel subtree
+// that inherits the var).
+const setInlineVar = (el: HTMLElement, name: string, value: string): void => {
+  if (el.style.getPropertyValue(name) !== value) {
+    el.style.setProperty(name, value)
+  }
+}
+
+export const writePanelRanges = (ranges: IPanelRange[]): void => {
+  for (const { panel, start, end } of ranges) {
+    setInlineVar(panel, '--arts-hs-panel-start', start)
+    setInlineVar(panel, '--arts-hs-panel-end', end)
+  }
+}
+
+export const stampPanelRanges = (
+  wrapper: HTMLElement,
+  track: HTMLElement,
+  distance: number,
+  inverted: boolean
+): void => {
+  writePanelRanges(readPanelRanges(wrapper, track, distance, inverted))
 }
 
 interface ILayoutSnapshot {
@@ -123,21 +164,23 @@ const announceLayout = (wrapper: HTMLElement, next: ILayoutSnapshot): void => {
 }
 
 export const measure = (wrapper: HTMLElement, track: HTMLElement): void => {
+  // Every read first, every write after: none of the writes below changes
+  // layout (the sizer derives the runway from the track in CSS; the distance
+  // var is the contract's, the inset var feeds the view timeline, the panel
+  // vars are animation ranges), so the reads are current before them, and a
+  // read after a write would pay a forced style + layout flush.
   const distance = distanceOf(wrapper, track)
-  wrapper.style.setProperty(VAR_DISTANCE, `${distance}px`)
-
   const insetStart = computeInsetStart(wrapper, track)
-  wrapper.style.setProperty('--arts-hs-inset-start', `${insetStart}px`)
-
   const inverted = isInverted(wrapper)
-  stampPanelRanges(wrapper, track, distance, inverted)
-
+  const ranges = readPanelRanges(wrapper, track, distance, inverted)
   // Zero travel means the section behaves like a normal block, where Pro's
   // own vertical math is the correct answer again — hence the distance gate.
-  // pinWindowOf reads the runway's layout height, which the stylesheet's
-  // sizer derives from the track — current whatever was written above.
   const horizontal = distance > 0 && isScrubbing(track)
   const pinWindow = pinWindowOf(wrapper, track)
+
+  setInlineVar(wrapper, VAR_DISTANCE, `${distance}px`)
+  setInlineVar(wrapper, '--arts-hs-inset-start', `${insetStart}px`)
+  writePanelRanges(ranges)
   updateTrackState(wrapper, {
     active: horizontal,
     inverted,
