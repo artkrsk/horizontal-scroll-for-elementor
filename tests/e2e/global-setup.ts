@@ -5,11 +5,14 @@ import { fileURLToPath } from 'node:url'
 /**
  * Seeds the site the specs run against.
  *
- * The fixture is dev/seed/demo-page.php — the same script the wp.org Live
- * Preview blueprint inlines, deliberately rather than a purpose-built one: it
- * is already idempotent and WP_CLI-guarded, and pointing both consumers at it
- * means a page that stops rendering breaks the suite and the shop-window
- * preview together, on the same signal.
+ * The main fixture is dev/seed/demo-page.php — the same script the wp.org
+ * Live Preview blueprint inlines, deliberately rather than a purpose-built
+ * one: it is already idempotent and WP_CLI-guarded, and pointing both
+ * consumers at it means a page that stops rendering breaks the suite and the
+ * shop-window preview together, on the same signal. The demo keeps its design,
+ * so the panel-width cases it does not carry (Layout vertical on tablet, a Fit
+ * Content panel, a legacy typed `max-content` Width, a boxed panel) live on a
+ * second, purpose-built page: tests/e2e/fixtures/stacking-page.php.
  *
  * No login here. Every spec is a frontend visitor, which is also the state the
  * pin math is tuned for — an admin bar shifts the sticky offset.
@@ -18,6 +21,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 
 /** test-workspace is the repo root, mounted by .wp-env.json. */
 const SEED = '/var/www/html/test-workspace/dev/seed/demo-page.php'
+const STACKING_FIXTURE = '/var/www/html/test-workspace/tests/e2e/fixtures/stacking-page.php'
 
 const wp = (command: string): string =>
   execSync(`pnpm exec wp-env run cli -- ${command}`, {
@@ -32,6 +36,9 @@ export default function globalSetup(): void {
 
   const seeded = wp(`wp eval-file ${SEED} --user=1`)
   console.log(`[e2e] ${seeded.trim()}`)
+
+  const fixture = wp(`wp eval-file ${STACKING_FIXTURE} --user=1`)
+  console.log(`[e2e] ${fixture.trim()}`)
 
   // Repeats the seed's delete of Elementor's activation-redirect transient.
   try {
