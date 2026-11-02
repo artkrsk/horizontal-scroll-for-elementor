@@ -77,6 +77,10 @@ By default the section switches to a vertical stack on touch devices – panels 
 
 Yes – panels are real Elementor Containers, Flexbox or Grid alike. Anything you can build in a Container works, including nested layouts.
 
+= Can a panel be as wide as its content? =
+
+Yes. Open the panel's Layout tab and turn on Fit Content, right under Width. The panel then sizes itself to whatever is inside it while the section scrolls horizontally, and still fills the section whenever the layout stacks – on touch devices or at a vertical Layout breakpoint. Width is hidden while Fit Content is on and comes back, unchanged, when you turn it off.
+
 = The scroll feels too fast – what do I change? =
 
 Scroll Length. It sets how much page scroll the section consumes, so raising it stretches the same journey over more scrolling. Height is a different thing: it's the pinned viewport the panels fill, not the distance they travel. Adding panels doesn't speed anything up either – the section simply gets taller, and each panel still takes the same amount of scroll to cross.
@@ -129,6 +133,10 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 4. Scroll: pinned section height, direction, how much page scroll the section consumes, and a pin offset for sticky headers.
 
 == Changelog ==
+
+= 1.5.0 =
+* added: a Fit Content option on each panel, for panels that should be as wide as what's inside them – no more typing max-content into the Width field.
+* fixed: on tablets and touch devices, panels sized to their content no longer collapse or run past the screen when the section stacks – every panel now fills the section once stacked.
 
 = 1.4.5 – October 29, 2026 =
 * added: for theme developers – a mount(root) call lets scripts that load content before Elementor is ready start horizontal scroll sections on it.
