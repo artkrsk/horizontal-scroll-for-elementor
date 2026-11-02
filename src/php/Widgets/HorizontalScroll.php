@@ -222,8 +222,8 @@ class HorizontalScroll extends Widget_Nested_Base {
 				// return to horizontal under a wider vertical, while Stack on
 				// Touch still beats an explicit horizontal.
 				'selectors_dictionary' => array(
-					'horizontal' => '--arts-hs-animation: var(--arts-hs-h-animation); --arts-hs-move: var(--arts-hs-h-move); --arts-hs-track-position: var(--arts-hs-h-track-position); --arts-hs-track-direction: var(--arts-hs-h-track-direction); --arts-hs-track-width: var(--arts-hs-h-track-width); --arts-hs-track-height: var(--arts-hs-h-track-height); --arts-hs-sizer-display: var(--arts-hs-h-sizer-display);',
-					'vertical'   => '--arts-hs-animation: none; --arts-hs-move: 0; --arts-hs-track-position: static; --arts-hs-track-direction: column; --arts-hs-track-width: auto; --arts-hs-track-height: auto; --arts-hs-sizer-display: contents;',
+					'horizontal' => '--arts-hs-animation: var(--arts-hs-h-animation); --arts-hs-move: var(--arts-hs-h-move); --arts-hs-track-position: var(--arts-hs-h-track-position); --arts-hs-track-direction: var(--arts-hs-h-track-direction); --arts-hs-track-width: var(--arts-hs-h-track-width); --arts-hs-track-height: var(--arts-hs-h-track-height); --arts-hs-sizer-display: var(--arts-hs-h-sizer-display); --arts-hs-panel-width: var(--arts-hs-h-panel-width);',
+					'vertical'   => '--arts-hs-animation: none; --arts-hs-move: 0; --arts-hs-track-position: static; --arts-hs-track-direction: column; --arts-hs-track-width: auto; --arts-hs-track-height: auto; --arts-hs-sizer-display: contents; --arts-hs-panel-width: 100%;',
 				),
 				'selectors'            => array( self::RUNWAY => '{{VALUE}}' ),
 			)

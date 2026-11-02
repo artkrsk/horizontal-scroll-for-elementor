@@ -40,7 +40,15 @@
     // authored widths win, the track grows to fit. No-op in vertical states —
     // track-height is auto there, so the column main axis has no deficit to
     // shrink against.
+    //
+    // Width: core's own `.e-con { width: var(--width) }` is single-class,
+    // so this two-class rule owns the property. Horizontally the state var
+    // is guaranteed-invalid and the fallback IS core's declaration — byte-
+    // identical behaviour; in every stacked state the var says 100%, so the
+    // authored Width (which Elementor cascades from desktop into tablet and
+    // into touch stacks at any width) never decides a column panel's width.
     > .e-con {
+      width: var(--arts-hs-panel-width, var(--width));
       flex-shrink: 0;
 
       // Panel content keeps the page's real direction even when Direction
@@ -55,7 +63,7 @@
     // `.e-con-inner` handles the boxed max-width (--content-width). Give the boxed
     // outer a definite one-screen width; the inner stays centered at its cap.
     > .e-con-boxed {
-      width: 100cqw;
+      width: var(--arts-hs-panel-width, 100cqw);
     }
   }
 

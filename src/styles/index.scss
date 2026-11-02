@@ -27,6 +27,15 @@
 // lets a narrower breakpoint return to horizontal under a wider
 // vertical without defeating feature detection — and keeps touch
 // stacking above an explicit horizontal.
+//
+// `--arts-hs-panel-width` sizes the panels themselves in vertical states
+// (100%) and is guaranteed-invalid horizontally, so each panel rule's
+// fallback — the authored width — applies only while the track is a row.
+// In a column the authored width has no job, and leaving it in charge
+// collapses content-sized panels: Elementor cascades a Container's desktop
+// Width into the tablet range and into every touch/no-support stack at
+// desktop widths, where `max-content` around percentage-sized content is
+// 0px wide (issue #44).
 // ============================================================
 
 @mixin arts-hs-vertical-vars($ns: '') {
@@ -37,6 +46,7 @@
   --arts-hs-#{$ns}track-width: auto;
   --arts-hs-#{$ns}track-height: auto;
   --arts-hs-#{$ns}sizer-display: contents;
+  --arts-hs-#{$ns}panel-width: 100%;
 }
 
 @mixin arts-hs-horizontal-layout-vars($ns: '') {
@@ -46,6 +56,7 @@
   --arts-hs-#{$ns}track-width: initial;
   --arts-hs-#{$ns}track-height: initial;
   --arts-hs-#{$ns}sizer-display: initial;
+  --arts-hs-#{$ns}panel-width: initial;
 }
 
 .arts-hs {
@@ -217,7 +228,7 @@
 // scrollbar never makes a panel overhang it the way `100vw` would.
 :where(.arts-hs__track > .arts-hs__panel) {
   box-sizing: border-box;
-  width: 100cqw;
+  width: var(--arts-hs-panel-width, 100cqw);
 }
 
 @keyframes arts-hs-slide {

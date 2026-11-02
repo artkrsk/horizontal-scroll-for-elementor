@@ -136,3 +136,74 @@ describe('the stylesheet and TS agree on the names they share', () => {
     expect(STYLESHEET).not.toContain(`.${TRACK_CLASS}`)
   })
 })
+
+/** `--arts-hs-#{$ns}name: value;` pairs declared inside the named SCSS mixin. */
+const mixinVars = (mixin: string): Array<[string, string]> => {
+  const body = STYLESHEET.match(
+    new RegExp(`@mixin ${mixin}\\([^)]*\\)\\s*\\{([\\s\\S]*?)\\n\\}`)
+  )?.[1]
+  if (!body) {
+    throw new Error(`mixin ${mixin} not found in the stylesheet`)
+  }
+  return [...body.matchAll(/--arts-hs-#\{\$ns\}([a-z-]+):\s*([^;]+);/g)].map((match) => [
+    match[1] ?? '',
+    (match[2] ?? '').trim()
+  ])
+}
+
+/** The Layout control's selectors_dictionary entry for one state. */
+const layoutDictionary = (state: 'vertical' | 'horizontal'): string => {
+  const match = WIDGET_PHP.match(new RegExp(`'${state}'\\s*=>\\s*'([^']+)'`))
+  if (!match?.[1]) {
+    throw new Error(`the layout dictionary has no ${state} entry`)
+  }
+  return match[1]
+}
+
+describe('the Layout control flips every layout-state var the stylesheet declares', () => {
+  // The stylesheet's vertical mixin is the designed stack; the Layout
+  // control's vertical dictionary restates it at {{WRAPPER}} specificity. A
+  // var added to one side only leaves a breakpoint half-stacked.
+  it('writes every vertical mixin var, value for value, in the vertical state', () => {
+    const vars = mixinVars('arts-hs-vertical-vars')
+
+    expect(vars.map(([name]) => name)).toContain('panel-width')
+    for (const [name, value] of vars) {
+      expect(layoutDictionary('vertical')).toContain(`--arts-hs-${name}: ${value};`)
+    }
+  })
+
+  it('chains every vertical mixin var through its h- twin in the horizontal state', () => {
+    for (const [name] of mixinVars('arts-hs-vertical-vars')) {
+      expect(layoutDictionary('horizontal')).toContain(
+        `--arts-hs-${name}: var(--arts-hs-h-${name});`
+      )
+    }
+  })
+
+  it('resets every vertical mixin var in the horizontal layout mixin', () => {
+    // `animation` is the one deliberate exception: the horizontal layout
+    // mixin leaves h-animation at `none` so a polyfilled or explicitly
+    // horizontal breakpoint never starts the CSS animation.
+    const horizontal = mixinVars('arts-hs-horizontal-layout-vars').map(([name]) => name)
+
+    for (const [name] of mixinVars('arts-hs-vertical-vars').filter(([n]) => n !== 'animation')) {
+      expect(horizontal).toContain(name)
+    }
+  })
+
+  it('sizes panels from the state var, with the horizontal width as the fallback', () => {
+    // Elementor panels fall back to core's own `var(--width)`, so the
+    // horizontal state is byte-identical to core; authored markup falls back
+    // to one screen. In every stacked state the var says 100%.
+    expect(STYLESHEET).toContain(
+      '> .e-con {\n      width: var(--arts-hs-panel-width, var(--width));'
+    )
+    expect(STYLESHEET).toContain(
+      '> .e-con-boxed {\n      width: var(--arts-hs-panel-width, 100cqw);'
+    )
+    expect(STYLESHEET).toContain(
+      ':where(.arts-hs__track > .arts-hs__panel) {\n  box-sizing: border-box;\n  width: var(--arts-hs-panel-width, 100cqw);'
+    )
+  })
+})
