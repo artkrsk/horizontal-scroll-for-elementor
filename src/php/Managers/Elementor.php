@@ -8,6 +8,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Arts\HorizontalScroll\Base\Manager as BaseManager;
 use Arts\HorizontalScroll\Widgets\HorizontalScroll;
+use Elementor\Controls_Manager;
+use Elementor\Controls_Stack;
 
 class Elementor extends BaseManager {
 
@@ -47,5 +49,100 @@ class Elementor extends BaseManager {
 			return;
 		}
 		$widgets_manager->register( new HorizontalScroll() );
+	}
+
+	/**
+	 * Panels are core Containers, so "as wide as its content" belongs on the
+	 * Container's own Layout tab, next to Width. Registered on EVERY Container
+	 * (stacks are keyed by element type) and shown on panels only, through the
+	 * hidden marker HorizontalScroll::PANEL_FLAG that our panels alone carry.
+	 * Not gated on the nested-elements experiment: the conditions already keep
+	 * both controls invisible where no panel exists, and a gate would only be
+	 * one more way for CSS generation and the editor to disagree.
+	 *
+	 * The switch writes `width`, not `--width`: a second writer of core's
+	 * custom property would tie it at equal specificity and media query, where
+	 * print order decides. On the Container's own three-class selector `width`
+	 * beats core's single-class `.e-con { width: var(--width) }` and our
+	 * two-class track rule outright, and folding in the layout-state var keeps
+	 * the panel at 100% in every stacked state (index.scss).
+	 *
+	 * Hooked at `elementor/element/container/section_layout_container/before_section_end`.
+	 */
+	public function register_panel_controls( Controls_Stack $element ): void {
+		$element->add_control(
+			HorizontalScroll::PANEL_FLAG,
+			array( 'type' => Controls_Manager::HIDDEN )
+		);
+
+		$element->add_control(
+			HorizontalScroll::FIT_CONTENT,
+			array(
+				'label'        => esc_html__( 'Fit Content', 'horizontal-scroll-for-elementor' ),
+				'description'  => esc_html__( 'Makes the panel as wide as its content. Replaces Width while on.', 'horizontal-scroll-for-elementor' ),
+				'type'         => Controls_Manager::SWITCHER,
+				'return_value' => 'yes',
+				'default'      => '',
+				// Boxed is excluded for the same reason core hides Width there:
+				// a `max-content` outer resolves circularly against its
+				// 100%-wide inner wrapper.
+				'condition'    => array(
+					HorizontalScroll::PANEL_FLAG => 'yes',
+					'content_width'              => 'full',
+				),
+				'selectors'    => array(
+					'{{WRAPPER}}' => 'width: var(--arts-hs-panel-width, max-content);',
+				),
+			),
+			array(
+				'position' => array(
+					'of'   => 'width',
+					'type' => 'control',
+					'at'   => 'after',
+				),
+			)
+		);
+
+		// Hide Width while Fit Content is on. update_control() is a shallow
+		// array_merge that swaps the whole `condition` array, so core's own
+		// rule (`content_width => full` today) is read back at runtime and our
+		// term merged into it — never a frozen copy that a later Elementor
+		// would silently lose. The singular `condition` map is used rather
+		// than the `conditions` DSL because is_control_visible() guards a
+		// missing key for the former while Conditions::check() does not.
+		// Never update_responsive_control(): it rebuilds the `responsive` args
+		// without the stored `min` device, and that `min` is the 768px floor
+		// that keeps a desktop Width out of mobile. Breakpoint variants
+		// (`width_tablet`, …) exist as their own controls only while
+		// Elementor's responsive duplication mode is `on` — CSS generation —
+		// so probe for each before touching it; the editor builds the stack
+		// with the mode `off` and clones the single control's condition per
+		// device itself.
+		$ids = array( 'width' );
+		/** @var mixed $breakpoints Typed Breakpoint[]|Breakpoint in the stubs. */
+		$breakpoints = \Elementor\Plugin::$instance->breakpoints->get_active_breakpoints();
+		if ( is_array( $breakpoints ) ) {
+			foreach ( array_keys( $breakpoints ) as $device ) {
+				$ids[] = 'width_' . $device;
+			}
+		}
+		foreach ( $ids as $id ) {
+			$control = $element->get_controls( $id );
+			if ( ! is_array( $control ) ) {
+				continue;
+			}
+			$core_condition = isset( $control['condition'] ) && is_array( $control['condition'] )
+				? $control['condition']
+				: array();
+			$element->update_control(
+				$id,
+				array(
+					'condition' => array_merge(
+						$core_condition,
+						array( HorizontalScroll::FIT_CONTENT . '!' => 'yes' )
+					),
+				)
+			);
+		}
 	}
 }

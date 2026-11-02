@@ -28,6 +28,24 @@ class HorizontalScroll extends Widget_Nested_Base {
 	 */
 	private const RUNWAY = '{{WRAPPER}} .arts-hs';
 
+	/**
+	 * Hidden Container setting that says "this Container is one of our panels".
+	 * Control stacks are keyed by element type, so a control cannot be
+	 * registered for a subtree — but a control's `condition` is evaluated per
+	 * element against its own settings. The Fit Content switch
+	 * (Managers\Elementor::register_panel_controls) is conditioned on this
+	 * marker, which is seeded in three places: panel_container() below for the
+	 * initial children, the editor create guard for "+ Add Panel"
+	 * (editor/patches/guard-panel-width.ts) and the editor view's admission hook
+	 * for panels from saves that predate it (editor/views/view.ts). Spelled
+	 * `self::PANEL_FLAG => 'yes'` in panel_container(): phpParity.test.ts pins
+	 * the TS restatement against both the const and that seed.
+	 */
+	public const PANEL_FLAG = 'arts_hs_panel';
+
+	/** The Fit Content switch injected into Container's Layout section. */
+	public const FIT_CONTENT = 'arts_hs_fit_content';
+
 	public function get_name(): string {
 		return 'arts-horizontal-scroll';
 	}
@@ -73,21 +91,22 @@ class HorizontalScroll extends Widget_Nested_Base {
 			// stamps the same flag on nested children it creates.
 			'isLocked' => true,
 			'settings' => array(
-				'_title'        => sprintf(
+				'_title'         => sprintf(
 					/* translators: %d: Panel index. */
 					__( 'Panel #%d', 'horizontal-scroll-for-elementor' ),
 					$index
 				),
-				'content_width' => 'full',
+				'content_width'  => 'full',
 				// Default new panels to one full screen. Elementor's own default is
 				// `--width: 100%`, which resolves circularly against the max-content flex
 				// track: the panel blows out AND the scrub geometry breaks (the track's
 				// scroll width and layout width diverge). A definite width sidesteps both.
 				// Authors override per panel via the Width control.
-				'width'         => array(
+				'width'          => array(
 					'unit' => 'vw',
 					'size' => 100,
 				),
+				self::PANEL_FLAG => 'yes',
 			),
 		);
 	}
