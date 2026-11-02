@@ -9,7 +9,7 @@ import { fakeDollarE } from '../../support'
  */
 
 interface IChild {
-  attributes: { isLocked?: boolean }
+  attributes: { isLocked?: boolean; settings?: unknown }
 }
 
 const child = (attributes: IChild['attributes'] = {}): IChild => ({ attributes })
@@ -67,5 +67,24 @@ describe('editor View.filter', () => {
     const View = await loadView(class {})
 
     expect(new View().filter(child(), 0)).toBe(true)
+  })
+
+  it('stamps the panel marker silently onto the child settings model', async () => {
+    // The marker gates the Fit Content switch on the panel's Layout tab.
+    // Silent: merely opening an old page must neither re-render nor read as
+    // an unsaved change; the value still serialises on the next save.
+    const View = await loadView(class {})
+    const settings = { set: vi.fn() }
+
+    new View().filter(child({ settings }), 0)
+
+    expect(settings.set).toHaveBeenCalledWith('arts_hs_panel', 'yes', { silent: true })
+  })
+
+  it('admits a child whose settings are not a model', async () => {
+    const View = await loadView(class {})
+
+    expect(() => new View().filter(child({ settings: {} }), 0)).not.toThrow()
+    expect(() => new View().filter(child(), 0)).not.toThrow()
   })
 })

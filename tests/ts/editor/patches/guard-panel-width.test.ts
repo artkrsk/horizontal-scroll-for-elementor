@@ -1,6 +1,7 @@
 import {
   applyDefaultPanelWidth,
   coercePanelWidths,
+  PANEL_FLAG,
   PANEL_WIDTH,
   registerPanelWidthGuard
 } from '@ts/editor/patches/guard-panel-width'
@@ -20,7 +21,11 @@ describe('applyDefaultPanelWidth', () => {
     const args = { model: { elType: 'container' } as any }
 
     expect(applyDefaultPanelWidth(args)).toBe(true)
-    expect(args.model.settings).toEqual({ content_width: 'full', width: { unit: 'vw', size: 100 } })
+    expect(args.model.settings).toEqual({
+      content_width: 'full',
+      width: { unit: 'vw', size: 100 },
+      arts_hs_panel: 'yes'
+    })
   })
 
   it('pairs the width with content_width full, which the control needs', () => {
@@ -40,6 +45,17 @@ describe('applyDefaultPanelWidth', () => {
 
     expect(args.model.settings.width).toBe(authored)
     expect(args.model.settings.content_width).toBeUndefined()
+    expect(args.model.settings.arts_hs_panel).toBe('yes')
+  })
+
+  it('marks every created panel as ours, authored width or not', () => {
+    // The marker is what shows the Fit Content switch on the panel's Layout
+    // tab; PHP seeds only the initial three, this covers "+ Add Panel".
+    const args = { model: { settings: { width: { unit: 'px', size: 640 } } } as any }
+
+    applyDefaultPanelWidth(args)
+
+    expect(args.model.settings[PANEL_FLAG]).toBe('yes')
   })
 
   it('keeps other settings on the model', () => {

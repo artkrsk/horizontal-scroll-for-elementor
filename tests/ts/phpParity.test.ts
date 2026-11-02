@@ -8,7 +8,7 @@ import {
   WRAPPER_CLASS
 } from '@ts/contract'
 import { DIAGNOSTIC_CLASS, DIAGNOSTIC_MESSAGE_CLASS } from '@ts/diagnostics'
-import { applyDefaultPanelWidth } from '@ts/editor/patches/guard-panel-width'
+import { applyDefaultPanelWidth, PANEL_FLAG } from '@ts/editor/patches/guard-panel-width'
 import { describe, expect, it } from 'vitest'
 
 /**
@@ -51,12 +51,18 @@ const phpPanelDefaults = () => {
     /'width'\s*=>\s*array\(\s*'unit'\s*=>\s*'([^']+)',\s*'size'\s*=>\s*([\d.]+),?\s*\)/
   )
   const contentWidth = WIDGET_PHP.match(/'content_width'\s*=>\s*'([^']+)'/)
-  if (!width?.[1] || !contentWidth?.[1]) {
+  // The panel marker: declared once as a const and seeded through it.
+  const flag = WIDGET_PHP.match(/const PANEL_FLAG = '([a-z_]+)'/)
+  if (!width?.[1] || !contentWidth?.[1] || !flag?.[1]) {
     throw new Error('panel_container() defaults not found in HorizontalScroll.php')
+  }
+  if (!WIDGET_PHP.includes("self::PANEL_FLAG => 'yes'")) {
+    throw new Error('panel_container() no longer seeds the panel marker through self::PANEL_FLAG')
   }
   return {
     content_width: contentWidth[1],
-    width: { unit: width[1], size: Number(width[2]) }
+    width: { unit: width[1], size: Number(width[2]) },
+    [flag[1]]: 'yes'
   }
 }
 
@@ -106,6 +112,12 @@ describe('a panel added in the editor matches a panel seeded by PHP', () => {
     applyDefaultPanelWidth({ model })
 
     expect(model.settings).toEqual(phpPanelDefaults())
+  })
+
+  it('names the panel marker identically in PHP and TS', () => {
+    // The Fit Content switch is conditioned on this setting in PHP; the editor
+    // stamps it in TS. A drift means the switch never shows on added panels.
+    expect(WIDGET_PHP.match(/const PANEL_FLAG = '([a-z_]+)'/)?.[1]).toBe(PANEL_FLAG)
   })
 })
 

@@ -15,12 +15,21 @@
 //      panel width is never sane here (it means "% of the track", never "one
 //      screen"), so this preserves intent in a unit that actually works.
 //
+// A third stamp rides the create guard: the hidden panel marker that shows
+// the Fit Content switch on this Container's Layout tab (the switch is
+// injected into core's Container and conditioned on the marker, since control
+// stacks are keyed by element type). PHP seeds it on the initial three panels,
+// this covers "+ Add Panel", and views/view.ts covers saves that predate it.
+//
 // Both applies are plain object transforms, kept out of the defineDependency
 // callbacks so they can be exercised without an $e to extend.
 import { defineDependency, editedContainers, isOurWidget, registerDependencies } from './dependency'
 
 /** Must equal panel_container()'s width in the PHP widget — pinned by phpParity.test.ts. */
 export const PANEL_WIDTH = { unit: 'vw', size: 100 }
+
+/** Must equal HorizontalScroll::PANEL_FLAG in the PHP widget — pinned by phpParity.test.ts. */
+export const PANEL_FLAG = 'arts_hs_panel'
 
 export const applyDefaultPanelWidth = (args: any): boolean => {
   const model = args.model
@@ -33,6 +42,8 @@ export const applyDefaultPanelWidth = (args: any): boolean => {
     model.settings.content_width = 'full'
     model.settings.width = { ...PANEL_WIDTH }
   }
+  // Every panel of ours carries the marker, authored width or not.
+  model.settings[PANEL_FLAG] = 'yes'
   return true // allow the (now-enriched) create
 }
 
