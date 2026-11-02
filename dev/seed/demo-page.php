@@ -363,16 +363,6 @@ function ahs_panel_settings( string $title, int $width_vw, string $bg, array $ex
 				'size'  => $width_vw,
 				'sizes' => array(),
 			),
-			// Core re-declares its 100% width placeholder at mobile but not at
-			// tablet, so tablet inherits the authored desktop width; without
-			// this, tablet-width touch stacking leaves ragged right edges. vw,
-			// not %: percentages resolve against the max-content track in the
-			// horizontal state and blow the panels up.
-			'width_tablet'          => array(
-				'unit'  => 'vw',
-				'size'  => 100,
-				'sizes' => array(),
-			),
 			'flex_direction'        => 'column',
 			'flex_justify_content'  => 'space-between',
 			'flex_gap'              => ahs_zero_gap(),
