@@ -56,9 +56,12 @@ class Elementor extends BaseManager {
 	 * Container's own Layout tab, next to Width. Registered on EVERY Container
 	 * (stacks are keyed by element type) and shown on panels only, through the
 	 * hidden marker HorizontalScroll::PANEL_FLAG that our panels alone carry.
-	 * Not gated on the nested-elements experiment: the conditions already keep
-	 * both controls invisible where no panel exists, and a gate would only be
-	 * one more way for CSS generation and the editor to disagree.
+	 * Gated on the nested-elements experiment like register_widgets(), and for
+	 * the same reason: versions predating it have no Widget_Nested_Base, and
+	 * merely reading HorizontalScroll::PANEL_FLAG autoloads the widget onto
+	 * that missing parent — on every Container stack build. The guard runs
+	 * before the first reference, so the degrade stays "no widget", never a
+	 * fatal. (No widget means no panels, so nothing is lost by bailing.)
 	 *
 	 * The switch writes `width`, not `--width`: a second writer of core's
 	 * custom property would tie it at equal specificity and media query, where
@@ -70,6 +73,10 @@ class Elementor extends BaseManager {
 	 * Hooked at `elementor/element/container/section_layout_container/before_section_end`.
 	 */
 	public function register_panel_controls( Controls_Stack $element ): void {
+		if ( ! \Elementor\Plugin::$instance->experiments->is_feature_active( 'nested-elements' ) ) {
+			return;
+		}
+
 		$element->add_control(
 			HorizontalScroll::PANEL_FLAG,
 			array( 'type' => Controls_Manager::HIDDEN )
@@ -79,7 +86,10 @@ class Elementor extends BaseManager {
 			HorizontalScroll::FIT_CONTENT,
 			array(
 				'label'        => esc_html__( 'Fit Content', 'horizontal-scroll-for-elementor' ),
-				'description'  => esc_html__( 'Makes the panel as wide as its content. Replaces Width while on.', 'horizontal-scroll-for-elementor' ),
+				// Says where it acts: stacked layouts fill the section by design,
+				// so toggling it while previewing a stacked device changes nothing
+				// and must not read as a dead switch.
+				'description'  => esc_html__( 'Makes the panel as wide as its content while the section scrolls horizontally; stacked layouts always fill the section. Replaces Width while on.', 'horizontal-scroll-for-elementor' ),
 				'type'         => Controls_Manager::SWITCHER,
 				'return_value' => 'yes',
 				'default'      => '',

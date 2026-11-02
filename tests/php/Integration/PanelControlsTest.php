@@ -4,6 +4,7 @@ namespace Arts\HorizontalScroll\Tests\Integration;
 
 use Arts\HorizontalScroll\Widgets\HorizontalScroll;
 use Elementor\Controls_Manager;
+use Elementor\Core\Experiments\Manager as Experiments_Manager;
 use Elementor\Core\Frontend\Performance;
 
 /**
@@ -35,20 +36,15 @@ class PanelControlsTest extends TestCase {
 	}
 
 	/**
-	 * Container controls as the CSS generator and the editor see them, from a
-	 * FRESH stack built under $mode.
-	 *
-	 * @return array<string, array<string, mixed>>
+	 * A Container built NOW, not the registered singleton: Container's
+	 * constructor captures the active kit, and the singleton was built at
+	 * bootstrap when this environment had none — its kit is Elementor's empty
+	 * stand-in, whose own controls can't register (null main post), so the
+	 * singleton's stack build dies mid-section. The stack is keyed by element
+	 * name, so this instance builds the one shared stack.
 	 */
-	private function fresh_container_controls( string $mode = 'off' ): array {
-		$plugin = \Elementor\Plugin::$instance;
-		// A Container built NOW, not the registered singleton: Container's
-		// constructor captures the active kit, and the singleton was built at
-		// bootstrap when this environment had none — its kit is Elementor's
-		// empty stand-in, whose own controls can't register (null main post),
-		// so the singleton's stack build dies mid-section. The stack is keyed
-		// by element name, so this instance builds the one shared stack.
-		$container = $plugin->elements_manager->create_element_instance(
+	private function fresh_container(): \Elementor\Element_Base {
+		$container = \Elementor\Plugin::$instance->elements_manager->create_element_instance(
 			array(
 				'id'       => 'ahscontainer',
 				'elType'   => 'container',
@@ -57,6 +53,33 @@ class PanelControlsTest extends TestCase {
 			)
 		);
 		$this->assertInstanceOf( \Elementor\Element_Base::class, $container );
+
+		return $container;
+	}
+
+	/**
+	 * Whether the switch shows for a Container carrying $values, as the editor
+	 * and the CSS generator decide it.
+	 *
+	 * @param array<mixed, mixed> $control
+	 * @param array<string, string> $values
+	 */
+	private function switch_visible( array $control, array $values ): bool {
+		// elementor-stubs types $values as `null` only; Elementor documents and
+		// accepts an array (controls-stack.php: `if ( null === $values ) …`).
+		// @phpstan-ignore argument.type
+		return (bool) $this->fresh_container()->is_control_visible( $control, $values );
+	}
+
+	/**
+	 * Container controls as the CSS generator and the editor see them, from a
+	 * FRESH stack built under $mode.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function fresh_container_controls( string $mode = 'off' ): array {
+		$plugin    = \Elementor\Plugin::$instance;
+		$container = $this->fresh_container();
 
 		$initial = $this->string_value( $plugin->breakpoints->get_responsive_control_duplication_mode() );
 		$plugin->breakpoints->set_responsive_control_duplication_mode( $mode );
@@ -116,6 +139,56 @@ class PanelControlsTest extends TestCase {
 		// context core files selector-bearing controls into a separate
 		// style_controls stack and computes the injection index against the
 		// merged list, so PHP order is not the editor's. Verified in the editor.
+
+		// The runtime semantics the condition array stands for: visible on a
+		// marked full-width panel, hidden on every other Container.
+		$this->assertTrue(
+			$this->switch_visible(
+				$switch,
+				array(
+					HorizontalScroll::PANEL_FLAG => 'yes',
+					'content_width'              => 'full',
+				)
+			)
+		);
+		$this->assertFalse(
+			$this->switch_visible(
+				$switch,
+				array(
+					HorizontalScroll::PANEL_FLAG => '',
+					'content_width'              => 'full',
+				)
+			)
+		);
+		$this->assertFalse(
+			$this->switch_visible(
+				$switch,
+				array(
+					HorizontalScroll::PANEL_FLAG => 'yes',
+					'content_width'              => 'boxed',
+				)
+			)
+		);
+	}
+
+	public function test_injects_nothing_while_nested_elements_is_off(): void {
+		$this->with_feature_default_state(
+			'nested-elements',
+			Experiments_Manager::STATE_INACTIVE,
+			function (): void {
+				// Versions predating the experiment have no Widget_Nested_Base:
+				// reading HorizontalScroll::PANEL_FLAG there would autoload the
+				// widget and fatal on its parent class, so the hook must bail
+				// before touching the widget — the same degrade to "no widget"
+				// that register_widgets() promises. No widget, no panels, no
+				// controls to show.
+				$controls = $this->fresh_container_controls();
+
+				$this->assertArrayNotHasKey( 'arts_hs_fit_content', $controls );
+				$this->assertArrayNotHasKey( 'arts_hs_panel', $controls );
+				$this->assertSame( array( 'content_width' => 'full' ), $controls['width']['condition'] ?? null );
+			}
+		);
 	}
 
 	public function test_width_hides_while_fit_content_is_on(): void {
