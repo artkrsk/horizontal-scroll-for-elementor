@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.5.0 – November 2, 2026
+
+* added: a Fit Content option on each panel, for panels that should be as wide as what's inside them – no more typing max-content into the Width field.
+* improved: pages with many panels load and resize noticeably faster, with far less work done while the browser lays out the section.
+* improved: for theme developers – getTimeline() now stays in step with the section when the admin bar or sticky offset changes, and getScrollTop() and getScrollRange() answer faster.
+* fixed: on tablets and touch devices, panels sized to their content no longer collapse or run past the screen when the section stacks – every panel now fills the section once stacked.
+* fixed: on Elementor versions without nested elements, the plugin no longer causes a fatal error when editing Containers.
+
 ## 1.4.5 – October 29, 2026
 
 * added: for theme developers – a mount(root) call lets scripts that load content before Elementor is ready start horizontal scroll sections on it.
