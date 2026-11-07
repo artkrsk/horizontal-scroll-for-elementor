@@ -12,7 +12,6 @@
  * Text Domain: horizontal-scroll-for-elementor
  * Plugin URI: https://artemsemkin.com/plugins/horizontal-scroll-for-elementor/
  * Author URI: https://artemsemkin.com
- * Tested up to: 7.1
  */
 
 if ( ! defined( 'ABSPATH' ) ) {
