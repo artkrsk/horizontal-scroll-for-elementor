@@ -471,6 +471,15 @@ class HorizontalScroll extends Widget_Nested_Base {
 	}
 
 	/**
+	 * Nothing of its own for the plain-text copy of the page Elementor keeps in
+	 * `post_content`, which WordPress search reads. The inherited method prints
+	 * the whole render, and `render()` prints every panel: the panels' full
+	 * markup, attributes included, became searchable text, while Elementor asks
+	 * each element inside the panels for its plain content anyway.
+	 */
+	public function render_plain_content(): void {}
+
+	/**
 	 * Editor markup. Child containers are mounted INTO the placeholder selector
 	 * by the nested-elements editor machinery — the track stays empty. No
 	 * distance estimate here: the engine measures and overwrites it on boot.
