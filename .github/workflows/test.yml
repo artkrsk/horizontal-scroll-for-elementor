@@ -19,6 +19,7 @@ jobs:
   test:
     uses: artkrsk/wordpress-plugin-workflows/.github/workflows/test.yml@main
     with:
+      runner: ubuntu-latest
       zip_budget_mb: '0.5'
       blueprint_check: true
       integration_suites: '["tests/php/phpunit.xml.dist", "tests/php/phpunit-no-elementor.xml.dist"]'
