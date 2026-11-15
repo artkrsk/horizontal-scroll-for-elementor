@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.5.1 – November 15, 2026
+
+* fixed: the section's panel markup is no longer stored in the page's searchable text, so site search no longer matches code from inside the widget.
+
 ## 1.5.0 – November 2, 2026
 
 * added: a Fit Content option on each panel, for panels that should be as wide as what's inside them – no more typing max-content into the Width field.

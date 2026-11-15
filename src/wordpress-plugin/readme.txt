@@ -5,7 +5,7 @@ Tags: elementor, horizontal scroll, scroll effects, sticky section, scroll anima
 Requires at least: 6.5
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/
@@ -134,7 +134,7 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
-= 1.5.1 =
+= 1.5.1 – November 15, 2026 =
 * fixed: the section's panel markup is no longer stored in the page's searchable text, so site search no longer matches code from inside the widget.
 
 = 1.5.0 – November 2, 2026 =
