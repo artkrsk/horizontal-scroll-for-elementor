@@ -134,6 +134,9 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
+= 1.5.1 =
+* fixed: the section's panel markup is no longer stored in the page's searchable text, so site search no longer matches code from inside the widget.
+
 = 1.5.0 – November 2, 2026 =
 * added: a Fit Content option on each panel, for panels that should be as wide as what's inside them – no more typing max-content into the Width field.
 * improved: pages with many panels load and resize noticeably faster, with far less work done while the browser lays out the section.
