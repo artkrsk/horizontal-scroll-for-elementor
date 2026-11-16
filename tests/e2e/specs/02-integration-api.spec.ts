@@ -2,8 +2,8 @@ import { expect, type Page, test } from '@playwright/test'
 
 /**
  * The Integration contract in a real browser. The unit tier states every offset
- * the engine reads; these specs let the browser compute them, on the native tier
- * (Chromium) and the polyfilled one (Firefox) alike — the anchor landing, the
+ * the engine reads; these specs let the browser compute them, in both browsers
+ * (native timelines; the polyfilled tier is covered in 04-standalone) alike — the anchor landing, the
  * scroll window getScrollRange promises, and when arts-hs:layout fires.
  */
 

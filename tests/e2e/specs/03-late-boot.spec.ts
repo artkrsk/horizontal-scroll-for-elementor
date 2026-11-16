@@ -6,8 +6,8 @@ import { expect, test } from '@playwright/test'
  * elementor/frontend/init fired, and then runs Elementor's ready triggers for
  * the new content. Holding the bundle back until Elementor is up and replaying
  * that trigger reproduces the order on a single page, with the real Elementor
- * frontend and — in Firefox — a scroll-timeline polyfill that is already
- * installed by the time the bundle evaluates.
+ * frontend and, in a browser without native timelines, a scroll-timeline
+ * polyfill that is already installed by the time the bundle evaluates.
  */
 
 const DEMO = '/ahs-demo/'

@@ -28,10 +28,11 @@ export default defineConfig({
   projects: [
     // Chromium drives the native tier: real view-timeline, real animation-range.
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
-    // Firefox drives the POLYFILLED tier, and is the only thing anywhere in the
-    // repo that does. Its failure mode is the worst one the plugin has — a
-    // pinned track that never scrubs strands every panel behind overflow-x:
-    // clip — and a stubbed ViewTimeline can't tell us it works.
+    // Firefox 159+ is native too, so 04-standalone forces the POLYFILLED tier
+    // there, and nothing else in the repo runs it. Its failure mode is the
+    // worst one the plugin has — a pinned track that never scrubs strands
+    // every panel behind overflow-x: clip — and a stubbed ViewTimeline can't
+    // tell us it works.
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } }
   ]
 })
