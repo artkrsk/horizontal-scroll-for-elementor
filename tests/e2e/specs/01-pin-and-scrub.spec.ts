@@ -6,11 +6,10 @@ import { expect, test } from '@playwright/test'
  * happy-dom has no layout and no scroll, so every offset the unit suite reads
  * is one the fixture stated rather than the browser computed.
  *
- * Chromium answers on the native tier and Firefox, today, on the polyfilled
- * one. The tier is deliberately not asserted: what the contract promises is a
- * pinned, scrubbing section, both paths owe the visitor exactly that, and the
- * day Firefox ships scroll-driven animations this same file simply starts
- * covering the other tier instead of failing.
+ * Chromium and, since Firefox 159, Firefox both answer on the native tier; the
+ * polyfilled one is forced in 04-standalone. The tier is deliberately not
+ * asserted: what the contract promises is a pinned, scrubbing section, and both
+ * paths owe the visitor exactly that.
  */
 
 const DEMO = '/ahs-demo/'

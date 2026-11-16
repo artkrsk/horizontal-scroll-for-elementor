@@ -8,9 +8,9 @@ import { expect, type Page, test } from '@playwright/test'
  * The package without WordPress: authored wrapper/track/panel markup, the
  * built library and stylesheet, and the shared polyfill loader — served from
  * disk on a made-up origin, so no Elementor, no PHP and no wp-env site is in
- * the page. Chromium drives the native tier, Firefox the polyfilled one: the
- * same split the WordPress specs use, and the only place the standalone
- * polyfilled path runs for real.
+ * the page. Chromium drives the native tier, Firefox the polyfilled one
+ * (forced, see `hideNativeTimelines`): the only place the polyfilled path runs
+ * for real.
  */
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..')
@@ -73,11 +73,41 @@ const html = ({
 </body>
 </html>`
 
+const NATIVE_GATE = /@supports\s*\(view-timeline:/g
+
+/**
+ * Firefox 159+ ships scroll timelines natively, so the loader would resolve
+ * `native` and the polyfilled path would run nowhere. Present Firefox as the
+ * older builds were: no timeline constructors, no timeline properties in
+ * `CSS.supports` or in the stylesheet's `@supports` gate (a JS stub cannot
+ * reach that one, hence the rewrite), so the CSS animation stays off and the
+ * engine builds the scrub itself.
+ */
+const hideNativeTimelines = async (page: Page) => {
+  await page.addInitScript(() => {
+    const NATIVE = /animation-timeline|view-timeline|scroll-timeline|animation-range/
+    const supports = CSS.supports.bind(CSS) as (...args: string[]) => boolean
+    CSS.supports = (...args: string[]) => !NATIVE.test(args.join(' ')) && supports(...args)
+    Reflect.deleteProperty(window, 'ScrollTimeline')
+    Reflect.deleteProperty(window, 'ViewTimeline')
+  })
+}
+
 const serve = async (page: Page, options: IPageOptions = {}) => {
+  const legacyFirefox = page.context().browser()?.browserType().name() === 'firefox'
+  if (legacyFirefox) {
+    await hideNativeTimelines(page)
+  }
   await page.route(`${ORIGIN}/**`, (route) => {
     const { pathname } = new URL(route.request().url())
     if (pathname.startsWith('/hs/')) {
       const file = path.join(ESM, pathname.slice('/hs/'.length))
+      if (legacyFirefox && file.endsWith('.css')) {
+        return route.fulfill({
+          body: readFileSync(file, 'utf8').replace(NATIVE_GATE, '@supports (view-timeline-gone:'),
+          contentType: 'text/css'
+        })
+      }
       return route.fulfill({
         path: file,
         contentType: file.endsWith('.css') ? 'text/css' : 'text/javascript'

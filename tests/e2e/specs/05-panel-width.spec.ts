@@ -16,7 +16,7 @@ import { expect, type Page, test } from '@playwright/test'
 const FIXTURE = '/ahs-stacking/'
 const DEMO = '/ahs-demo/'
 
-/** Horizontal tiers boot asynchronously (Firefox waits on the polyfill); measure only once the timeline exists. */
+/** Horizontal tiers boot asynchronously (a polyfilled browser waits on the polyfill); measure only once the timeline exists. */
 const waitForEngine = (page: Page) =>
   page.waitForFunction(() => {
     const wrapper = document.querySelector('.js-arts-hs')
