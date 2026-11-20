@@ -12,6 +12,7 @@ import {
 } from './anchor-scroll'
 import { type IArtsHorizontalScrollGlobal, WRAPPER_CLASS, WRAPPER_SELECTOR } from './contract'
 import { boot, getTimeline, teardown } from './engine'
+import { installFocusScroll } from './focus-scroll'
 import { isHTMLElement } from './utils/isHTMLElement'
 
 export interface IHorizontalScrollAppOptions {
@@ -28,7 +29,7 @@ export interface IHorizontalScrollAppOptions {
 export interface IHorizontalScrollApp extends IArtsHorizontalScrollGlobal {
   /** Aborted by destroy(); scope host listeners to it. */
   readonly signal: AbortSignal
-  /** Publishes `window.artsHorizontalScroll` and installs anchor handling. Idempotent. */
+  /** Publishes `window.artsHorizontalScroll` and installs anchor and keyboard-focus handling. Idempotent. */
   init(): void
   /** Boots every `.js-arts-hs` section in `root` (default: the document; the root itself included). Idempotent per section. */
   mount(root?: Document | Element): void
@@ -76,6 +77,7 @@ export const createHorizontalScrollApp = (
       initialized = true
       host().artsHorizontalScroll = app
       installAnchorScroll(lifetime.signal)
+      installFocusScroll(lifetime.signal)
       if (options.deepLink !== false) {
         whenParsed(() => initLoadCorrection(lifetime.signal), lifetime.signal)
       }

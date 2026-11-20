@@ -5,9 +5,10 @@ import { section } from './support'
 
 /**
  * The host lifecycle — what a standalone page (and the WordPress boot) drives.
- * The engine and anchor handling are stood in for: their own suites pin what
- * boot/teardown and the correction do, and what is ours here is WHICH sections
- * reach them, WHEN, and that every listener and global goes away again.
+ * The engine, anchor and keyboard-focus handling are stood in for: their own
+ * suites pin what boot/teardown and the correction do, and what is ours here is
+ * WHICH sections reach them, WHEN, and that every listener and global goes away
+ * again.
  */
 
 const mocks = vi.hoisted(() => ({
@@ -17,7 +18,8 @@ const mocks = vi.hoisted(() => ({
   getScrollTop: vi.fn(),
   getScrollRange: vi.fn(),
   installAnchorScroll: vi.fn(),
-  initLoadCorrection: vi.fn()
+  initLoadCorrection: vi.fn(),
+  installFocusScroll: vi.fn()
 }))
 
 vi.mock('@ts/engine', () => ({
@@ -30,6 +32,9 @@ vi.mock('@ts/anchor-scroll', () => ({
   initLoadCorrection: mocks.initLoadCorrection,
   getScrollTop: mocks.getScrollTop,
   getScrollRange: mocks.getScrollRange
+}))
+vi.mock('@ts/focus-scroll', () => ({
+  installFocusScroll: mocks.installFocusScroll
 }))
 
 const { createHorizontalScrollApp } = await import('@ts/app')
@@ -68,6 +73,7 @@ describe('construction', () => {
 
     expect(window.artsHorizontalScroll).toBeUndefined()
     expect(mocks.installAnchorScroll).not.toHaveBeenCalled()
+    expect(mocks.installFocusScroll).not.toHaveBeenCalled()
     expect(mocks.boot).not.toHaveBeenCalled()
     expect(app.contract).toBe(1)
     expect(app.getTimeline).toBe(mocks.getTimeline)
@@ -102,6 +108,16 @@ describe('init', () => {
 
     expect(mocks.installAnchorScroll).toHaveBeenCalledTimes(1)
     expect(mocks.installAnchorScroll).toHaveBeenCalledWith(app.signal)
+  })
+
+  it('scopes keyboard-focus handling to the app lifetime, once', () => {
+    const app = createHorizontalScrollApp()
+
+    app.init()
+    app.init()
+
+    expect(mocks.installFocusScroll).toHaveBeenCalledTimes(1)
+    expect(mocks.installFocusScroll).toHaveBeenCalledWith(app.signal)
   })
 
   it('corrects a deep link straight away on a parsed document', () => {

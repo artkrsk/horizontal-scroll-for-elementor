@@ -266,6 +266,43 @@ test('mirrors the traversal on an RTL page', async ({ page }) => {
   expect(Math.abs(await landOn(page, 'p3'))).toBeLessThanOrEqual(2)
 })
 
+/** Where the page's one focusable control is: a button appended to the last panel. */
+const controlState = (page: Page) =>
+  page.evaluate(() => {
+    const control = document.getElementById('reach') as HTMLElement
+    const box = control.getBoundingClientRect()
+    const stage = (document.querySelector('.js-arts-hs') as HTMLElement).getBoundingClientRect()
+    return {
+      focused: document.activeElement === control,
+      onStage:
+        box.left >= stage.left - 1 &&
+        box.right <= stage.right + 1 &&
+        box.top >= 0 &&
+        box.bottom <= window.innerHeight
+    }
+  })
+
+for (const dir of ['ltr', 'rtl'] as const) {
+  // Firefox runs this on the polyfilled tier, the one place a real Tab press
+  // meets the WAAPI-built scrub; RTL is the mirrored traversal in both.
+  test(`brings a control focused with the keyboard on stage (${dir})`, async ({ page }) => {
+    await serve(page, { dir })
+    await page.goto(`${ORIGIN}/`)
+    await horizontal(page)
+    await page.evaluate(() => {
+      const button = document.createElement('button')
+      button.id = 'reach'
+      button.textContent = 'Reach me'
+      ;(document.getElementById('p3') as HTMLElement).appendChild(button)
+    })
+    expect(await controlState(page)).toEqual({ focused: false, onStage: false })
+
+    await page.keyboard.press('Tab')
+
+    await expect.poll(() => controlState(page)).toEqual({ focused: true, onStage: true })
+  })
+}
+
 test('scrubs on the polyfilled tier without the stylesheet skip marker', async ({
   page,
   browserName
