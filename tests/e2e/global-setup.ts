@@ -12,7 +12,10 @@ import { fileURLToPath } from 'node:url'
  * shop-window preview together, on the same signal. The demo keeps its design,
  * so the panel-width cases it does not carry (Layout vertical on tablet, a Fit
  * Content panel, a legacy typed `max-content` Width, a boxed panel) live on a
- * second, purpose-built page: tests/e2e/fixtures/stacking-page.php.
+ * second, purpose-built page: tests/e2e/fixtures/stacking-page.php. Its two
+ * controls in the track wait on an entrance animation, out of the tab order
+ * until revealed, so the keyboard-focus cases get a third:
+ * tests/e2e/fixtures/keyboard-page.php.
  *
  * No login here. Every spec is a frontend visitor, which is also the state the
  * pin math is tuned for — an admin bar shifts the sticky offset.
@@ -22,6 +25,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 /** test-workspace is the repo root, mounted by .wp-env.json. */
 const SEED = '/var/www/html/test-workspace/dev/seed/demo-page.php'
 const STACKING_FIXTURE = '/var/www/html/test-workspace/tests/e2e/fixtures/stacking-page.php'
+const KEYBOARD_FIXTURE = '/var/www/html/test-workspace/tests/e2e/fixtures/keyboard-page.php'
 
 const wp = (command: string): string =>
   execSync(`pnpm exec wp-env run cli -- ${command}`, {
@@ -37,8 +41,9 @@ export default function globalSetup(): void {
   const seeded = wp(`wp eval-file ${SEED} --user=1`)
   console.log(`[e2e] ${seeded.trim()}`)
 
-  const fixture = wp(`wp eval-file ${STACKING_FIXTURE} --user=1`)
-  console.log(`[e2e] ${fixture.trim()}`)
+  for (const fixture of [STACKING_FIXTURE, KEYBOARD_FIXTURE]) {
+    console.log(`[e2e] ${wp(`wp eval-file ${fixture} --user=1`).trim()}`)
+  }
 
   // Repeats the seed's delete of Elementor's activation-redirect transient.
   try {
