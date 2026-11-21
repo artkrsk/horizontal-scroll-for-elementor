@@ -86,7 +86,7 @@ describe('resolveHashTarget', () => {
     expect(resolveHashTarget('')).toBeNull()
   })
 
-  it('returns null for malformed encoding rather than throwing', () => {
+  it('does not throw on a malformed escape', () => {
     expect(resolveHashTarget('#%E0%A4%A')).toBeNull()
   })
 
