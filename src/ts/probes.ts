@@ -41,16 +41,23 @@ export const isEditMode = (): boolean =>
     window as { elementorFrontend?: { isEditMode?: () => boolean } }
   ).elementorFrontend?.isEditMode?.() === true
 
+/** Percent-decodes as the browser's fragment lookup does: a malformed escape
+    (`#100%`, a CSS ID with a stray `%`) stays as written instead of throwing. */
+const decodeHash = (hash: string): string =>
+  hash.replace(/(?:%[0-9A-Fa-f]{2})+/g, (run) => {
+    try {
+      return decodeURIComponent(run)
+    } catch {
+      return run
+    }
+  })
+
 export const resolveHashTarget = (hash: string): HTMLElement | null => {
   if (hash.length < 2) {
     return null
   }
-  try {
-    // getElementById, not querySelector: ids like "#123" are invalid selectors
-    return document.getElementById(decodeURIComponent(hash.slice(1)))
-  } catch {
-    return null
-  }
+  // getElementById, not querySelector: ids like "#123" are invalid selectors
+  return document.getElementById(decodeHash(hash.slice(1)))
 }
 
 // The track child the target sits in (or is); null when the target is the
