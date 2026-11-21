@@ -1,5 +1,4 @@
 {
-	"core": "https://wordpress.org/wordpress-7.0.1.zip",
 	"phpVersion": "8.3",
 	"port": 8900,
 	"testsPort": 8901,
