@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.5.2 – November 21, 2026
+
+* improved: pressing Tab to a link or button inside a pinned section now scrolls the page so the focused control comes on stage, instead of leaving it out of sight.
+* improved: confirmed compatibility with WordPress 7.2.
+* fixed: panel links and one-page menu items whose address contains a stray percent sign, such as #100%, now scroll to the right panel instead of the section start.
+
 ## 1.5.1 – November 15, 2026
 
 * fixed: the section's panel markup is no longer stored in the page's searchable text, so site search no longer matches code from inside the widget.

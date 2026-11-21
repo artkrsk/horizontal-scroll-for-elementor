@@ -3,9 +3,9 @@ Contributors: artemsemkin
 Donate link: https://buymeacoffee.com/artemsemkin
 Tags: elementor, horizontal scroll, scroll effects, sticky section, scroll animation
 Requires at least: 6.5
-Tested up to: 7.1
+Tested up to: 7.2
 Requires PHP: 8.0
-Stable tag: 1.5.1
+Stable tag: 1.5.2
 License: GPLv3
 License URI: https://www.gnu.org/licenses/gpl-3.0
 GitHub Plugin URI: https://github.com/artkrsk/horizontal-scroll-for-elementor/
@@ -134,7 +134,7 @@ Yes. The section publishes a small stable surface: a named CSS scroll timeline, 
 
 == Changelog ==
 
-= 1.5.2 =
+= 1.5.2 – November 21, 2026 =
 * improved: pressing Tab to a link or button inside a pinned section now scrolls the page so the focused control comes on stage, instead of leaving it out of sight.
 * improved: confirmed compatibility with WordPress 7.2.
 * fixed: panel links and one-page menu items whose address contains a stray percent sign, such as #100%, now scroll to the right panel instead of the section start.
