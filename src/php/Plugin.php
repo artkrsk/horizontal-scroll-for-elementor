@@ -2,6 +2,8 @@
 
 namespace Arts\HorizontalScroll;
 
+use ArtsHorizontalScroll\Arts\Base\Elementor\CacheClear;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -42,7 +44,7 @@ final class Plugin extends Base\Plugin {
 			'elementor/element/container/section_layout_container/before_section_end',
 			array( $this->managers->elementor, 'register_panel_controls' )
 		);
-		add_action( 'elementor/init', array( $this->managers->elementor, 'maybe_clear_cache_on_version_change' ) );
+		CacheClear::on_version( 'horizontal-scroll', ARTS_HORIZONTAL_SCROLL_PLUGIN_VERSION );
 		add_action( 'elementor/editor/before_enqueue_scripts', array( $this->managers->assets, 'enqueue_editor_js' ) );
 		add_action(
 			'elementor/preview/enqueue_scripts',
