@@ -16,6 +16,10 @@ Pinned horizontal scroll sections for Elementor. Panels are real Containers you 
 
 One widget that adds a pinned horizontal scroll section to Elementor: the section holds still while its panels travel sideways as the page scrolls. Panels are free-form content – real Elementor Containers, on the same nested-elements foundation as Elementor's own Mega Menu – so you design them right in the canvas, like any other layout. And there's no Pro version: this is the whole thing.
 
+= ✅ Used in Velum =
+
+Velum, my portfolio theme for architects and studios, builds its horizontal scroll page with this plugin. [Open it in the Velum demo](https://artemsemkin.com/preview/themes/velum/?at=/horizontal-scroll/&utm_source=wordpress.org&utm_medium=referral&utm_campaign=horizontal-scroll-for-elementor) to see it on a real site.
+
 = Free-form panels =
 
 Most ways to get horizontal scrolling in Elementor make you author the content somewhere else: a saved template picked from a dropdown, a section elsewhere on the page wired up by CSS ID, or a repeater with fixed image-and-text fields. Here a panel is a real Container. Drop widgets into it, nest layouts inside it, style it directly in the editor, next to the rest of your page. The pin runs live in the canvas too: scroll the editor and the section scrubs exactly like the frontend.
